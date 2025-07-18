@@ -34,7 +34,6 @@ import {
   ArrowDown
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './components/ui/tooltip'
-import { cn } from '@/lib/utils'
 import { PRHistoryChart } from './components/PRHistoryChart'
 
 interface CheckRun {
@@ -98,7 +97,7 @@ function App() {
   const [repository, setRepository] = useState('')
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [rateLimit, setRateLimit] = useState<ApiResponse['rate_limit'] | null>(null)
+  const [, setRateLimit] = useState<ApiResponse['rate_limit'] | null>(null)
   const [activeTab, setActiveTab] = useState('all')
   const [sortColumn, setSortColumn] = useState<string | null>(null)
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
@@ -152,18 +151,6 @@ function App() {
     }
   }
 
-  const getApprovalBadgeVariant = (status?: string): "default" | "secondary" | "destructive" | "outline" => {
-    switch (status) {
-      case 'approved':
-        return 'default'
-      case 'changes_requested':
-        return 'destructive'
-      case 'partially_approved':
-        return 'secondary'
-      default:
-        return 'outline'
-    }
-  }
 
   const formatTimeAgo = (date: string) => {
     const now = new Date()
@@ -182,27 +169,6 @@ function App() {
     }
   }
 
-  const formatApprovalDetails = (approval: PullRequest['approval_summary']) => {
-    if (!approval) return 'No approval data'
-    
-    const details = []
-    if (approval.approved_users?.length > 0) {
-      details.push(`Approved: ${approval.approved_users.join(', ')}`)
-    }
-    if (approval.changes_requested_users?.length > 0) {
-      details.push(`Changes requested: ${approval.changes_requested_users.join(', ')}`)
-    }
-    if (approval.commented_users?.length > 0) {
-      details.push(`Commented: ${approval.commented_users.join(', ')}`)
-    }
-    if (approval.pending_users?.length > 0) {
-      details.push(`Pending: ${approval.pending_users.join(', ')}`)
-    }
-    if (approval.pending_teams?.length > 0) {
-      details.push(`Pending teams: ${approval.pending_teams.join(', ')}`)
-    }
-    return details.length > 0 ? details.join('\n') : 'No review information available'
-  }
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
@@ -618,7 +584,7 @@ function App() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {filteredPullRequests.map((pr, index) => (
+                        {filteredPullRequests.map((pr) => (
                           <TableRow 
                             key={pr.id || `${pr.number}-${pr.id}`}
                             className="cursor-pointer"
@@ -706,7 +672,7 @@ function App() {
                           </TableCell>
                           <TableCell>
                             <div className="space-y-1">
-                              {pr.approval_summary?.approved_users?.length > 0 ? (
+                              {pr.approval_summary?.approved_users && pr.approval_summary.approved_users.length > 0 ? (
                                 <a
                                   href={pr.url}
                                   target="_blank"
@@ -714,7 +680,7 @@ function App() {
                                   className="block hover:underline text-blue-600"
                                   onClick={(e) => e.stopPropagation()}
                                 >
-                                  {pr.approval_summary.approved_users.map((user, idx) => (
+                                  {pr.approval_summary?.approved_users?.map((user, idx) => (
                                     <div key={idx} className="text-xs">
                                       {user}
                                     </div>
