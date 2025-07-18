@@ -1,0 +1,770 @@
+import { useEffect, useState } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs'
+import { Badge } from './components/ui/badge'
+import { Button } from './components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from './components/ui/avatar'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from './components/ui/table'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from './components/ui/dropdown-menu'
+import { 
+  GitPullRequest, 
+  AlertCircle, 
+  CheckCircle2, 
+  XCircle,
+  Clock,
+  RefreshCw,
+  Search,
+  Filter,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown
+} from 'lucide-react'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './components/ui/tooltip'
+import { cn } from '@/lib/utils'
+import { PRHistoryChart } from './components/PRHistoryChart'
+
+interface CheckRun {
+  name: string
+  status: string
+  url: string
+  description?: string
+  required?: boolean
+}
+
+interface PullRequest {
+  id: number
+  number: number
+  title: string
+  author: string
+  created_at: string
+  updated_at: string
+  url: string
+  state: string
+  draft: boolean
+  mergeable?: boolean
+  additions?: number
+  deletions?: number
+  changed_files?: number
+  ci_status: string
+  failing_checks: CheckRun[]
+  total_checks: number
+  successful_checks: number
+  failed_checks: number
+  backend_approval_status: string
+  approval_summary?: {
+    status: string
+    approved_count: number
+    changes_requested_count: number
+    pending_count: number
+    approved_users: string[]
+    changes_requested_users: string[]
+    commented_users: string[]
+    pending_users: string[]
+    pending_teams: string[]
+  }
+}
+
+interface ApiResponse {
+  pull_requests: PullRequest[]
+  count: number
+  repository: string
+  last_updated: string
+  updating: boolean
+  rate_limit?: {
+    remaining: number
+    limit: number
+    resets_at: string
+  }
+}
+
+function App() {
+  const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [repository, setRepository] = useState('')
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [rateLimit, setRateLimit] = useState<ApiResponse['rate_limit'] | null>(null)
+  const [activeTab, setActiveTab] = useState('all')
+  const [sortColumn, setSortColumn] = useState<string | null>(null)
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+
+  useEffect(() => {
+    fetchPullRequests()
+  }, [])
+
+  const fetchPullRequests = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/reviews`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch pull requests')
+      }
+      const data: ApiResponse = await response.json()
+      setPullRequests(data.pull_requests)
+      setRepository(data.repository)
+      setLastUpdated(data.last_updated)
+      setIsRefreshing(data.updating)
+      setRateLimit(data.rate_limit || null)
+      setLoading(false)
+    } catch (err) {
+      console.error('Error fetching PRs:', err)
+      setError(err instanceof Error ? err.message : 'An error occurred')
+      setLoading(false)
+    }
+  }
+
+  const refreshData = async () => {
+    setIsRefreshing(true)
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/reviews/refresh`, { method: 'POST' })
+      // Wait a bit then fetch the updated data
+      setTimeout(fetchPullRequests, 2000)
+    } catch (err) {
+      console.error('Error refreshing data:', err)
+      setIsRefreshing(false)
+    }
+  }
+
+  const getCIStatusIcon = (status: string) => {
+    switch (status) {
+      case 'success':
+        return <CheckCircle2 className="h-4 w-4 text-green-500" />
+      case 'failure':
+        return <XCircle className="h-4 w-4 text-red-500" />
+      case 'pending':
+        return <Clock className="h-4 w-4 text-yellow-500" />
+      default:
+        return <AlertCircle className="h-4 w-4 text-gray-500" />
+    }
+  }
+
+  const getApprovalBadgeVariant = (status?: string): "default" | "secondary" | "destructive" | "outline" => {
+    switch (status) {
+      case 'approved':
+        return 'default'
+      case 'changes_requested':
+        return 'destructive'
+      case 'partially_approved':
+        return 'secondary'
+      default:
+        return 'outline'
+    }
+  }
+
+  const formatTimeAgo = (date: string) => {
+    const now = new Date()
+    const then = new Date(date)
+    const diffInMs = now.getTime() - then.getTime()
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60))
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60))
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
+
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} ago`
+    } else if (diffInHours < 24) {
+      return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`
+    } else {
+      return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`
+    }
+  }
+
+  const formatApprovalDetails = (approval: PullRequest['approval_summary']) => {
+    if (!approval) return 'No approval data'
+    
+    const details = []
+    if (approval.approved_users?.length > 0) {
+      details.push(`Approved: ${approval.approved_users.join(', ')}`)
+    }
+    if (approval.changes_requested_users?.length > 0) {
+      details.push(`Changes requested: ${approval.changes_requested_users.join(', ')}`)
+    }
+    if (approval.commented_users?.length > 0) {
+      details.push(`Commented: ${approval.commented_users.join(', ')}`)
+    }
+    if (approval.pending_users?.length > 0) {
+      details.push(`Pending: ${approval.pending_users.join(', ')}`)
+    }
+    if (approval.pending_teams?.length > 0) {
+      details.push(`Pending teams: ${approval.pending_teams.join(', ')}`)
+    }
+    return details.length > 0 ? details.join('\n') : 'No review information available'
+  }
+
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortColumn(column)
+      setSortDirection('asc')
+    }
+  }
+
+  const sortPullRequests = (prs: PullRequest[]) => {
+    if (!sortColumn) return prs
+
+    return [...prs].sort((a, b) => {
+      let aValue: any
+      let bValue: any
+
+      switch (sortColumn) {
+        case 'number':
+          aValue = a.number
+          bValue = b.number
+          break
+        case 'title':
+          aValue = a.title
+          bValue = b.title
+          break
+        case 'author':
+          aValue = a.author
+          bValue = b.author
+          break
+        case 'ci_status':
+          aValue = a.ci_status
+          bValue = b.ci_status
+          break
+        case 'failures':
+          aValue = a.failed_checks
+          bValue = b.failed_checks
+          break
+        case 'approvals':
+          aValue = a.approval_summary?.approved_count || 0
+          bValue = b.approval_summary?.approved_count || 0
+          break
+        case 'backend_approval':
+          aValue = a.backend_approval_status
+          bValue = b.backend_approval_status
+          break
+        case 'created':
+          aValue = new Date(a.created_at).getTime()
+          bValue = new Date(b.created_at).getTime()
+          break
+        case 'updated':
+          aValue = new Date(a.updated_at).getTime()
+          bValue = new Date(b.updated_at).getTime()
+          break
+        default:
+          return 0
+      }
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
+      return 0
+    })
+  }
+
+  const filterPullRequests = (prs: PullRequest[]) => {
+    switch (activeTab) {
+      case 'failing':
+        return prs.filter(pr => pr.ci_status === 'failure')
+      case 'approved':
+        return prs.filter(pr => pr.approval_summary?.status === 'approved')
+      case 'draft':
+        return prs.filter(pr => pr.draft)
+      default:
+        return prs
+    }
+  }
+
+  const filteredPullRequests = sortPullRequests(filterPullRequests(pullRequests))
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading pull requests...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Card className="w-96">
+          <CardHeader>
+            <CardTitle className="text-destructive">Error</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>{error}</p>
+            <Button onClick={fetchPullRequests} className="mt-4">
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  return (
+    <TooltipProvider>
+      <div className="flex-col md:flex min-h-screen gradient-bg">
+        <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="flex h-16 items-center px-4">
+            <GitPullRequest className="mr-2 h-5 w-5" />
+            <h2 className="text-lg font-semibold">Pull Request Dashboard</h2>
+            <div className="ml-auto flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-muted-foreground">
+                  {repository}
+                </span>
+                {lastUpdated && (
+                  <span className="text-sm text-muted-foreground">
+                    • Last updated {formatTimeAgo(lastUpdated)}
+                  </span>
+                )}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={refreshData}
+                disabled={isRefreshing}
+              >
+                <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src="" />
+                      <AvatarFallback>U</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>Settings</DropdownMenuItem>
+                  <DropdownMenuItem>Support</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>Log out</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 space-y-4 p-8 pt-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+              <p className="text-muted-foreground">Your pull request overview and insights</p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button variant="outline" size="sm">
+                <Search className="mr-2 h-4 w-4" />
+                Search
+              </Button>
+              <Button variant="outline" size="sm">
+                <Filter className="mr-2 h-4 w-4" />
+                Filter
+              </Button>
+            </div>
+          </div>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="all">
+                All PRs
+                <Badge variant="secondary" className="ml-2">
+                  {pullRequests.length}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="failing">
+                Failing CI
+                <Badge variant="destructive" className="ml-2">
+                  {pullRequests.filter(pr => pr.ci_status === 'failure').length}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="approved">
+                Approved
+                <Badge className="ml-2">
+                  {pullRequests.filter(pr => pr.approval_summary?.status === 'approved').length}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="draft">
+                Drafts
+                <Badge variant="outline" className="ml-2">
+                  {pullRequests.filter(pr => pr.draft).length}
+                </Badge>
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value={activeTab} className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+                <Card data-slot="card" className="card-gradient-subtle">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      Total Pull Requests
+                    </CardTitle>
+                    <GitPullRequest className="h-5 w-5 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{filteredPullRequests.length}</div>
+                    <p className="text-xs text-muted-foreground">
+                      {pullRequests.filter(pr => !pr.draft).length} ready for review
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card data-slot="card" className="card-gradient-destructive">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      Failing CI
+                    </CardTitle>
+                    <XCircle className="h-5 w-5 text-destructive" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {filteredPullRequests.filter(pr => pr.ci_status === 'failure').length}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Requires attention
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card data-slot="card" className="card-gradient-success">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      Approved
+                    </CardTitle>
+                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {filteredPullRequests.filter(pr => pr.approval_summary?.status === 'approved').length}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {filteredPullRequests.filter(pr => pr.approval_summary?.status === 'changes_requested').length} changes requested
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card data-slot="card" className="card-gradient-subtle">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      Draft PRs
+                    </CardTitle>
+                    <Clock className="h-5 w-5 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {filteredPullRequests.filter(pr => pr.draft).length}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Work in progress
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card data-slot="card" className="card-gradient-warning">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      Pending Review
+                    </CardTitle>
+                    <AlertCircle className="h-5 w-5 text-yellow-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {filteredPullRequests.filter(pr => !pr.approval_summary?.status || pr.approval_summary?.status === 'pending').length}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {filteredPullRequests.filter(pr => pr.approval_summary?.status === 'partially_approved').length} partially approved
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+              <PRHistoryChart days={7} />
+              <Card>
+                <CardHeader>
+                  <CardTitle>Pull Requests</CardTitle>
+                  <CardDescription>
+                    A list of all pull requests in the repository.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-md border border-gray-200 dark:border-gray-800 overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[100px]">
+                            <button
+                              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+                              onClick={() => handleSort('number')}
+                            >
+                              PR
+                              {sortColumn === 'number' ? (
+                                sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                              ) : (
+                                <ArrowUpDown className="h-4 w-4 opacity-50" />
+                              )}
+                            </button>
+                          </TableHead>
+                          <TableHead>
+                            <button
+                              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+                              onClick={() => handleSort('title')}
+                            >
+                              Title
+                              {sortColumn === 'title' ? (
+                                sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                              ) : (
+                                <ArrowUpDown className="h-4 w-4 opacity-50" />
+                              )}
+                            </button>
+                          </TableHead>
+                          <TableHead>
+                            <button
+                              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+                              onClick={() => handleSort('author')}
+                            >
+                              Author
+                              {sortColumn === 'author' ? (
+                                sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                              ) : (
+                                <ArrowUpDown className="h-4 w-4 opacity-50" />
+                              )}
+                            </button>
+                          </TableHead>
+                          <TableHead>
+                            <button
+                              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+                              onClick={() => handleSort('ci_status')}
+                            >
+                              CI Status
+                              {sortColumn === 'ci_status' ? (
+                                sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                              ) : (
+                                <ArrowUpDown className="h-4 w-4 opacity-50" />
+                              )}
+                            </button>
+                          </TableHead>
+                          <TableHead>
+                            <button
+                              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+                              onClick={() => handleSort('failures')}
+                            >
+                              CI Failures
+                              {sortColumn === 'failures' ? (
+                                sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                              ) : (
+                                <ArrowUpDown className="h-4 w-4 opacity-50" />
+                              )}
+                            </button>
+                          </TableHead>
+                          <TableHead>
+                            <button
+                              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+                              onClick={() => handleSort('approvals')}
+                            >
+                              Approvals
+                              {sortColumn === 'approvals' ? (
+                                sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                              ) : (
+                                <ArrowUpDown className="h-4 w-4 opacity-50" />
+                              )}
+                            </button>
+                          </TableHead>
+                          <TableHead>
+                            <button
+                              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+                              onClick={() => handleSort('backend_approval')}
+                            >
+                              Backend Approval
+                              {sortColumn === 'backend_approval' ? (
+                                sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                              ) : (
+                                <ArrowUpDown className="h-4 w-4 opacity-50" />
+                              )}
+                            </button>
+                          </TableHead>
+                          <TableHead>Commented</TableHead>
+                          <TableHead>
+                            <button
+                              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+                              onClick={() => handleSort('created')}
+                            >
+                              Created
+                              {sortColumn === 'created' ? (
+                                sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                              ) : (
+                                <ArrowUpDown className="h-4 w-4 opacity-50" />
+                              )}
+                            </button>
+                          </TableHead>
+                          <TableHead className="text-right">
+                            <button
+                              className="inline-flex items-center gap-1 hover:text-foreground transition-colors ml-auto"
+                              onClick={() => handleSort('updated')}
+                            >
+                              Updated
+                              {sortColumn === 'updated' ? (
+                                sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                              ) : (
+                                <ArrowUpDown className="h-4 w-4 opacity-50" />
+                              )}
+                            </button>
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredPullRequests.map((pr, index) => (
+                          <TableRow 
+                            key={pr.id || `${pr.number}-${pr.id}`}
+                            className="cursor-pointer"
+                          >
+                          <TableCell className="font-medium">
+                            <a
+                              href={pr.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 hover:underline"
+                            >
+                              #{pr.number}
+                            </a>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <a
+                                href={pr.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:underline max-w-[400px] truncate"
+                              >
+                                {pr.title}
+                              </a>
+                              {pr.draft && <Badge variant="outline">Draft</Badge>}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <a
+                              href={`https://github.com/${pr.author}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:underline text-blue-600"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {pr.author}
+                            </a>
+                          </TableCell>
+                          <TableCell>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <a
+                                  href={`${pr.url}/checks`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-2 hover:underline"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {getCIStatusIcon(pr.ci_status)}
+                                  <span className="text-sm">
+                                    {pr.successful_checks}/{pr.total_checks}
+                                  </span>
+                                </a>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <div className="space-y-1">
+                                  <p className="font-semibold">CI Status: {pr.ci_status}</p>
+                                  <p>Successful: {pr.successful_checks}</p>
+                                  <p>Failed: {pr.failed_checks}</p>
+                                  <p>Pending/Skipped: {pr.total_checks - pr.successful_checks - pr.failed_checks}</p>
+                                  <p>Total: {pr.total_checks}</p>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              {pr.failing_checks.map((check, idx) => (
+                                <a
+                                  key={idx}
+                                  href={check.url || `${pr.url}/checks`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="block text-xs text-red-600 hover:underline truncate max-w-[200px]"
+                                  title={check.name}
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {check.name}
+                                </a>
+                              ))}
+                              {pr.failing_checks.length === 0 && (
+                                <span className="text-xs text-muted-foreground">None</span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              {pr.approval_summary?.approved_users?.length > 0 ? (
+                                <a
+                                  href={pr.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="block hover:underline text-blue-600"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {pr.approval_summary.approved_users.map((user, idx) => (
+                                    <div key={idx} className="text-xs">
+                                      {user}
+                                    </div>
+                                  ))}
+                                </a>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">None</span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center justify-center">
+                              {pr.backend_approval_status === 'approved' ? (
+                                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                              ) : (
+                                <XCircle className="h-5 w-5 text-muted-foreground" />
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              {pr.approval_summary?.commented_users?.map((user, idx) => (
+                                <div key={idx} className="text-xs">
+                                  {user}
+                                </div>
+                              ))}
+                              {(!pr.approval_summary?.commented_users || pr.approval_summary.commented_users.length === 0) && (
+                                <span className="text-xs text-muted-foreground">None</span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {formatTimeAgo(pr.created_at)}
+                          </TableCell>
+                          <TableCell className="text-right text-sm text-muted-foreground">
+                            {formatTimeAgo(pr.updated_at)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+    </TooltipProvider>
+  )
+}
+
+export default App
