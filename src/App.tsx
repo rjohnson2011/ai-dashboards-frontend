@@ -80,7 +80,9 @@ interface PullRequest {
 
 interface ApiResponse {
   pull_requests: PullRequest[]
+  approved_pull_requests: PullRequest[]
   count: number
+  approved_count: number
   repository: string
   last_updated: string
   updating: boolean
@@ -93,6 +95,7 @@ interface ApiResponse {
 
 function App() {
   const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
+  const [approvedPullRequests, setApprovedPullRequests] = useState<PullRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [repository, setRepository] = useState('')
@@ -114,7 +117,8 @@ function App() {
         throw new Error('Failed to fetch pull requests')
       }
       const data: ApiResponse = await response.json()
-      setPullRequests(data.pull_requests)
+      setPullRequests(data.pull_requests || [])
+      setApprovedPullRequests(data.approved_pull_requests || [])
       setRepository(data.repository)
       setLastUpdated(data.last_updated)
       setIsRefreshing(data.updating)
@@ -240,6 +244,10 @@ function App() {
 
   const filterPullRequests = (prs: PullRequest[]) => {
     switch (activeTab) {
+      case 'open':
+        return prs.filter(pr => !pr.draft)
+      case 'backend-approved':
+        return approvedPullRequests
       case 'failing':
         return prs.filter(pr => pr.ci_status === 'failure')
       case 'approved':
@@ -251,7 +259,9 @@ function App() {
     }
   }
 
-  const filteredPullRequests = sortPullRequests(filterPullRequests(pullRequests))
+  const filteredPullRequests = sortPullRequests(
+    activeTab === 'backend-approved' ? approvedPullRequests : filterPullRequests(pullRequests)
+  )
 
   if (loading) {
     return (
@@ -353,6 +363,18 @@ function App() {
                 All PRs
                 <Badge variant="secondary" className="ml-2">
                   {pullRequests.length}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="open">
+                Open PRs
+                <Badge variant="secondary" className="ml-2">
+                  {pullRequests.filter(pr => !pr.draft).length}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="backend-approved">
+                Backend Approved
+                <Badge variant="default" className="ml-2">
+                  {approvedPullRequests.length}
                 </Badge>
               </TabsTrigger>
               <TabsTrigger value="failing">
