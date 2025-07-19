@@ -64,6 +64,7 @@ interface PullRequest {
   successful_checks: number
   failed_checks: number
   backend_approval_status: string
+  ready_for_backend_review: boolean
   approval_summary?: {
     status: string
     approved_count: number
@@ -214,6 +215,10 @@ function App() {
         case 'backend_approval':
           aValue = a.backend_approval_status
           bValue = b.backend_approval_status
+          break
+        case 'ready_for_backend':
+          aValue = a.ready_for_backend_review ? 1 : 0
+          bValue = b.ready_for_backend_review ? 1 : 0
           break
         case 'created':
           aValue = new Date(a.created_at).getTime()
@@ -554,6 +559,19 @@ function App() {
                               )}
                             </button>
                           </TableHead>
+                          <TableHead>
+                            <button
+                              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+                              onClick={() => handleSort('ready_for_backend')}
+                            >
+                              Ready for Backend
+                              {sortColumn === 'ready_for_backend' ? (
+                                sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                              ) : (
+                                <ArrowUpDown className="h-4 w-4 opacity-50" />
+                              )}
+                            </button>
+                          </TableHead>
                           <TableHead>Commented</TableHead>
                           <TableHead>
                             <button
@@ -694,6 +712,15 @@ function App() {
                           <TableCell>
                             <div className="flex items-center justify-center">
                               {pr.backend_approval_status === 'approved' ? (
+                                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                              ) : (
+                                <XCircle className="h-5 w-5 text-muted-foreground" />
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center justify-center">
+                              {pr.ready_for_backend_review ? (
                                 <CheckCircle2 className="h-5 w-5 text-green-500" />
                               ) : (
                                 <XCircle className="h-5 w-5 text-muted-foreground" />
