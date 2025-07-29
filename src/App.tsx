@@ -669,7 +669,7 @@ function App() {
                             <Tooltip>
                               <TooltipTrigger>
                                 <a
-                                  href={`${pr.url}/checks`}
+                                  href={`${pr.url}#pullrequestreview-new_review_form`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="flex items-center gap-2 hover:underline"
@@ -697,7 +697,7 @@ function App() {
                               {pr.failing_checks.map((check, idx) => (
                                 <a
                                   key={idx}
-                                  href={check.url || `${pr.url}/checks`}
+                                  href={`${pr.url}#pullrequestreview-new_review_form`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="block text-xs text-red-600 hover:underline truncate max-w-[200px]"
