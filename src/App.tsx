@@ -76,6 +76,7 @@ interface PullRequest {
     pending_users: string[]
     pending_teams: string[]
   }
+  recent_timeline?: string[]
 }
 
 interface ApiResponse {
@@ -102,7 +103,7 @@ function App() {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [, setRateLimit] = useState<ApiResponse['rate_limit'] | null>(null)
-  const [activeTab, setActiveTab] = useState('all')
+  const [activeTab, setActiveTab] = useState('open')
   const [sortColumn, setSortColumn] = useState<string | null>(null)
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
@@ -595,6 +596,7 @@ function App() {
                             </button>
                           </TableHead>
                           <TableHead>Commented</TableHead>
+                          <TableHead>Last 5 Timeline</TableHead>
                           <TableHead>
                             <button
                               className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
@@ -758,6 +760,18 @@ function App() {
                               ))}
                               {(!pr.approval_summary?.commented_users || pr.approval_summary.commented_users.length === 0) && (
                                 <span className="text-xs text-muted-foreground">None</span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              {pr.recent_timeline?.map((event, idx) => (
+                                <div key={idx} className="text-xs text-muted-foreground">
+                                  {event}
+                                </div>
+                              ))}
+                              {(!pr.recent_timeline || pr.recent_timeline.length === 0) && (
+                                <span className="text-xs text-muted-foreground">Loading...</span>
                               )}
                             </div>
                           </TableCell>
