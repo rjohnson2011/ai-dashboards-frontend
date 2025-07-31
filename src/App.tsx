@@ -500,7 +500,7 @@ function App() {
                               )}
                             </button>
                           </TableHead>
-                          <TableHead>
+                          <TableHead className="max-w-[250px]">
                             <button
                               className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
                               onClick={() => handleSort('title')}
@@ -579,7 +579,7 @@ function App() {
                             </button>
                           </TableHead>
                           <TableHead>Commented</TableHead>
-                          <TableHead>Last 5 Timeline</TableHead>
+                          <TableHead className="min-w-[200px]">Timeline Updates</TableHead>
                           <TableHead>
                             <button
                               className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
@@ -630,7 +630,7 @@ function App() {
                                 href={pr.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="hover:underline max-w-[400px] truncate"
+                                className="hover:underline max-w-[250px] truncate"
                               >
                                 {pr.title}
                               </a>
@@ -737,7 +737,7 @@ function App() {
                               )}
                             </div>
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="min-w-[200px]">
                             <div className="space-y-1">
                               {pr.recent_timeline?.map((event, idx) => (
                                 <div key={idx} className="text-xs text-muted-foreground">
