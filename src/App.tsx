@@ -247,12 +247,10 @@ function App() {
     switch (activeTab) {
       case 'open':
         return prs.filter(pr => !pr.draft)
-      case 'backend-approved':
-        return approvedPullRequests
       case 'failing':
         return prs.filter(pr => pr.ci_status === 'failure')
       case 'approved':
-        return prs.filter(pr => pr.approval_summary?.status === 'approved')
+        return prs.filter(pr => pr.ready_for_backend_review)
       case 'draft':
         return prs.filter(pr => pr.draft)
       default:
@@ -261,7 +259,7 @@ function App() {
   }
 
   const filteredPullRequests = sortPullRequests(
-    activeTab === 'backend-approved' ? approvedPullRequests : filterPullRequests(pullRequests)
+    filterPullRequests(pullRequests)
   )
 
   if (loading) {
@@ -378,12 +376,6 @@ function App() {
                   {pullRequests.filter(pr => !pr.draft).length}
                 </Badge>
               </TabsTrigger>
-              <TabsTrigger value="backend-approved">
-                Backend Approved
-                <Badge variant="default" className="ml-2">
-                  {approvedPullRequests.length}
-                </Badge>
-              </TabsTrigger>
               <TabsTrigger value="failing">
                 Failing CI
                 <Badge variant="destructive" className="ml-2">
@@ -391,9 +383,9 @@ function App() {
                 </Badge>
               </TabsTrigger>
               <TabsTrigger value="approved">
-                Approved
+                Ready for Review
                 <Badge className="ml-2">
-                  {pullRequests.filter(pr => pr.approval_summary?.status === 'approved').length}
+                  {pullRequests.filter(pr => pr.ready_for_backend_review).length}
                 </Badge>
               </TabsTrigger>
               <TabsTrigger value="draft">
@@ -419,6 +411,22 @@ function App() {
                     </p>
                   </CardContent>
                 </Card>
+                <Card data-slot="card" className="card-gradient-success">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      Ready for Review
+                    </CardTitle>
+                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {filteredPullRequests.filter(pr => pr.ready_for_backend_review).length}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Can be reviewed
+                    </p>
+                  </CardContent>
+                </Card>
                 <Card data-slot="card" className="card-gradient-destructive">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
@@ -432,22 +440,6 @@ function App() {
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Requires attention
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card data-slot="card" className="card-gradient-success">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Approved
-                    </CardTitle>
-                    <CheckCircle2 className="h-5 w-5 text-green-500" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {filteredPullRequests.filter(pr => pr.approval_summary?.status === 'approved').length}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {filteredPullRequests.filter(pr => pr.approval_summary?.status === 'changes_requested').length} changes requested
                     </p>
                   </CardContent>
                 </Card>
