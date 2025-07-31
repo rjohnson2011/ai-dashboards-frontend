@@ -578,19 +578,6 @@ function App() {
                           <TableHead>
                             <button
                               className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
-                              onClick={() => handleSort('backend_approval')}
-                            >
-                              Backend Approval
-                              {sortColumn === 'backend_approval' ? (
-                                sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
-                              ) : (
-                                <ArrowUpDown className="h-4 w-4 opacity-50" />
-                              )}
-                            </button>
-                          </TableHead>
-                          <TableHead>
-                            <button
-                              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
                               onClick={() => handleSort('ready_for_backend')}
                             >
                               Ready for Review
@@ -736,15 +723,6 @@ function App() {
                                 </a>
                               ) : (
                                 <span className="text-xs text-muted-foreground">None</span>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center justify-center">
-                              {pr.backend_approval_status === 'approved' ? (
-                                <CheckCircle2 className="h-5 w-5 text-green-500" />
-                              ) : (
-                                <XCircle className="h-5 w-5 text-muted-foreground" />
                               )}
                             </div>
                           </TableCell>
