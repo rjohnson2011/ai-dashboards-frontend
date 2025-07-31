@@ -96,7 +96,6 @@ interface ApiResponse {
 
 function App() {
   const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
-  const [approvedPullRequests, setApprovedPullRequests] = useState<PullRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [repository, setRepository] = useState('')
@@ -119,7 +118,6 @@ function App() {
       }
       const data: ApiResponse = await response.json()
       setPullRequests(data.pull_requests || [])
-      setApprovedPullRequests(data.approved_pull_requests || [])
       setRepository(data.repository)
       setLastUpdated(data.last_updated)
       setIsRefreshing(data.updating)
