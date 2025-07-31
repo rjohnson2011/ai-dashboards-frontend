@@ -100,7 +100,6 @@ function App() {
   const [error, setError] = useState<string | null>(null)
   const [repository, setRepository] = useState('')
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
-  const [isRefreshing, setIsRefreshing] = useState(false)
   const [, setRateLimit] = useState<ApiResponse['rate_limit'] | null>(null)
   const [activeTab, setActiveTab] = useState('open')
   const [sortColumn, setSortColumn] = useState<string | null>(null)
@@ -120,7 +119,6 @@ function App() {
       setPullRequests(data.pull_requests || [])
       setRepository(data.repository)
       setLastUpdated(data.last_updated)
-      setIsRefreshing(data.updating)
       setRateLimit(data.rate_limit || null)
       setLoading(false)
     } catch (err) {
@@ -130,17 +128,6 @@ function App() {
     }
   }
 
-  const refreshData = async () => {
-    setIsRefreshing(true)
-    try {
-      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/reviews/refresh`, { method: 'POST' })
-      // Wait a bit then fetch the updated data
-      setTimeout(fetchPullRequests, 2000)
-    } catch (err) {
-      console.error('Error refreshing data:', err)
-      setIsRefreshing(false)
-    }
-  }
 
   const getCIStatusIcon = (status: string) => {
     switch (status) {
@@ -315,15 +302,6 @@ function App() {
                   </span>
                 )}
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={refreshData}
-                disabled={isRefreshing}
-              >
-                <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
