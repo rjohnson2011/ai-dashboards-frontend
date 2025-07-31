@@ -593,7 +593,7 @@ function App() {
                               className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
                               onClick={() => handleSort('ready_for_backend')}
                             >
-                              Ready for Backend
+                              Ready for Review
                               {sortColumn === 'ready_for_backend' ? (
                                 sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
                               ) : (
