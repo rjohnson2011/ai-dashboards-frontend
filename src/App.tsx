@@ -305,11 +305,13 @@ function App() {
                   <span className="text-sm text-muted-foreground">
                     • Last updated {formatTimeAgo(lastUpdated)} ({new Date(lastUpdated).toLocaleString('en-US', { 
                       timeZone: 'America/New_York',
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
                       hour: 'numeric',
                       minute: '2-digit',
-                      hour12: true,
-                      timeZoneName: 'short'
-                    })})
+                      hour12: true
+                    })} EST)
                   </span>
                 )}
               </div>
