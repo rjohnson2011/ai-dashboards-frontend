@@ -659,6 +659,8 @@ function App() {
                             <div className="space-y-1">
                               {pr.failing_checks.filter(check => check.name !== 'Pull Request Ready for Review').length > 0 ? (
                                 <span className="text-xs font-medium text-red-600">Resolve CI Failures</span>
+                              ) : pr.ci_status === 'pending' && pr.total_checks - pr.successful_checks === 1 && pr.failed_checks === 0 ? (
+                                <span className="text-xs font-medium text-yellow-600">Succeed if backend approval is confirmed</span>
                               ) : pr.failing_checks.length > 0 && pr.failing_checks.every(check => check.name === 'Pull Request Ready for Review') ? (
                                 pr.failing_checks.map((check, idx) => (
                                   <a
