@@ -363,7 +363,7 @@ function App() {
               </TabsTrigger>
               <TabsTrigger value="failing">
                 Failing CI
-                <Badge variant="destructive" className="ml-2">
+                <Badge variant="destructive" className="ml-2 !text-white">
                   {pullRequests.filter(pr => pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)).length}
                 </Badge>
               </TabsTrigger>
