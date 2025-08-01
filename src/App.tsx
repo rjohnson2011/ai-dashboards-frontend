@@ -657,20 +657,23 @@ function App() {
                           </TableCell>
                           <TableCell>
                             <div className="space-y-1">
-                              {pr.failing_checks.map((check, idx) => (
-                                <a
-                                  key={idx}
-                                  href={`${pr.url}#pullrequestreview-new_review_form`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="block text-xs text-red-600 hover:underline truncate max-w-[200px]"
-                                  title={check.name}
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  {check.name}
-                                </a>
-                              ))}
-                              {pr.failing_checks.length === 0 && (
+                              {pr.failing_checks.filter(check => check.name !== 'Pull Request Ready for Review').length > 0 ? (
+                                <span className="text-xs font-medium text-red-600">Resolve CI Failures</span>
+                              ) : pr.failing_checks.length > 0 && pr.failing_checks.every(check => check.name === 'Pull Request Ready for Review') ? (
+                                pr.failing_checks.map((check, idx) => (
+                                  <a
+                                    key={idx}
+                                    href={`${pr.url}#pullrequestreview-new_review_form`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block text-xs text-red-600 hover:underline truncate max-w-[200px]"
+                                    title={check.name}
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    {check.name}
+                                  </a>
+                                ))
+                              ) : (
                                 <span className="text-xs text-muted-foreground">None</span>
                               )}
                             </div>
