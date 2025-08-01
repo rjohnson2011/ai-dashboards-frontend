@@ -647,7 +647,13 @@ function App() {
                                 >
                                   {getCIStatusIcon(pr.ci_status)}
                                   <span className="text-sm">
-                                    {pr.successful_checks}/{pr.total_checks}
+                                    {pr.failed_checks > 0 ? (
+                                      <span className="text-red-600">{pr.failed_checks} failing</span>
+                                    ) : pr.total_checks - pr.successful_checks > 0 ? (
+                                      <span className="text-yellow-600">{pr.total_checks - pr.successful_checks} pending</span>
+                                    ) : (
+                                      <span className="text-green-600">All passing</span>
+                                    )}
                                   </span>
                                 </a>
                               </TooltipTrigger>
