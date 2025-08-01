@@ -711,7 +711,11 @@ function App() {
                           <TableCell>
                             <div className="flex items-center justify-center">
                               {pr.ready_for_backend_review ? (
-                                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                                pr.ci_status === 'pending' && pr.total_checks - pr.successful_checks === 1 && pr.failed_checks === 0 ? (
+                                  <span className="text-xs font-medium text-blue-600">Awaiting team member review</span>
+                                ) : (
+                                  <CheckCircle2 className="h-5 w-5 text-green-500" />
+                                )
                               ) : (
                                 <XCircle className="h-5 w-5 text-muted-foreground" />
                               )}
