@@ -228,12 +228,19 @@ function App() {
     })
   }
 
+  const hasNonReviewFailingChecks = (pr: PullRequest) => {
+    return pr.failing_checks.some(check => 
+      check.name !== 'Pull Request Ready for Review' && 
+      !check.name.toLowerCase().includes('backend')
+    )
+  }
+
   const filterPullRequests = (prs: PullRequest[]) => {
     switch (activeTab) {
       case 'open':
         return prs.filter(pr => !pr.draft)
       case 'failing':
-        return prs.filter(pr => pr.ci_status === 'failure')
+        return prs.filter(pr => pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr))
       case 'approved':
         return prs.filter(pr => pr.ready_for_backend_review)
       case 'draft':
@@ -357,7 +364,7 @@ function App() {
               <TabsTrigger value="failing">
                 Failing CI
                 <Badge variant="destructive" className="ml-2">
-                  {pullRequests.filter(pr => pr.ci_status === 'failure').length}
+                  {pullRequests.filter(pr => pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)).length}
                 </Badge>
               </TabsTrigger>
               <TabsTrigger value="approved">
@@ -414,10 +421,10 @@ function App() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {filteredPullRequests.filter(pr => pr.ci_status === 'failure').length}
+                      {filteredPullRequests.filter(pr => pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Requires attention
+                      Failing multiple checks
                     </p>
                   </CardContent>
                 </Card>
