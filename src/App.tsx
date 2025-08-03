@@ -405,7 +405,7 @@ function App() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {filteredPullRequests.filter(pr => pr.ready_for_backend_review).length}
+                      {pullRequests.filter(pr => pr.ready_for_backend_review).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Can be reviewed
@@ -421,7 +421,7 @@ function App() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {filteredPullRequests.filter(pr => pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)).length}
+                      {pullRequests.filter(pr => pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Failing multiple checks
@@ -437,7 +437,7 @@ function App() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {filteredPullRequests.filter(pr => pr.draft).length}
+                      {pullRequests.filter(pr => pr.draft).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Work in progress
@@ -453,10 +453,10 @@ function App() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {filteredPullRequests.filter(pr => !pr.approval_summary?.status || pr.approval_summary?.status === 'pending').length}
+                      {pullRequests.filter(pr => !pr.approval_summary?.status || pr.approval_summary?.status === 'pending').length}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {filteredPullRequests.filter(pr => pr.approval_summary?.status === 'partially_approved').length} partially approved
+                      {pullRequests.filter(pr => pr.approval_summary?.status === 'partially_approved').length} partially approved
                     </p>
                   </CardContent>
                 </Card>
