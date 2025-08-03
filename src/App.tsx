@@ -30,7 +30,8 @@ import {
   Filter,
   ArrowUpDown,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  TrendingUp
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './components/ui/tooltip'
 import { PRHistoryChart } from './components/PRHistoryChart'
@@ -102,6 +103,7 @@ function App() {
   const [, setRateLimit] = useState<ApiResponse['rate_limit'] | null>(null)
   const [sortColumn, setSortColumn] = useState<string | null>(null)
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+  const [showChart, setShowChart] = useState(false)
 
   useEffect(() => {
     fetchPullRequests()
@@ -329,6 +331,22 @@ function App() {
               </Button>
             </div>
           </div>
+          <div className="flex justify-between items-center">
+            <Button
+              variant={showChart ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowChart(!showChart)}
+              className="mb-4"
+            >
+              <TrendingUp className="mr-2 h-4 w-4" />
+              PR Trends
+            </Button>
+          </div>
+          {showChart && (
+            <div className="mb-6">
+              <PRHistoryChart days={7} />
+            </div>
+          )}
           <div className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
                 <Card data-slot="card" className="card-gradient-success">
@@ -410,7 +428,6 @@ function App() {
                   </CardContent>
                 </Card>
               </div>
-              <PRHistoryChart days={7} />
               <Card>
                 <CardHeader>
                   <CardTitle>Pull Requests</CardTitle>
