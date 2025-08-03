@@ -398,7 +398,7 @@ function App() {
                     <GitPullRequest className="h-5 w-5 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{activeFilter === 'all' ? pullRequests.length : filteredPullRequests.length}</div>
+                    <div className="text-2xl font-bold">{pullRequests.length}</div>
                     <p className="text-xs text-muted-foreground">
                       {pullRequests.filter(pr => !pr.draft).length} ready for review
                     </p>
