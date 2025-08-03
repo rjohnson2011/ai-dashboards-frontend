@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs'
 import { Badge } from './components/ui/badge'
 import { Button } from './components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from './components/ui/avatar'
@@ -96,12 +95,11 @@ interface ApiResponse {
 
 function App() {
   const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [repository, setRepository] = useState('')
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [, setRateLimit] = useState<ApiResponse['rate_limit'] | null>(null)
-  const [activeTab, setActiveTab] = useState('approved')
   const [sortColumn, setSortColumn] = useState<string | null>(null)
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
@@ -235,24 +233,8 @@ function App() {
     )
   }
 
-  const filterPullRequests = (prs: PullRequest[]) => {
-    switch (activeTab) {
-      case 'open':
-        return prs.filter(pr => !pr.draft)
-      case 'failing':
-        return prs.filter(pr => pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr))
-      case 'approved':
-        return prs.filter(pr => pr.ready_for_backend_review)
-      case 'draft':
-        return prs.filter(pr => pr.draft)
-      default:
-        return prs
-    }
-  }
 
-  const filteredPullRequests = sortPullRequests(
-    filterPullRequests(pullRequests)
-  )
+  const filteredPullRequests = sortPullRequests(pullRequests)
 
   if (loading) {
     return (
@@ -347,15 +329,7 @@ function App() {
               </Button>
             </div>
           </div>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="approved">Ready for Review</TabsTrigger>
-              <TabsTrigger value="all">All PRs</TabsTrigger>
-              <TabsTrigger value="open">Open PRs</TabsTrigger>
-              <TabsTrigger value="failing">Failing CI</TabsTrigger>
-              <TabsTrigger value="draft">Drafts</TabsTrigger>
-            </TabsList>
-            <TabsContent value={activeTab} className="space-y-4">
+          <div className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
                 <Card data-slot="card" className="card-gradient-success">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -737,8 +711,7 @@ function App() {
                   </div>
                 </CardContent>
               </Card>
-            </TabsContent>
-          </Tabs>
+          </div>
         </div>
       </div>
     </TooltipProvider>
