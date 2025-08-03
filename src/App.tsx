@@ -96,7 +96,7 @@ interface ApiResponse {
 
 function App() {
   const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [repository, setRepository] = useState('')
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
@@ -111,6 +111,7 @@ function App() {
   }, [])
 
   const fetchPullRequests = async () => {
+    setLoading(true)
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/reviews`)
       if (!response.ok) {
