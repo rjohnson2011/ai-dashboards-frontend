@@ -104,6 +104,7 @@ function App() {
   const [sortColumn, setSortColumn] = useState<string | null>(null)
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
   const [showChart, setShowChart] = useState(false)
+  const [activeFilter, setActiveFilter] = useState<string>('all')
 
   useEffect(() => {
     fetchPullRequests()
@@ -236,7 +237,23 @@ function App() {
   }
 
 
-  const filteredPullRequests = sortPullRequests(pullRequests)
+  const filterPullRequests = (prs: PullRequest[]) => {
+    switch (activeFilter) {
+      case 'ready':
+        return prs.filter(pr => pr.ready_for_backend_review)
+      case 'failing':
+        return prs.filter(pr => pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr))
+      case 'draft':
+        return prs.filter(pr => pr.draft)
+      case 'pending':
+        return prs.filter(pr => !pr.approval_summary?.status || pr.approval_summary?.status === 'pending')
+      case 'all':
+      default:
+        return prs
+    }
+  }
+
+  const filteredPullRequests = sortPullRequests(filterPullRequests(pullRequests))
 
   if (loading) {
     return (
@@ -349,7 +366,11 @@ function App() {
           )}
           <div className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-                <Card data-slot="card" className="card-gradient-success">
+                <Card 
+                  data-slot="card" 
+                  className={`card-gradient-success cursor-pointer transition-all hover:scale-105 ${activeFilter === 'ready' ? 'ring-2 ring-green-500' : ''}`}
+                  onClick={() => setActiveFilter('ready')}
+                >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
                       Ready for Review
@@ -365,7 +386,11 @@ function App() {
                     </p>
                   </CardContent>
                 </Card>
-                <Card data-slot="card" className="card-gradient-subtle">
+                <Card 
+                  data-slot="card" 
+                  className={`card-gradient-subtle cursor-pointer transition-all hover:scale-105 ${activeFilter === 'all' ? 'ring-2 ring-primary' : ''}`}
+                  onClick={() => setActiveFilter('all')}
+                >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
                       Total Pull Requests
@@ -373,13 +398,17 @@ function App() {
                     <GitPullRequest className="h-5 w-5 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{filteredPullRequests.length}</div>
+                    <div className="text-2xl font-bold">{activeFilter === 'all' ? pullRequests.length : filteredPullRequests.length}</div>
                     <p className="text-xs text-muted-foreground">
                       {pullRequests.filter(pr => !pr.draft).length} ready for review
                     </p>
                   </CardContent>
                 </Card>
-                <Card data-slot="card" className="card-gradient-destructive">
+                <Card 
+                  data-slot="card" 
+                  className={`card-gradient-destructive cursor-pointer transition-all hover:scale-105 ${activeFilter === 'failing' ? 'ring-2 ring-red-500' : ''}`}
+                  onClick={() => setActiveFilter('failing')}
+                >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
                       Failing CI
@@ -395,7 +424,11 @@ function App() {
                     </p>
                   </CardContent>
                 </Card>
-                <Card data-slot="card" className="card-gradient-subtle">
+                <Card 
+                  data-slot="card" 
+                  className={`card-gradient-subtle cursor-pointer transition-all hover:scale-105 ${activeFilter === 'draft' ? 'ring-2 ring-gray-500' : ''}`}
+                  onClick={() => setActiveFilter('draft')}
+                >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
                       Draft PRs
@@ -411,7 +444,11 @@ function App() {
                     </p>
                   </CardContent>
                 </Card>
-                <Card data-slot="card" className="card-gradient-warning">
+                <Card 
+                  data-slot="card" 
+                  className={`card-gradient-warning cursor-pointer transition-all hover:scale-105 ${activeFilter === 'pending' ? 'ring-2 ring-yellow-500' : ''}`}
+                  onClick={() => setActiveFilter('pending')}
+                >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
                       Pending Review
