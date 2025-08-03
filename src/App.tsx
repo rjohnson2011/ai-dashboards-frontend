@@ -101,7 +101,7 @@ function App() {
   const [repository, setRepository] = useState('')
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [, setRateLimit] = useState<ApiResponse['rate_limit'] | null>(null)
-  const [activeTab, setActiveTab] = useState('open')
+  const [activeTab, setActiveTab] = useState('approved')
   const [sortColumn, setSortColumn] = useState<string | null>(null)
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
@@ -349,6 +349,12 @@ function App() {
           </div>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
             <TabsList>
+              <TabsTrigger value="approved">
+                Ready for Review
+                <Badge className="ml-2">
+                  {pullRequests.filter(pr => pr.ready_for_backend_review).length}
+                </Badge>
+              </TabsTrigger>
               <TabsTrigger value="all">
                 All PRs
                 <Badge variant="secondary" className="ml-2">
@@ -365,12 +371,6 @@ function App() {
                 Failing CI
                 <Badge variant="destructive" className="ml-2 !text-white">
                   {pullRequests.filter(pr => pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)).length}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="approved">
-                Ready for Review
-                <Badge className="ml-2">
-                  {pullRequests.filter(pr => pr.ready_for_backend_review).length}
                 </Badge>
               </TabsTrigger>
               <TabsTrigger value="draft">
