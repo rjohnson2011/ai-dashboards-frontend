@@ -349,53 +349,14 @@ function App() {
           </div>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
             <TabsList>
-              <TabsTrigger value="approved">
-                Ready for Review
-                <Badge className="ml-2">
-                  {pullRequests.filter(pr => pr.ready_for_backend_review).length}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="all">
-                All PRs
-                <Badge variant="secondary" className="ml-2">
-                  {pullRequests.length}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="open">
-                Open PRs
-                <Badge variant="secondary" className="ml-2">
-                  {pullRequests.filter(pr => !pr.draft).length}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="failing">
-                Failing CI
-                <Badge variant="destructive" className="ml-2 !text-white">
-                  {pullRequests.filter(pr => pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)).length}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="draft">
-                Drafts
-                <Badge variant="outline" className="ml-2">
-                  {pullRequests.filter(pr => pr.draft).length}
-                </Badge>
-              </TabsTrigger>
+              <TabsTrigger value="approved">Ready for Review</TabsTrigger>
+              <TabsTrigger value="all">All PRs</TabsTrigger>
+              <TabsTrigger value="open">Open PRs</TabsTrigger>
+              <TabsTrigger value="failing">Failing CI</TabsTrigger>
+              <TabsTrigger value="draft">Drafts</TabsTrigger>
             </TabsList>
             <TabsContent value={activeTab} className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-                <Card data-slot="card" className="card-gradient-subtle">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Total Pull Requests
-                    </CardTitle>
-                    <GitPullRequest className="h-5 w-5 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{filteredPullRequests.length}</div>
-                    <p className="text-xs text-muted-foreground">
-                      {pullRequests.filter(pr => !pr.draft).length} ready for review
-                    </p>
-                  </CardContent>
-                </Card>
                 <Card data-slot="card" className="card-gradient-success">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
@@ -409,6 +370,20 @@ function App() {
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Can be reviewed
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card data-slot="card" className="card-gradient-subtle">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      Total Pull Requests
+                    </CardTitle>
+                    <GitPullRequest className="h-5 w-5 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{filteredPullRequests.length}</div>
+                    <p className="text-xs text-muted-foreground">
+                      {pullRequests.filter(pr => !pr.draft).length} ready for review
                     </p>
                   </CardContent>
                 </Card>
