@@ -240,6 +240,16 @@ function App() {
     )
   }
 
+  const hasNonBotApprovals = (pr: PullRequest) => {
+    if (!pr.approval_summary?.approved_users || pr.approval_summary.approved_users.length === 0) {
+      return false
+    }
+    return pr.approval_summary.approved_users.some(user => 
+      !user.toLowerCase().includes('bot') && 
+      !user.toLowerCase().includes('backend-review-group')
+    )
+  }
+
 
   const filterPullRequests = (prs: PullRequest[]) => {
     let filtered = prs
@@ -765,7 +775,7 @@ function App() {
                           <TableCell>
                             <div className="flex items-center justify-center">
                               {pr.ready_for_backend_review ? (
-                                pr.ci_status === 'pending' && pr.total_checks - pr.successful_checks === 1 && pr.failed_checks === 0 ? (
+                                pr.ci_status === 'pending' && pr.total_checks - pr.successful_checks === 1 && pr.failed_checks === 0 && !hasNonBotApprovals(pr) ? (
                                   <span className="text-xs font-medium text-blue-600">Awaiting team member review</span>
                                 ) : (
                                   <CheckCircle2 className="h-5 w-5 text-green-500" />
