@@ -77,24 +77,31 @@ export function PRHistoryChart({ days = 7 }: PRHistoryChartProps) {
 
   const fetchHistoricalData = async () => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/reviews/historical?days=${days}`
-      )
+      const apiUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/reviews/historical?days=${days}`
+      console.log('Fetching historical data from:', apiUrl)
+      
+      const response = await fetch(apiUrl)
+      console.log('Response status:', response.status, response.statusText)
+      
       if (!response.ok) {
-        throw new Error('Failed to fetch historical data')
+        throw new Error(`Failed to fetch historical data: ${response.status} ${response.statusText}`)
       }
       const result = await response.json()
+      console.log('API Response:', result)
       
       // Use mock data if insufficient real data available
       if (!result.data || result.data.length < 7) {
         console.log('Using mock data - only', result.data?.length || 0, 'days of real data available')
+        console.log('Available data:', result.data)
         setData(generateMockTrends())
       } else {
+        console.log('Using real data:', result.data)
         setData(result.data)
       }
       setLoading(false)
     } catch (err) {
       console.error('Error fetching historical data:', err)
+      console.log('Full error details:', err)
       // Use mock data on error
       setData(generateMockTrends())
       setError(null) // Don't show error if we have mock data

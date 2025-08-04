@@ -241,13 +241,27 @@ function App() {
   }
 
   const hasNonBotApprovals = (pr: PullRequest) => {
-    if (!pr.approval_summary?.approved_users || pr.approval_summary.approved_users.length === 0) {
+    // Check if there are any approvals at all
+    if (!pr.approval_summary || pr.approval_summary.approved_count === 0) {
       return false
     }
-    return pr.approval_summary.approved_users.some(user => 
-      !user.toLowerCase().includes('bot') && 
-      !user.toLowerCase().includes('backend-review-group')
-    )
+    
+    // If we have approvals but no approved_users array, assume they are human approvals
+    // This handles cases where the approved_count is > 0 but approved_users might be empty
+    if (pr.approval_summary.approved_count > 0 && (!pr.approval_summary.approved_users || pr.approval_summary.approved_users.length === 0)) {
+      console.log(`PR #${pr.number} has ${pr.approval_summary.approved_count} approvals but no approved_users list - assuming human approval`)
+      return true
+    }
+    
+    // Check the approved_users list
+    if (pr.approval_summary.approved_users && pr.approval_summary.approved_users.length > 0) {
+      return pr.approval_summary.approved_users.some(user => 
+        !user.toLowerCase().includes('bot') && 
+        !user.toLowerCase().includes('backend-review-group')
+      )
+    }
+    
+    return false
   }
 
 
