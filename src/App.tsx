@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './com
 import { Badge } from './components/ui/badge'
 import { Button } from './components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from './components/ui/avatar'
+import { Input } from './components/ui/input'
 import {
   Table,
   TableBody,
@@ -105,6 +106,8 @@ function App() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
   const [showChart, setShowChart] = useState(false)
   const [activeFilter, setActiveFilter] = useState<string>('all')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [showSearch, setShowSearch] = useState(false)
 
   useEffect(() => {
     fetchPullRequests()
@@ -239,19 +242,36 @@ function App() {
 
 
   const filterPullRequests = (prs: PullRequest[]) => {
+    let filtered = prs
+    
+    // Apply card filter
     switch (activeFilter) {
       case 'ready':
-        return prs.filter(pr => pr.ready_for_backend_review)
+        filtered = filtered.filter(pr => pr.ready_for_backend_review)
+        break
       case 'failing':
-        return prs.filter(pr => pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr))
+        filtered = filtered.filter(pr => pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr))
+        break
       case 'draft':
-        return prs.filter(pr => pr.draft)
+        filtered = filtered.filter(pr => pr.draft)
+        break
       case 'pending':
-        return prs.filter(pr => !pr.approval_summary?.status || pr.approval_summary?.status === 'pending')
-      case 'all':
-      default:
-        return prs
+        filtered = filtered.filter(pr => !pr.approval_summary?.status || pr.approval_summary?.status === 'pending')
+        break
     }
+    
+    // Apply search filter
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase()
+      filtered = filtered.filter(pr => 
+        pr.title.toLowerCase().includes(search) ||
+        pr.author.toLowerCase().includes(search) ||
+        pr.number.toString().includes(search) ||
+        pr.failing_checks.some(check => check.name.toLowerCase().includes(search))
+      )
+    }
+    
+    return filtered
   }
 
   const filteredPullRequests = sortPullRequests(filterPullRequests(pullRequests))
@@ -339,11 +359,37 @@ function App() {
               <p className="text-muted-foreground">Your pull request overview and insights</p>
             </div>
             <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm">
-                <Search className="mr-2 h-4 w-4" />
-                Search
-              </Button>
-              <Button variant="outline" size="sm">
+              {showSearch ? (
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="text"
+                    placeholder="Search PRs by title, author, number..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-64"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setShowSearch(false)
+                      setSearchTerm('')
+                    }}
+                  >
+                    <XCircle className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowSearch(true)}
+                >
+                  <Search className="mr-2 h-4 w-4" />
+                  Search
+                </Button>
+              )}
+              <Button variant="outline" size="sm" disabled>
                 <Filter className="mr-2 h-4 w-4" />
                 Filter
               </Button>
