@@ -28,7 +28,6 @@ import {
   Clock,
   RefreshCw,
   Search,
-  Filter,
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
@@ -398,10 +397,6 @@ function App() {
                   Search
                 </Button>
               )}
-              <Button variant="outline" size="sm" disabled>
-                <Filter className="mr-2 h-4 w-4" />
-                Filter
-              </Button>
             </div>
           </div>
           <div className="flex justify-between items-center">
