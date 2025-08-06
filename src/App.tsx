@@ -95,6 +95,8 @@ interface ApiResponse {
   }
 }
 
+const BACKEND_REVIEWERS = ['ericboehs', 'LindseySaari', 'rmtolmach', 'stiehlrod', 'RachalCassity', 'rjohnson2011', 'stevenjcumming']
+
 function App() {
   const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
   const [loading, setLoading] = useState(true)
@@ -254,8 +256,11 @@ function App() {
       case 'draft':
         filtered = filtered.filter(pr => pr.draft)
         break
-      case 'pending':
-        filtered = filtered.filter(pr => !pr.approval_summary?.status || pr.approval_summary?.status === 'pending')
+      case 'reviewed-today':
+        filtered = filtered.filter(pr => 
+          pr.backend_approval_status === 'approved' || 
+          (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
+        )
         break
     }
     
@@ -492,21 +497,24 @@ function App() {
                 </Card>
                 <Card 
                   data-slot="card" 
-                  className={`card-gradient-warning cursor-pointer transition-all hover:scale-105 ${activeFilter === 'pending' ? 'ring-2 ring-yellow-500' : ''}`}
-                  onClick={() => setActiveFilter('pending')}
+                  className={`card-gradient-warning cursor-pointer transition-all hover:scale-105 ${activeFilter === 'reviewed-today' ? 'ring-2 ring-yellow-500' : ''}`}
+                  onClick={() => setActiveFilter('reviewed-today')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
-                      Pending Review
+                      PRs Reviewed Today
                     </CardTitle>
-                    <AlertCircle className="h-5 w-5 text-yellow-500" />
+                    <CheckCircle2 className="h-5 w-5 text-yellow-500" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {pullRequests.filter(pr => !pr.approval_summary?.status || pr.approval_summary?.status === 'pending').length}
+                      {pullRequests.filter(pr => 
+                        pr.backend_approval_status === 'approved' || 
+                        (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
+                      ).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {pullRequests.filter(pr => pr.approval_summary?.status === 'partially_approved').length} partially approved
+                      Backend reviewed
                     </p>
                   </CardContent>
                 </Card>
