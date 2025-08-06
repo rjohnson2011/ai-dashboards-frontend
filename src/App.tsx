@@ -248,7 +248,12 @@ function App() {
     // Apply card filter
     switch (activeFilter) {
       case 'ready':
-        filtered = filtered.filter(pr => pr.approval_summary && pr.approval_summary.approved_count > 0)
+        filtered = filtered.filter(pr => 
+          pr.approval_summary && 
+          pr.approval_summary.approved_count > 0 &&
+          pr.backend_approval_status !== 'approved' &&
+          !(pr.approval_summary.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
+        )
         break
       case 'failing':
         filtered = filtered.filter(pr => pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr))
@@ -430,7 +435,12 @@ function App() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {pullRequests.filter(pr => pr.approval_summary && pr.approval_summary.approved_count > 0).length}
+                      {pullRequests.filter(pr => 
+                        pr.approval_summary && 
+                        pr.approval_summary.approved_count > 0 &&
+                        pr.backend_approval_status !== 'approved' &&
+                        !(pr.approval_summary.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
+                      ).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Can be reviewed
@@ -451,7 +461,10 @@ function App() {
                   <CardContent>
                     <div className="text-2xl font-bold">{pullRequests.length}</div>
                     <p className="text-xs text-muted-foreground">
-                      {pullRequests.filter(pr => pr.approval_summary && pr.approval_summary.approved_count > 0).length} with approvals
+                      {pullRequests.filter(pr => 
+                        pr.backend_approval_status === 'approved' || 
+                        (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
+                      ).length} backend reviewed
                     </p>
                   </CardContent>
                 </Card>
@@ -502,7 +515,7 @@ function App() {
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
-                      PRs Reviewed Today
+                      PRs Reviewed
                     </CardTitle>
                     <CheckCircle2 className="h-5 w-5 text-yellow-500" />
                   </CardHeader>
@@ -771,7 +784,10 @@ function App() {
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center justify-center">
-                              {(pr.approval_summary && pr.approval_summary.approved_count > 0) ? (
+                              {(pr.approval_summary && 
+                                pr.approval_summary.approved_count > 0 &&
+                                pr.backend_approval_status !== 'approved' &&
+                                !(pr.approval_summary.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))) ? (
                                 <CheckCircle2 className="h-5 w-5 text-green-500" />
                               ) : (
                                 <XCircle className="h-5 w-5 text-muted-foreground" />
