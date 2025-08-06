@@ -246,7 +246,7 @@ function App() {
     // Apply card filter
     switch (activeFilter) {
       case 'ready':
-        filtered = filtered.filter(pr => pr.ready_for_backend_review)
+        filtered = filtered.filter(pr => pr.approval_summary && pr.approval_summary.approved_count > 0)
         break
       case 'failing':
         filtered = filtered.filter(pr => pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr))
@@ -425,7 +425,7 @@ function App() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {pullRequests.filter(pr => pr.ready_for_backend_review).length}
+                      {pullRequests.filter(pr => pr.approval_summary && pr.approval_summary.approved_count > 0).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Can be reviewed
@@ -446,7 +446,7 @@ function App() {
                   <CardContent>
                     <div className="text-2xl font-bold">{pullRequests.length}</div>
                     <p className="text-xs text-muted-foreground">
-                      {pullRequests.filter(pr => !pr.draft).length} ready for review
+                      {pullRequests.filter(pr => pr.approval_summary && pr.approval_summary.approved_count > 0).length} with approvals
                     </p>
                   </CardContent>
                 </Card>
