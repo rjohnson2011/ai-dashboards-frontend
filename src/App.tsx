@@ -763,7 +763,7 @@ function App() {
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center justify-center">
-                              {pr.ready_for_backend_review ? (
+                              {(pr.approval_summary && pr.approval_summary.approved_count > 0) ? (
                                 <CheckCircle2 className="h-5 w-5 text-green-500" />
                               ) : (
                                 <XCircle className="h-5 w-5 text-muted-foreground" />
