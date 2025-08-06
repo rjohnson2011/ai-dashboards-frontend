@@ -248,6 +248,7 @@ function App() {
     switch (activeFilter) {
       case 'ready':
         filtered = filtered.filter(pr => 
+          !pr.draft &&
           pr.approval_summary && 
           pr.approval_summary.approved_count > 0 &&
           pr.backend_approval_status !== 'approved' &&
@@ -431,6 +432,7 @@ function App() {
                   <CardContent>
                     <div className="text-2xl font-bold">
                       {pullRequests.filter(pr => 
+                        !pr.draft &&
                         pr.approval_summary && 
                         pr.approval_summary.approved_count > 0 &&
                         pr.backend_approval_status !== 'approved' &&
@@ -779,7 +781,8 @@ function App() {
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center justify-center">
-                              {(pr.approval_summary && 
+                              {(!pr.draft &&
+                                pr.approval_summary && 
                                 pr.approval_summary.approved_count > 0 &&
                                 pr.backend_approval_status !== 'approved' &&
                                 !(pr.approval_summary.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))) ? (
