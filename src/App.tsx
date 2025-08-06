@@ -240,31 +240,6 @@ function App() {
     )
   }
 
-  const hasNonBotApprovals = (pr: PullRequest) => {
-    // Check if there are any approvals at all
-    if (!pr.approval_summary || pr.approval_summary.approved_count === 0) {
-      return false
-    }
-    
-    // If we have approvals but no approved_users array, assume they are human approvals
-    // This handles cases where the approved_count is > 0 but approved_users might be empty
-    if (pr.approval_summary.approved_count > 0 && (!pr.approval_summary.approved_users || pr.approval_summary.approved_users.length === 0)) {
-      console.log(`PR #${pr.number} has ${pr.approval_summary.approved_count} approvals but no approved_users list - assuming human approval`)
-      return true
-    }
-    
-    // Check the approved_users list
-    if (pr.approval_summary.approved_users && pr.approval_summary.approved_users.length > 0) {
-      return pr.approval_summary.approved_users.some(user => 
-        !user.toLowerCase().includes('bot') && 
-        !user.toLowerCase().includes('backend-review-group')
-      )
-    }
-    
-    return false
-  }
-
-
   const filterPullRequests = (prs: PullRequest[]) => {
     let filtered = prs
     
@@ -789,11 +764,7 @@ function App() {
                           <TableCell>
                             <div className="flex items-center justify-center">
                               {pr.ready_for_backend_review ? (
-                                pr.ci_status === 'pending' && pr.total_checks - pr.successful_checks === 1 && pr.failed_checks === 0 && !hasNonBotApprovals(pr) ? (
-                                  <span className="text-xs font-medium text-blue-600">Awaiting team member review</span>
-                                ) : (
-                                  <CheckCircle2 className="h-5 w-5 text-green-500" />
-                                )
+                                <CheckCircle2 className="h-5 w-5 text-green-500" />
                               ) : (
                                 <XCircle className="h-5 w-5 text-muted-foreground" />
                               )}
