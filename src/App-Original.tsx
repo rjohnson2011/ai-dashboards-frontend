@@ -118,7 +118,7 @@ function App() {
   const [repository, setRepository] = useState('')
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [, setRateLimit] = useState<ApiResponse['rate_limit'] | null>(null)
-  const [sortColumn, setSortColumn] = useState<string | null>(null)
+  const [sortColumn, setSortColumn] = useState<string | null>('updated')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
   const [showChart, setShowChart] = useState(false)
   const [activeFilter, setActiveFilter] = useState<string>('ready')
@@ -303,6 +303,14 @@ function App() {
           pr.backend_approval_status !== 'approved' &&
           !(pr.approval_summary.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
         )
+        // Default to showing oldest updated PRs first for ready for review
+        if (!sortColumn) {
+          filtered = filtered.sort((a, b) => {
+            const aTime = new Date(a.updated_at).getTime()
+            const bTime = new Date(b.updated_at).getTime()
+            return aTime - bTime // Ascending = oldest first
+          })
+        }
         break
       case 'failing':
         filtered = filtered.filter(pr => pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr))
