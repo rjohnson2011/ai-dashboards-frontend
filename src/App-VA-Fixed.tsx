@@ -368,10 +368,10 @@ function App() {
         {/* Metrics Cards */}
         <div className="vads-grid-row vads-u-margin-bottom--3">
           <div className="vads-grid-col-12 tablet:vads-grid-col-6 desktop:vads-grid-col-3 vads-u-margin-bottom--2">
-            <div 
-              className={`vads-u-background-color--gray-lightest vads-u-padding--2 vads-u-border--1px vads-u-border-color--gray-light ${activeFilter === 'ready' ? 'vads-u-border-color--green' : ''}`}
-              style={{ cursor: 'pointer', borderWidth: activeFilter === 'ready' ? '2px' : '1px', height: '100%' }}
+            <va-card 
+              show-shadow="true"
               onClick={() => setActiveFilter('ready')}
+              style={{ cursor: 'pointer', border: activeFilter === 'ready' ? '2px solid #2e8540' : 'none' }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
@@ -381,14 +381,14 @@ function App() {
                 </div>
                 <CheckCircle2 style={{ color: '#2e8540', width: '24px', height: '24px' }} />
               </div>
-            </div>
+            </va-card>
           </div>
 
           <div className="vads-grid-col-12 tablet:vads-grid-col-6 desktop:vads-grid-col-3 vads-u-margin-bottom--2">
-            <div 
-              className={`vads-u-background-color--gray-lightest vads-u-padding--2 vads-u-border--1px vads-u-border-color--gray-light ${activeFilter === 'all' ? 'vads-u-border-color--primary' : ''}`}
-              style={{ cursor: 'pointer', borderWidth: activeFilter === 'all' ? '2px' : '1px', height: '100%' }}
+            <va-card 
+              show-shadow="true"
               onClick={() => setActiveFilter('all')}
+              style={{ cursor: 'pointer', border: activeFilter === 'all' ? '2px solid #005ea2' : 'none' }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
@@ -398,14 +398,14 @@ function App() {
                 </div>
                 <GitPullRequest style={{ color: '#5b616b', width: '24px', height: '24px' }} />
               </div>
-            </div>
+            </va-card>
           </div>
 
           <div className="vads-grid-col-12 tablet:vads-grid-col-6 desktop:vads-grid-col-3 vads-u-margin-bottom--2">
-            <div 
-              className={`vads-u-background-color--gray-lightest vads-u-padding--2 vads-u-border--1px vads-u-border-color--gray-light ${activeFilter === 'failing' ? 'vads-u-border-color--secondary-dark' : ''}`}
-              style={{ cursor: 'pointer', borderWidth: activeFilter === 'failing' ? '2px' : '1px', height: '100%' }}
+            <va-card 
+              show-shadow="true"
               onClick={() => setActiveFilter('failing')}
+              style={{ cursor: 'pointer', border: activeFilter === 'failing' ? '2px solid #e31c3d' : 'none' }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
@@ -415,14 +415,14 @@ function App() {
                 </div>
                 <XCircle style={{ color: '#e31c3d', width: '24px', height: '24px' }} />
               </div>
-            </div>
+            </va-card>
           </div>
 
           <div className="vads-grid-col-12 tablet:vads-grid-col-6 desktop:vads-grid-col-3 vads-u-margin-bottom--2">
-            <div 
-              className={`vads-u-background-color--gray-lightest vads-u-padding--2 vads-u-border--1px vads-u-border-color--gray-light ${activeFilter === 'reviewed-today' ? 'vads-u-border-color--gold' : ''}`}
-              style={{ cursor: 'pointer', borderWidth: activeFilter === 'reviewed-today' ? '2px' : '1px', height: '100%' }}
+            <va-card 
+              show-shadow="true"
               onClick={() => setActiveFilter('reviewed-today')}
+              style={{ cursor: 'pointer', border: activeFilter === 'reviewed-today' ? '2px solid #fdb81e' : 'none' }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
@@ -432,7 +432,7 @@ function App() {
                 </div>
                 <CheckCircle2 style={{ color: '#fdb81e', width: '24px', height: '24px' }} />
               </div>
-            </div>
+            </va-card>
           </div>
         </div>
 
