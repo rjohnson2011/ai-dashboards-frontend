@@ -5,6 +5,13 @@ import { Button } from './components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from './components/ui/avatar'
 import { Input } from './components/ui/input'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './components/ui/select'
+import {
   Table,
   TableBody,
   TableCell,
@@ -94,6 +101,14 @@ interface ApiResponse {
   }
 }
 
+interface Repository {
+  owner: string
+  name: string
+  display_name: string
+  full_name: string
+  backend_review_required: boolean
+}
+
 const BACKEND_REVIEWERS = ['ericboehs', 'LindseySaari', 'rmtolmach', 'stiehlrod', 'RachalCassity', 'rjohnson2011', 'stevenjcumming']
 
 function App() {
@@ -109,15 +124,47 @@ function App() {
   const [activeFilter, setActiveFilter] = useState<string>('ready')
   const [searchTerm, setSearchTerm] = useState('')
   const [showSearch, setShowSearch] = useState(false)
+  const [repositories, setRepositories] = useState<Repository[]>([])
+  const [selectedRepository, setSelectedRepository] = useState<Repository | null>(null)
 
   useEffect(() => {
-    fetchPullRequests()
+    fetchRepositories()
   }, [])
+  
+  useEffect(() => {
+    if (selectedRepository) {
+      fetchPullRequests()
+    }
+  }, [selectedRepository])
 
+  const fetchRepositories = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/repositories`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch repositories')
+      }
+      const data = await response.json()
+      setRepositories(data.repositories || [])
+      // Select the first repository by default
+      if (data.repositories && data.repositories.length > 0) {
+        setSelectedRepository(data.repositories[0])
+      }
+    } catch (err) {
+      console.error('Error fetching repositories:', err)
+      setError(err instanceof Error ? err.message : 'An error occurred')
+    }
+  }
+  
   const fetchPullRequests = async () => {
+    if (!selectedRepository) return
+    
     setLoading(true)
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/reviews`)
+      const params = new URLSearchParams({
+        repository_owner: selectedRepository.owner,
+        repository_name: selectedRepository.name
+      })
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/reviews?${params}`)
       if (!response.ok) {
         throw new Error('Failed to fetch pull requests')
       }
@@ -367,7 +414,26 @@ function App() {
               <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
               <p className="text-muted-foreground">Your pull request overview and insights</p>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-4">
+              <Select 
+                value={selectedRepository?.full_name || ''} 
+                onValueChange={(value) => {
+                  const repo = repositories.find(r => r.full_name === value)
+                  if (repo) setSelectedRepository(repo)
+                }}
+              >
+                <SelectTrigger className="w-[280px]">
+                  <SelectValue placeholder="Select a repository" />
+                </SelectTrigger>
+                <SelectContent>
+                  {repositories.map((repo) => (
+                    <SelectItem key={repo.full_name} value={repo.full_name}>
+                      {repo.display_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex items-center space-x-2">
               {showSearch ? (
                 <div className="flex items-center space-x-2">
                   <Input
@@ -398,6 +464,7 @@ function App() {
                   Search
                 </Button>
               )}
+              </div>
             </div>
           </div>
           <div className="flex justify-between items-center">
