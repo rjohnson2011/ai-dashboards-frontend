@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { 
   GitPullRequest, 
   CheckCircle2, 
@@ -98,6 +98,7 @@ function App() {
   const [showChart, setShowChart] = useState(false)
   const [activeFilter, setActiveFilter] = useState<string>('ready')
   const [searchTerm, setSearchTerm] = useState('')
+  const tableRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetchPullRequests()
@@ -288,7 +289,7 @@ function App() {
 
   if (loading) {
     return (
-      <div className="vads-l-grid-container" style={{ paddingTop: '2rem' }}>
+      <div className="vads-grid-container--full" style={{ padding: '2rem' }}>
         <va-loading-indicator 
           label="Loading pull requests..."
           message="Please wait while we fetch the latest data."
@@ -299,7 +300,7 @@ function App() {
 
   if (error) {
     return (
-      <div className="vads-l-grid-container" style={{ paddingTop: '2rem' }}>
+      <div className="vads-grid-container--full" style={{ padding: '2rem' }}>
         <va-alert 
           status="error"
           visible="true"
@@ -312,80 +313,6 @@ function App() {
     )
   }
 
-  const createTableRows = () => {
-    return filteredPullRequests.map((pr) => {
-      const readyForReview = (!pr.draft &&
-        pr.approval_summary && 
-        pr.approval_summary.approved_count > 0 &&
-        pr.backend_approval_status !== 'approved' &&
-        !(pr.approval_summary.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))))
-
-      return `
-        <tr key="${pr.id}">
-          <td>
-            <a href="${pr.url}" target="_blank" rel="noopener noreferrer">
-              #${pr.number}
-            </a>
-          </td>
-          <td>
-            <a href="${pr.url}" target="_blank" rel="noopener noreferrer" style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block;">
-              ${pr.title}
-            </a>
-            ${pr.draft ? '<span style="margin-left: 8px; font-size: 0.875rem; color: #5b616b;">[Draft]</span>' : ''}
-          </td>
-          <td>
-            <a href="https://github.com/${pr.author}" target="_blank" rel="noopener noreferrer">
-              ${pr.author}
-            </a>
-          </td>
-          <td>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              ${pr.ci_status === 'success' ? 
-                '<span style="color: #2e8540;">✓</span>' : 
-                pr.ci_status === 'failure' ? 
-                '<span style="color: #e31c3d;">✗</span>' : 
-                '<span style="color: #fdb81e;">○</span>'}
-              <span style="font-size: 0.875rem;">
-                ${pr.failed_checks > 0 ? 
-                  `<span style="color: #e31c3d;">${pr.failed_checks} failing</span>` : 
-                  pr.total_checks - pr.successful_checks > 0 ? 
-                  `<span style="color: #fdb81e;">${pr.total_checks - pr.successful_checks} pending</span>` : 
-                  '<span style="color: #2e8540;">All passing</span>'}
-              </span>
-            </div>
-          </td>
-          <td>
-            ${pr.ci_status === 'pending' && pr.total_checks - pr.successful_checks === 1 && pr.failed_checks === 0 ? 
-              '<span style="font-size: 0.75rem; color: #fdb81e;">Succeed if backend approval</span>' : 
-              pr.failing_checks.length > 0 ? 
-              pr.failing_checks.map(check => 
-                `<div style="font-size: 0.75rem; color: #e31c3d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;" title="${check.name}">${check.name}</div>`
-              ).join('') : 
-              '<span style="font-size: 0.75rem; color: #5b616b;">None</span>'}
-          </td>
-          <td>
-            ${pr.approval_summary?.approved_users && pr.approval_summary.approved_users.length > 0 ? 
-              pr.approval_summary.approved_users.map(user => 
-                `<div style="font-size: 0.875rem;">${user}</div>`
-              ).join('') : 
-              '<span style="font-size: 0.875rem; color: #5b616b;">None</span>'}
-          </td>
-          <td style="text-align: center;">
-            ${readyForReview ? 
-              '<span style="color: #2e8540; font-size: 1.25rem;">✓</span>' : 
-              '<span style="color: #5b616b; font-size: 1.25rem;">–</span>'}
-          </td>
-          <td style="font-size: 0.875rem; color: #5b616b;">
-            ${formatTimeAgo(pr.created_at)}
-          </td>
-          <td style="font-size: 0.875rem; color: #5b616b; text-align: right;">
-            ${formatTimeAgo(pr.updated_at)}
-          </td>
-        </tr>
-      `
-    }).join('')
-  }
-
   return (
     <>
       <va-banner 
@@ -395,10 +322,10 @@ function App() {
         Track and manage pull requests for {repository}
       </va-banner>
 
-      <div className="vads-l-grid-container" style={{ paddingTop: '2rem' }}>
+      <div className="vads-grid-container--full" style={{ padding: '2rem' }}>
         {/* Header */}
-        <div className="vads-l-row">
-          <div className="vads-l-col--12">
+        <div className="vads-grid-row">
+          <div className="vads-grid-col-12">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
               <div>
                 <h1 className="vads-u-margin-y--0">Pull Request Dashboard</h1>
@@ -427,8 +354,8 @@ function App() {
         </div>
 
         {/* Search Bar */}
-        <div className="vads-l-row vads-u-margin-bottom--2">
-          <div className="vads-l-col--12">
+        <div className="vads-grid-row vads-u-margin-bottom--2">
+          <div className="vads-grid-col-12">
             <va-search-input
               value={searchTerm}
               onInput={(e: any) => setSearchTerm(e.target.value)}
@@ -439,13 +366,14 @@ function App() {
         </div>
 
         {/* Metrics Cards */}
-        <div className="vads-l-row vads-u-margin-bottom--3">
-          <div className="vads-l-col--12 medium-screen:vads-l-col--3">
-            <div 
-              className={`vads-u-background-color--gray-lightest vads-u-padding--2 vads-u-border--1px vads-u-border-color--gray-light ${activeFilter === 'ready' ? 'vads-u-border-color--green' : ''}`}
-              style={{ cursor: 'pointer', borderWidth: activeFilter === 'ready' ? '2px' : '1px' }}
-              onClick={() => setActiveFilter('ready')}
-            >
+        <div className="vads-grid-row vads-u-margin-bottom--3">
+          <div className="vads-grid-col-12 tablet:vads-grid-col-6 desktop:vads-grid-col-3 vads-u-margin-bottom--2">
+            <div style={{ height: '100%' }}>
+              <va-card 
+                show-shadow="true"
+                onClick={() => setActiveFilter('ready')}
+                style={{ cursor: 'pointer', border: activeFilter === 'ready' ? '2px solid #2e8540' : 'none', height: '100%' }}
+              >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
                   <h3 className="vads-u-margin-y--0 vads-u-font-size--base">Ready for Review</h3>
@@ -454,15 +382,17 @@ function App() {
                 </div>
                 <CheckCircle2 style={{ color: '#2e8540', width: '24px', height: '24px' }} />
               </div>
+            </va-card>
             </div>
           </div>
 
-          <div className="vads-l-col--12 medium-screen:vads-l-col--3">
-            <div 
-              className={`vads-u-background-color--gray-lightest vads-u-padding--2 vads-u-border--1px vads-u-border-color--gray-light ${activeFilter === 'all' ? 'vads-u-border-color--primary' : ''}`}
-              style={{ cursor: 'pointer', borderWidth: activeFilter === 'all' ? '2px' : '1px' }}
-              onClick={() => setActiveFilter('all')}
-            >
+          <div className="vads-grid-col-12 tablet:vads-grid-col-6 desktop:vads-grid-col-3 vads-u-margin-bottom--2">
+            <div style={{ height: '100%' }}>
+              <va-card 
+                show-shadow="true"
+                onClick={() => setActiveFilter('all')}
+                style={{ cursor: 'pointer', border: activeFilter === 'all' ? '2px solid #005ea2' : 'none', height: '100%' }}
+              >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
                   <h3 className="vads-u-margin-y--0 vads-u-font-size--base">Total Pull Requests</h3>
@@ -471,15 +401,17 @@ function App() {
                 </div>
                 <GitPullRequest style={{ color: '#5b616b', width: '24px', height: '24px' }} />
               </div>
+            </va-card>
             </div>
           </div>
 
-          <div className="vads-l-col--12 medium-screen:vads-l-col--3">
-            <div 
-              className={`vads-u-background-color--gray-lightest vads-u-padding--2 vads-u-border--1px vads-u-border-color--gray-light ${activeFilter === 'failing' ? 'vads-u-border-color--secondary-dark' : ''}`}
-              style={{ cursor: 'pointer', borderWidth: activeFilter === 'failing' ? '2px' : '1px' }}
-              onClick={() => setActiveFilter('failing')}
-            >
+          <div className="vads-grid-col-12 tablet:vads-grid-col-6 desktop:vads-grid-col-3 vads-u-margin-bottom--2">
+            <div style={{ height: '100%' }}>
+              <va-card 
+                show-shadow="true"
+                onClick={() => setActiveFilter('failing')}
+                style={{ cursor: 'pointer', border: activeFilter === 'failing' ? '2px solid #e31c3d' : 'none', height: '100%' }}
+              >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
                   <h3 className="vads-u-margin-y--0 vads-u-font-size--base">Failing CI</h3>
@@ -488,15 +420,17 @@ function App() {
                 </div>
                 <XCircle style={{ color: '#e31c3d', width: '24px', height: '24px' }} />
               </div>
+            </va-card>
             </div>
           </div>
 
-          <div className="vads-l-col--12 medium-screen:vads-l-col--3">
-            <div 
-              className={`vads-u-background-color--gray-lightest vads-u-padding--2 vads-u-border--1px vads-u-border-color--gray-light ${activeFilter === 'reviewed-today' ? 'vads-u-border-color--gold' : ''}`}
-              style={{ cursor: 'pointer', borderWidth: activeFilter === 'reviewed-today' ? '2px' : '1px' }}
-              onClick={() => setActiveFilter('reviewed-today')}
-            >
+          <div className="vads-grid-col-12 tablet:vads-grid-col-6 desktop:vads-grid-col-3 vads-u-margin-bottom--2">
+            <div style={{ height: '100%' }}>
+              <va-card 
+                show-shadow="true"
+                onClick={() => setActiveFilter('reviewed-today')}
+                style={{ cursor: 'pointer', border: activeFilter === 'reviewed-today' ? '2px solid #fdb81e' : 'none', height: '100%' }}
+              >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
                   <h3 className="vads-u-margin-y--0 vads-u-font-size--base">PRs Reviewed</h3>
@@ -505,13 +439,14 @@ function App() {
                 </div>
                 <CheckCircle2 style={{ color: '#fdb81e', width: '24px', height: '24px' }} />
               </div>
+            </va-card>
             </div>
           </div>
         </div>
 
         {/* Chart Toggle */}
-        <div className="vads-l-row vads-u-margin-bottom--2">
-          <div className="vads-l-col--12">
+        <div className="vads-grid-row vads-u-margin-bottom--2">
+          <div className="vads-grid-col-12">
             <va-button 
               text={showChart ? "Hide PR Trends" : "Show PR Trends"}
               onClick={() => setShowChart(!showChart)} 
@@ -522,59 +457,134 @@ function App() {
 
         {/* Chart */}
         {showChart && (
-          <div className="vads-l-row vads-u-margin-bottom--3">
-            <div className="vads-l-col--12">
+          <div className="vads-grid-row vads-u-margin-bottom--3">
+            <div className="vads-grid-col-12">
               <PRHistoryChart days={7} />
             </div>
           </div>
         )}
 
         {/* Table */}
-        <div className="vads-l-row">
-          <div className="vads-l-col--12">
+        <div className="vads-grid-row">
+          <div className="vads-grid-col-12">
             <h2>Pull Requests</h2>
             <p className="vads-u-color--gray-medium">A list of all pull requests in the repository.</p>
             
-            <div style={{ overflowX: 'auto' }}>
-              <va-table 
-                table-title="Pull Requests Table"
-                sortable
-              >
-                <table className="usa-table usa-table--borderless" style={{ width: '100%' }}>
-                  <thead>
-                    <tr>
-                      <th scope="col" onClick={() => handleSort('number')} style={{ cursor: 'pointer' }}>
-                        PR {sortColumn === 'number' && (sortDirection === 'asc' ? '↑' : '↓')}
-                      </th>
-                      <th scope="col" onClick={() => handleSort('title')} style={{ cursor: 'pointer' }}>
-                        Title {sortColumn === 'title' && (sortDirection === 'asc' ? '↑' : '↓')}
-                      </th>
-                      <th scope="col" onClick={() => handleSort('author')} style={{ cursor: 'pointer' }}>
-                        Author {sortColumn === 'author' && (sortDirection === 'asc' ? '↑' : '↓')}
-                      </th>
-                      <th scope="col" onClick={() => handleSort('ci_status')} style={{ cursor: 'pointer' }}>
-                        CI Status {sortColumn === 'ci_status' && (sortDirection === 'asc' ? '↑' : '↓')}
-                      </th>
-                      <th scope="col" onClick={() => handleSort('failures')} style={{ cursor: 'pointer' }}>
-                        CI Failures {sortColumn === 'failures' && (sortDirection === 'asc' ? '↑' : '↓')}
-                      </th>
-                      <th scope="col" onClick={() => handleSort('approvals')} style={{ cursor: 'pointer' }}>
-                        Approvals {sortColumn === 'approvals' && (sortDirection === 'asc' ? '↑' : '↓')}
-                      </th>
-                      <th scope="col" onClick={() => handleSort('ready_for_backend')} style={{ cursor: 'pointer' }}>
-                        Ready {sortColumn === 'ready_for_backend' && (sortDirection === 'asc' ? '↑' : '↓')}
-                      </th>
-                      <th scope="col" onClick={() => handleSort('created')} style={{ cursor: 'pointer' }}>
-                        Created {sortColumn === 'created' && (sortDirection === 'asc' ? '↑' : '↓')}
-                      </th>
-                      <th scope="col" onClick={() => handleSort('updated')} style={{ cursor: 'pointer' }}>
-                        Updated {sortColumn === 'updated' && (sortDirection === 'asc' ? '↑' : '↓')}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody dangerouslySetInnerHTML={{ __html: createTableRows() }} />
-                </table>
-              </va-table>
+            {/* Use standard table without va-table wrapper to avoid MutationObserver error */}
+            <div style={{ overflowX: 'auto' }} ref={tableRef}>
+              <table className="usa-table usa-table--borderless" style={{ width: '100%' }}>
+                <caption className="usa-table__caption">Pull Requests Table</caption>
+                <thead>
+                  <tr>
+                    <th scope="col" onClick={() => handleSort('number')} style={{ cursor: 'pointer' }}>
+                      PR {sortColumn === 'number' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th scope="col" onClick={() => handleSort('title')} style={{ cursor: 'pointer' }}>
+                      Title {sortColumn === 'title' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th scope="col" onClick={() => handleSort('author')} style={{ cursor: 'pointer' }}>
+                      Author {sortColumn === 'author' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th scope="col" onClick={() => handleSort('ci_status')} style={{ cursor: 'pointer' }}>
+                      CI Status {sortColumn === 'ci_status' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th scope="col" onClick={() => handleSort('failures')} style={{ cursor: 'pointer' }}>
+                      CI Failures {sortColumn === 'failures' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th scope="col" onClick={() => handleSort('approvals')} style={{ cursor: 'pointer' }}>
+                      Approvals {sortColumn === 'approvals' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th scope="col" onClick={() => handleSort('ready_for_backend')} style={{ cursor: 'pointer' }}>
+                      Ready {sortColumn === 'ready_for_backend' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th scope="col" onClick={() => handleSort('created')} style={{ cursor: 'pointer' }}>
+                      Created {sortColumn === 'created' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th scope="col" onClick={() => handleSort('updated')} style={{ cursor: 'pointer' }}>
+                      Updated {sortColumn === 'updated' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredPullRequests.map((pr) => {
+                    const readyForReview = (!pr.draft &&
+                      pr.approval_summary && 
+                      pr.approval_summary.approved_count > 0 &&
+                      pr.backend_approval_status !== 'approved' &&
+                      !(pr.approval_summary.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))))
+
+                    return (
+                      <tr key={pr.id}>
+                        <td>
+                          <a href={pr.url} target="_blank" rel="noopener noreferrer">
+                            #{pr.number}
+                          </a>
+                        </td>
+                        <td>
+                          <a href={pr.url} target="_blank" rel="noopener noreferrer" style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'inline-block' }}>
+                            {pr.title}
+                          </a>
+                          {pr.draft && <span style={{ marginLeft: '8px', fontSize: '0.875rem', color: '#5b616b' }}>[Draft]</span>}
+                        </td>
+                        <td>
+                          <a href={`https://github.com/${pr.author}`} target="_blank" rel="noopener noreferrer">
+                            {pr.author}
+                          </a>
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {getCIStatusIcon(pr.ci_status)}
+                            <span style={{ fontSize: '0.875rem' }}>
+                              {pr.failed_checks > 0 ? (
+                                <span style={{ color: '#e31c3d' }}>{pr.failed_checks} failing</span>
+                              ) : pr.total_checks - pr.successful_checks > 0 ? (
+                                <span style={{ color: '#fdb81e' }}>{pr.total_checks - pr.successful_checks} pending</span>
+                              ) : (
+                                <span style={{ color: '#2e8540' }}>All passing</span>
+                              )}
+                            </span>
+                          </div>
+                        </td>
+                        <td>
+                          {pr.ci_status === 'pending' && pr.total_checks - pr.successful_checks === 1 && pr.failed_checks === 0 ? (
+                            <span style={{ fontSize: '0.75rem', color: '#fdb81e' }}>Succeed if backend approval</span>
+                          ) : pr.failing_checks.length > 0 ? (
+                            pr.failing_checks.map((check, idx) => (
+                              <div key={idx} style={{ fontSize: '0.75rem', color: '#e31c3d', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }} title={check.name}>
+                                {check.name}
+                              </div>
+                            ))
+                          ) : (
+                            <span style={{ fontSize: '0.75rem', color: '#5b616b' }}>None</span>
+                          )}
+                        </td>
+                        <td>
+                          {pr.approval_summary?.approved_users && pr.approval_summary.approved_users.length > 0 ? (
+                            pr.approval_summary.approved_users.map((user, idx) => (
+                              <div key={idx} style={{ fontSize: '0.875rem' }}>{user}</div>
+                            ))
+                          ) : (
+                            <span style={{ fontSize: '0.875rem', color: '#5b616b' }}>None</span>
+                          )}
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          {readyForReview ? (
+                            <span style={{ color: '#2e8540', fontSize: '1.25rem' }}>✓</span>
+                          ) : (
+                            <span style={{ color: '#5b616b', fontSize: '1.25rem' }}>–</span>
+                          )}
+                        </td>
+                        <td style={{ fontSize: '0.875rem', color: '#5b616b' }}>
+                          {formatTimeAgo(pr.created_at)}
+                        </td>
+                        <td style={{ fontSize: '0.875rem', color: '#5b616b', textAlign: 'right' }}>
+                          {formatTimeAgo(pr.updated_at)}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

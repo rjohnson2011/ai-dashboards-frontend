@@ -1,8 +1,5 @@
-// Import the VA Design System version
-import AppVA from './App-VA-Fixed'
-// import { VATest } from './VATest'
+// Use the original version without VA Design System
+export { default } from './App-Original'
 
-// Uncomment to test VA components
-// export default VATest
-
-export default AppVA
+// To use the VA Design System version, uncomment the line below:
+// export { default } from './App-VA-DesignSC'
