@@ -6,9 +6,10 @@ import { initializeVAComponents } from './va-web-components'
 import "@department-of-veterans-affairs/component-library/dist/main.css"
 
 // Set the sprite location for VA icons
+(window as any).__SVGSPRITE__ = '/sprite.svg';
 (window as any).VetsGov = { 
   iconSprite: '/sprite.svg' 
-}
+};
 
 // Initialize VA Design System components
 initializeVAComponents()
