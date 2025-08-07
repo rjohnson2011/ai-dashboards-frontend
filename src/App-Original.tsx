@@ -169,7 +169,9 @@ function App() {
         throw new Error('Failed to fetch pull requests')
       }
       const data: ApiResponse = await response.json()
-      setPullRequests(data.pull_requests || [])
+      // Combine both regular and approved pull requests
+      const allPRs = [...(data.pull_requests || []), ...(data.approved_pull_requests || [])]
+      setPullRequests(allPRs)
       setRepository(data.repository)
       setLastUpdated(data.last_updated)
       setRateLimit(data.rate_limit || null)
