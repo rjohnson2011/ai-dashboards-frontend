@@ -6,7 +6,16 @@ import {
 
 // Initialize VA web components
 export const initializeVAComponents = () => {
-  applyPolyfills().then(() => {
-    defineCustomElements();
-  });
+  // Ensure DOM is ready before initializing
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      applyPolyfills().then(() => {
+        defineCustomElements(window);
+      });
+    });
+  } else {
+    applyPolyfills().then(() => {
+      defineCustomElements(window);
+    });
+  }
 };
