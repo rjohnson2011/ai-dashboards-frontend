@@ -1,6 +1,12 @@
 /* VA Design System base styles are loaded via main.tsx */
 /* Additional custom styles only */
 
+/* Fix for va-card taking full width */
+va-card {
+  display: block;
+  height: 100%;
+}
+
 /* Custom utility classes that complement VA design system */
 .va-u-color--green {
   color: #2e8540;

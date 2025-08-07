@@ -289,7 +289,7 @@ function App() {
 
   if (loading) {
     return (
-      <div className="vads-grid-container" style={{ paddingTop: '2rem' }}>
+      <div className="vads-grid-container--full" style={{ padding: '2rem' }}>
         <va-loading-indicator 
           label="Loading pull requests..."
           message="Please wait while we fetch the latest data."
@@ -300,7 +300,7 @@ function App() {
 
   if (error) {
     return (
-      <div className="vads-grid-container" style={{ paddingTop: '2rem' }}>
+      <div className="vads-grid-container--full" style={{ padding: '2rem' }}>
         <va-alert 
           status="error"
           visible="true"
@@ -322,7 +322,7 @@ function App() {
         Track and manage pull requests for {repository}
       </va-banner>
 
-      <div className="vads-grid-container" style={{ paddingTop: '2rem' }}>
+      <div className="vads-grid-container--full" style={{ padding: '2rem' }}>
         {/* Header */}
         <div className="vads-grid-row">
           <div className="vads-grid-col-12">
@@ -368,11 +368,12 @@ function App() {
         {/* Metrics Cards */}
         <div className="vads-grid-row vads-u-margin-bottom--3">
           <div className="vads-grid-col-12 tablet:vads-grid-col-6 desktop:vads-grid-col-3 vads-u-margin-bottom--2">
-            <va-card 
-              show-shadow="true"
-              onClick={() => setActiveFilter('ready')}
-              style={{ cursor: 'pointer', border: activeFilter === 'ready' ? '2px solid #2e8540' : 'none' }}
-            >
+            <div style={{ height: '100%' }}>
+              <va-card 
+                show-shadow="true"
+                onClick={() => setActiveFilter('ready')}
+                style={{ cursor: 'pointer', border: activeFilter === 'ready' ? '2px solid #2e8540' : 'none', height: '100%' }}
+              >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
                   <h3 className="vads-u-margin-y--0 vads-u-font-size--base">Ready for Review</h3>
@@ -382,14 +383,16 @@ function App() {
                 <CheckCircle2 style={{ color: '#2e8540', width: '24px', height: '24px' }} />
               </div>
             </va-card>
+            </div>
           </div>
 
           <div className="vads-grid-col-12 tablet:vads-grid-col-6 desktop:vads-grid-col-3 vads-u-margin-bottom--2">
-            <va-card 
-              show-shadow="true"
-              onClick={() => setActiveFilter('all')}
-              style={{ cursor: 'pointer', border: activeFilter === 'all' ? '2px solid #005ea2' : 'none' }}
-            >
+            <div style={{ height: '100%' }}>
+              <va-card 
+                show-shadow="true"
+                onClick={() => setActiveFilter('all')}
+                style={{ cursor: 'pointer', border: activeFilter === 'all' ? '2px solid #005ea2' : 'none', height: '100%' }}
+              >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
                   <h3 className="vads-u-margin-y--0 vads-u-font-size--base">Total Pull Requests</h3>
@@ -399,14 +402,16 @@ function App() {
                 <GitPullRequest style={{ color: '#5b616b', width: '24px', height: '24px' }} />
               </div>
             </va-card>
+            </div>
           </div>
 
           <div className="vads-grid-col-12 tablet:vads-grid-col-6 desktop:vads-grid-col-3 vads-u-margin-bottom--2">
-            <va-card 
-              show-shadow="true"
-              onClick={() => setActiveFilter('failing')}
-              style={{ cursor: 'pointer', border: activeFilter === 'failing' ? '2px solid #e31c3d' : 'none' }}
-            >
+            <div style={{ height: '100%' }}>
+              <va-card 
+                show-shadow="true"
+                onClick={() => setActiveFilter('failing')}
+                style={{ cursor: 'pointer', border: activeFilter === 'failing' ? '2px solid #e31c3d' : 'none', height: '100%' }}
+              >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
                   <h3 className="vads-u-margin-y--0 vads-u-font-size--base">Failing CI</h3>
@@ -416,14 +421,16 @@ function App() {
                 <XCircle style={{ color: '#e31c3d', width: '24px', height: '24px' }} />
               </div>
             </va-card>
+            </div>
           </div>
 
           <div className="vads-grid-col-12 tablet:vads-grid-col-6 desktop:vads-grid-col-3 vads-u-margin-bottom--2">
-            <va-card 
-              show-shadow="true"
-              onClick={() => setActiveFilter('reviewed-today')}
-              style={{ cursor: 'pointer', border: activeFilter === 'reviewed-today' ? '2px solid #fdb81e' : 'none' }}
-            >
+            <div style={{ height: '100%' }}>
+              <va-card 
+                show-shadow="true"
+                onClick={() => setActiveFilter('reviewed-today')}
+                style={{ cursor: 'pointer', border: activeFilter === 'reviewed-today' ? '2px solid #fdb81e' : 'none', height: '100%' }}
+              >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
                   <h3 className="vads-u-margin-y--0 vads-u-font-size--base">PRs Reviewed</h3>
@@ -433,6 +440,7 @@ function App() {
                 <CheckCircle2 style={{ color: '#fdb81e', width: '24px', height: '24px' }} />
               </div>
             </va-card>
+            </div>
           </div>
         </div>
 
