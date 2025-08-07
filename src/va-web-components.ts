@@ -2,7 +2,7 @@
 import {
   applyPolyfills,
   defineCustomElements
-} from "@department-of-veterans-affairs/component-library";
+} from "@department-of-veterans-affairs/web-components/loader";
 
 // Initialize VA web components
 export const initializeVAComponents = () => {

@@ -3,6 +3,9 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { initializeVAComponents } from './va-web-components'
+// Import USWDS styles first
+import "@uswds/uswds/css/uswds.min.css"
+// Then VA component styles
 import "@department-of-veterans-affairs/component-library/dist/main.css"
 
 // Set the sprite location for VA icons
