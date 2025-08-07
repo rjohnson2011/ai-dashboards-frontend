@@ -289,7 +289,7 @@ function App() {
 
   if (loading) {
     return (
-      <div className="vads-l-grid-container" style={{ paddingTop: '2rem' }}>
+      <div className="vads-grid-container" style={{ paddingTop: '2rem' }}>
         <va-loading-indicator 
           label="Loading pull requests..."
           message="Please wait while we fetch the latest data."
@@ -300,7 +300,7 @@ function App() {
 
   if (error) {
     return (
-      <div className="vads-l-grid-container" style={{ paddingTop: '2rem' }}>
+      <div className="vads-grid-container" style={{ paddingTop: '2rem' }}>
         <va-alert 
           status="error"
           visible="true"
@@ -322,10 +322,10 @@ function App() {
         Track and manage pull requests for {repository}
       </va-banner>
 
-      <div className="vads-l-grid-container" style={{ paddingTop: '2rem' }}>
+      <div className="vads-grid-container" style={{ paddingTop: '2rem' }}>
         {/* Header */}
-        <div className="vads-l-row">
-          <div className="vads-l-col--12">
+        <div className="vads-grid-row">
+          <div className="vads-grid-col-12">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
               <div>
                 <h1 className="vads-u-margin-y--0">Pull Request Dashboard</h1>
@@ -354,8 +354,8 @@ function App() {
         </div>
 
         {/* Search Bar */}
-        <div className="vads-l-row vads-u-margin-bottom--2">
-          <div className="vads-l-col--12">
+        <div className="vads-grid-row vads-u-margin-bottom--2">
+          <div className="vads-grid-col-12">
             <va-search-input
               value={searchTerm}
               onInput={(e: any) => setSearchTerm(e.target.value)}
@@ -366,11 +366,11 @@ function App() {
         </div>
 
         {/* Metrics Cards */}
-        <div className="vads-l-row vads-u-margin-bottom--3">
-          <div className="vads-l-col--12 medium-screen:vads-l-col--3">
+        <div className="vads-grid-row vads-u-margin-bottom--3">
+          <div className="vads-grid-col-12 tablet:vads-grid-col-6 desktop:vads-grid-col-3 vads-u-margin-bottom--2">
             <div 
               className={`vads-u-background-color--gray-lightest vads-u-padding--2 vads-u-border--1px vads-u-border-color--gray-light ${activeFilter === 'ready' ? 'vads-u-border-color--green' : ''}`}
-              style={{ cursor: 'pointer', borderWidth: activeFilter === 'ready' ? '2px' : '1px' }}
+              style={{ cursor: 'pointer', borderWidth: activeFilter === 'ready' ? '2px' : '1px', height: '100%' }}
               onClick={() => setActiveFilter('ready')}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -384,10 +384,10 @@ function App() {
             </div>
           </div>
 
-          <div className="vads-l-col--12 medium-screen:vads-l-col--3">
+          <div className="vads-grid-col-12 tablet:vads-grid-col-6 desktop:vads-grid-col-3 vads-u-margin-bottom--2">
             <div 
               className={`vads-u-background-color--gray-lightest vads-u-padding--2 vads-u-border--1px vads-u-border-color--gray-light ${activeFilter === 'all' ? 'vads-u-border-color--primary' : ''}`}
-              style={{ cursor: 'pointer', borderWidth: activeFilter === 'all' ? '2px' : '1px' }}
+              style={{ cursor: 'pointer', borderWidth: activeFilter === 'all' ? '2px' : '1px', height: '100%' }}
               onClick={() => setActiveFilter('all')}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -401,10 +401,10 @@ function App() {
             </div>
           </div>
 
-          <div className="vads-l-col--12 medium-screen:vads-l-col--3">
+          <div className="vads-grid-col-12 tablet:vads-grid-col-6 desktop:vads-grid-col-3 vads-u-margin-bottom--2">
             <div 
               className={`vads-u-background-color--gray-lightest vads-u-padding--2 vads-u-border--1px vads-u-border-color--gray-light ${activeFilter === 'failing' ? 'vads-u-border-color--secondary-dark' : ''}`}
-              style={{ cursor: 'pointer', borderWidth: activeFilter === 'failing' ? '2px' : '1px' }}
+              style={{ cursor: 'pointer', borderWidth: activeFilter === 'failing' ? '2px' : '1px', height: '100%' }}
               onClick={() => setActiveFilter('failing')}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -418,10 +418,10 @@ function App() {
             </div>
           </div>
 
-          <div className="vads-l-col--12 medium-screen:vads-l-col--3">
+          <div className="vads-grid-col-12 tablet:vads-grid-col-6 desktop:vads-grid-col-3 vads-u-margin-bottom--2">
             <div 
               className={`vads-u-background-color--gray-lightest vads-u-padding--2 vads-u-border--1px vads-u-border-color--gray-light ${activeFilter === 'reviewed-today' ? 'vads-u-border-color--gold' : ''}`}
-              style={{ cursor: 'pointer', borderWidth: activeFilter === 'reviewed-today' ? '2px' : '1px' }}
+              style={{ cursor: 'pointer', borderWidth: activeFilter === 'reviewed-today' ? '2px' : '1px', height: '100%' }}
               onClick={() => setActiveFilter('reviewed-today')}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -437,8 +437,8 @@ function App() {
         </div>
 
         {/* Chart Toggle */}
-        <div className="vads-l-row vads-u-margin-bottom--2">
-          <div className="vads-l-col--12">
+        <div className="vads-grid-row vads-u-margin-bottom--2">
+          <div className="vads-grid-col-12">
             <va-button 
               text={showChart ? "Hide PR Trends" : "Show PR Trends"}
               onClick={() => setShowChart(!showChart)} 
@@ -449,16 +449,16 @@ function App() {
 
         {/* Chart */}
         {showChart && (
-          <div className="vads-l-row vads-u-margin-bottom--3">
-            <div className="vads-l-col--12">
+          <div className="vads-grid-row vads-u-margin-bottom--3">
+            <div className="vads-grid-col-12">
               <PRHistoryChart days={7} />
             </div>
           </div>
         )}
 
         {/* Table */}
-        <div className="vads-l-row">
-          <div className="vads-l-col--12">
+        <div className="vads-grid-row">
+          <div className="vads-grid-col-12">
             <h2>Pull Requests</h2>
             <p className="vads-u-color--gray-medium">A list of all pull requests in the repository.</p>
             
