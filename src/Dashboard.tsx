@@ -505,7 +505,11 @@ function Dashboard() {
           </div>
           {showChart && (
             <div className="mb-6">
-              <PRHistoryChart days={7} />
+              <PRHistoryChart 
+                days={7} 
+                repositoryName={selectedRepository?.name}
+                repositoryOwner={selectedRepository?.owner}
+              />
             </div>
           )}
           <div className="space-y-4">

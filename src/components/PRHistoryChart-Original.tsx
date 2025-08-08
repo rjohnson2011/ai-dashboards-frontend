@@ -14,6 +14,8 @@ interface ChartData {
 
 interface PRHistoryChartProps {
   days?: number
+  repositoryName?: string
+  repositoryOwner?: string
 }
 
 // Mock data generator for visualization
@@ -66,7 +68,7 @@ const generateMockTrends = (): ChartData[] => {
   return mockData
 }
 
-export function PRHistoryChart({ days = 7 }: PRHistoryChartProps) {
+export function PRHistoryChart({ days = 7, repositoryName, repositoryOwner }: PRHistoryChartProps) {
   const [data, setData] = useState<ChartData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -77,7 +79,11 @@ export function PRHistoryChart({ days = 7 }: PRHistoryChartProps) {
 
   const fetchHistoricalData = async () => {
     try {
-      const apiUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/reviews/historical?days=${days}`
+      const params = new URLSearchParams({ days: days.toString() })
+      if (repositoryName) params.append('repository_name', repositoryName)
+      if (repositoryOwner) params.append('repository_owner', repositoryOwner)
+      
+      const apiUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/reviews/historical?${params}`
       console.log('Fetching historical data from:', apiUrl)
       
       const response = await fetch(apiUrl)
