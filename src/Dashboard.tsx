@@ -344,8 +344,9 @@ function Dashboard() {
         break
       case 'reviewed-today':
         filtered = filtered.filter(pr => 
-          pr.backend_approval_status === 'approved' || 
-          (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
+          pr.backend_approval_status !== 'approved' && 
+          !(pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))) &&
+          !pr.draft
         )
         break
     }
@@ -625,19 +626,20 @@ function Dashboard() {
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
-                      PRs Reviewed
+                      PRs Needing Team Review
                     </CardTitle>
-                    <CheckCircle2 className="h-5 w-5 text-yellow-500" />
+                    <Clock className="h-5 w-5 text-yellow-500" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
                       {pullRequests.filter(pr => 
-                        pr.backend_approval_status === 'approved' || 
-                        (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
+                        pr.backend_approval_status !== 'approved' && 
+                        !(pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))) &&
+                        !pr.draft
                       ).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Backend reviewed
+                      Awaiting backend review
                     </p>
                   </CardContent>
                 </Card>
