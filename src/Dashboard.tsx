@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
+import { authService } from './services/auth'
+import { LoginButton } from './components/LoginButton'
+import { UserProfile } from './components/UserProfile'
 import { Badge } from './components/ui/badge'
 import { Button } from './components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from './components/ui/avatar'
@@ -155,7 +158,11 @@ function Dashboard() {
 
   const fetchRepositories = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/repositories`)
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/repositories`, {
+        headers: {
+          ...authService.getAuthHeaders()
+        }
+      })
       if (!response.ok) {
         throw new Error('Failed to fetch repositories')
       }
@@ -177,7 +184,11 @@ function Dashboard() {
         repository_owner: selectedRepository.owner,
         repository_name: selectedRepository.name
       })
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/reviews?${params}`)
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/reviews?${params}`, {
+        headers: {
+          ...authService.getAuthHeaders()
+        }
+      })
       if (!response.ok) {
         throw new Error('Failed to fetch pull requests')
       }
@@ -392,6 +403,12 @@ function Dashboard() {
             <GitPullRequest className="mr-2 h-5 w-5" />
             <h2 className="text-lg font-semibold">Pull Request Dashboard</h2>
             <div className="ml-auto flex items-center space-x-4">
+              {/* Authentication UI */}
+              {authService.isAuthenticated() ? (
+                <UserProfile />
+              ) : (
+                <LoginButton />
+              )}
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-muted-foreground">
                   {repository}
