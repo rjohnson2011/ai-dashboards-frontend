@@ -3,9 +3,7 @@ import {
   GitPullRequest, 
   CheckCircle2, 
   XCircle,
-  Clock,
-  RefreshCw,
-  TrendingUp
+  Clock
 } from 'lucide-react'
 import { PRHistoryChart } from './components/PRHistoryChart-VA'
 
@@ -281,7 +279,6 @@ function App() {
   ).length
 
   const failingCICount = pullRequests.filter(pr => pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)).length
-  const draftCount = pullRequests.filter(pr => pr.draft).length
   const reviewedCount = pullRequests.filter(pr => 
     pr.backend_approval_status === 'approved' || 
     (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
