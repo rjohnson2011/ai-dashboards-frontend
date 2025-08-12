@@ -404,7 +404,7 @@ function Dashboard() {
             <GitPullRequest className="mr-2 h-5 w-5" />
             <h2 className="text-lg font-semibold">Pull Request Dashboard</h2>
             <div className="ml-auto flex items-center space-x-4">
-              {/* Authentication UI - Temporarily disabled during setup */}
+              {/* Authentication UI - Temporarily disabled during OAuth setup */}
               {/* {authService.isAuthenticated() ? (
                 <UserProfile />
               ) : (
