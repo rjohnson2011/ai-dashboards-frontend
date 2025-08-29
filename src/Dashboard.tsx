@@ -43,7 +43,8 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-  TrendingUp
+  TrendingUp,
+  Bot
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './components/ui/tooltip'
 import { PRHistoryChart } from './components/PRHistoryChart'
@@ -369,6 +370,11 @@ function Dashboard() {
           (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
         )
         break
+      case 'dependabot':
+        filtered = filtered.filter(pr => 
+          pr.author === 'dependabot[bot]'
+        )
+        break
     }
     
     // Apply search filter
@@ -564,7 +570,7 @@ function Dashboard() {
             </div>
           )}
           <div className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-7">
+              <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-8">
                 <Card 
                   data-slot="card" 
                   className={`card-gradient-success cursor-pointer transition-all hover:scale-105 ${activeFilter === 'ready' ? 'ring-2 ring-green-500' : ''}`}
@@ -725,6 +731,28 @@ function Dashboard() {
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Ready to merge
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card 
+                  data-slot="card" 
+                  className={`cursor-pointer transition-all hover:scale-105 ${activeFilter === 'dependabot' ? 'ring-2 ring-blue-500' : ''}`}
+                  onClick={() => setActiveFilter('dependabot')}
+                >
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      Dependabot PRs
+                    </CardTitle>
+                    <Bot className="h-5 w-5 text-blue-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {pullRequests.filter(pr => 
+                        pr.author === 'dependabot[bot]'
+                      ).length}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Automated updates
                     </p>
                   </CardContent>
                 </Card>
