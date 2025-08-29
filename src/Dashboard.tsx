@@ -363,6 +363,12 @@ function Dashboard() {
           pr.labels && pr.labels.includes('exempt-be-review')
         )
         break
+      case 'finished':
+        filtered = filtered.filter(pr => 
+          pr.backend_approval_status === 'approved' || 
+          (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
+        )
+        break
     }
     
     // Apply search filter
@@ -558,7 +564,7 @@ function Dashboard() {
             </div>
           )}
           <div className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+              <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-7">
                 <Card 
                   data-slot="card" 
                   className={`card-gradient-success cursor-pointer transition-all hover:scale-105 ${activeFilter === 'ready' ? 'ring-2 ring-green-500' : ''}`}
@@ -696,6 +702,29 @@ function Dashboard() {
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Backend review not required
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card 
+                  data-slot="card" 
+                  className={`cursor-pointer transition-all hover:scale-105 ${activeFilter === 'finished' ? 'ring-2 ring-purple-500' : ''}`}
+                  onClick={() => setActiveFilter('finished')}
+                >
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      Finished but Unmerged
+                    </CardTitle>
+                    <CheckCircle2 className="h-5 w-5 text-purple-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {pullRequests.filter(pr => 
+                        pr.backend_approval_status === 'approved' || 
+                        (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
+                      ).length}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Ready to merge
                     </p>
                   </CardContent>
                 </Card>
