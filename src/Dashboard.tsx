@@ -325,6 +325,8 @@ function Dashboard() {
         filtered = filtered.filter(pr => 
           !pr.draft &&
           pr.backend_approval_status !== 'approved' &&
+          // Exclude PRs with failing CI checks (they should be in "Failing CI" section)
+          !(pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) &&
           (
             // Regular PRs with approvals (not from backend reviewers)
             (pr.approval_summary && 
@@ -572,10 +574,17 @@ function Dashboard() {
                     <div className="text-2xl font-bold">
                       {pullRequests.filter(pr => 
                         !pr.draft &&
-                        pr.approval_summary && 
-                        pr.approval_summary.approved_count > 0 &&
                         pr.backend_approval_status !== 'approved' &&
-                        !(pr.approval_summary.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
+                        // Exclude PRs with failing CI checks
+                        !(pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) &&
+                        (
+                          // Regular PRs with approvals (not from backend reviewers)
+                          (pr.approval_summary && 
+                           pr.approval_summary.approved_count > 0 &&
+                           !(pr.approval_summary.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))) ||
+                          // PRs from backend team members (auto-ready for review)
+                          BACKEND_REVIEWERS.includes(pr.author)
+                        )
                       ).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
