@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "postinstall": "cp node_modules/@department-of-veterans-affairs/web-components/dist/img/sprite.svg public/ || true"
+    "postinstall": "cp node_modules/@department-of-veterans-affairs/web-components/dist/img/sprite.svg public/ || true",
+    "bump-version": "node bump-version.cjs"
   },
   "dependencies": {
     "@department-of-veterans-affairs/component-library": "^51.4.0",

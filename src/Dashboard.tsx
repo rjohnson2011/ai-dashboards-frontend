@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
 import { authService } from './services/auth'
-// import { LoginButton } from './components/LoginButton'
-// import { UserProfile } from './components/UserProfile'
+import { APP_VERSION } from './version'
+import { LoginButton } from './components/LoginButton'
+import { UserProfile } from './components/UserProfile'
 import { Badge } from './components/ui/badge'
 import { Button } from './components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from './components/ui/avatar'
@@ -46,6 +47,17 @@ import {
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './components/ui/tooltip'
 import { PRHistoryChart } from './components/PRHistoryChart'
+
+// Backend review team members
+const BACKEND_REVIEWERS = [
+  'rmtolmach',
+  'LindseySaari',
+  'stevenjcumming',
+  'stiehlrod',
+  'ericboehs',
+  'RachalCassity',
+  'rjohnson2011'
+]
 
 interface CheckRun {
   name: string
@@ -123,7 +135,7 @@ function Dashboard() {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [, setRateLimit] = useState<ApiResponse['rate_limit'] | null>(null)
   const [sortColumn, setSortColumn] = useState<string | null>('updated')
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [showChart, setShowChart] = useState(false)
   const [activeFilter, setActiveFilter] = useState<string>('ready')
   const [searchTerm, setSearchTerm] = useState('')
@@ -322,17 +334,22 @@ function Dashboard() {
       case 'ready':
         filtered = filtered.filter(pr => 
           !pr.draft &&
-          pr.approval_summary && 
-          pr.approval_summary.approved_count > 0 &&
           pr.backend_approval_status !== 'approved' &&
-          !(pr.approval_summary.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
+          (
+            // Regular PRs with approvals (not from backend reviewers)
+            (pr.approval_summary && 
+             pr.approval_summary.approved_count > 0 &&
+             !(pr.approval_summary.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))) ||
+            // PRs from backend team members (auto-ready for review)
+            BACKEND_REVIEWERS.includes(pr.author)
+          )
         )
-        // Default to showing oldest updated PRs first for ready for review
+        // Default to showing newest updated PRs first for ready for review
         if (!sortColumn) {
           filtered = filtered.sort((a, b) => {
             const aTime = new Date(a.updated_at).getTime()
             const bTime = new Date(b.updated_at).getTime()
-            return aTime - bTime // Ascending = oldest first
+            return bTime - aTime // Descending = newest first
           })
         }
         break
@@ -415,17 +432,30 @@ function Dashboard() {
                   {repository}
                 </span>
                 {lastUpdated && (
-                  <span className="text-sm text-muted-foreground">
-                    • Last updated {formatTimeAgo(lastUpdated)} ({new Date(lastUpdated).toLocaleString('en-US', { 
-                      timeZone: 'America/New_York',
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                      hour: 'numeric',
-                      minute: '2-digit',
-                      hour12: true
-                    })} EST)
-                  </span>
+                  <>
+                    <span className="text-sm text-muted-foreground">
+                      • Last updated {formatTimeAgo(lastUpdated)} ({new Date(lastUpdated).toLocaleString('en-US', { 
+                        timeZone: 'America/New_York',
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                      })} EST)
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      • Version {APP_VERSION.version} ({new Date(APP_VERSION.timestamp).toLocaleString('en-US', { 
+                        timeZone: 'America/New_York',
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                      })} EST)
+                    </span>
+                  </>
                 )}
               </div>
               <DropdownMenu>
