@@ -48,17 +48,6 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './components/ui/tooltip'
 import { PRHistoryChart } from './components/PRHistoryChart'
 
-// Backend review team members
-const BACKEND_REVIEWERS = [
-  'rmtolmach',
-  'LindseySaari',
-  'stevenjcumming',
-  'stiehlrod',
-  'ericboehs',
-  'RachalCassity',
-  'rjohnson2011'
-]
-
 interface CheckRun {
   name: string
   status: string
