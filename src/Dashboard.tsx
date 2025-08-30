@@ -330,6 +330,8 @@ function Dashboard() {
           !(pr.labels && pr.labels.includes('exempt-be-review')) &&
           // Exclude PRs with failing CI checks (they should be in "Failing CI" section)
           !(pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) &&
+          // Must be ready for backend review
+          pr.ready_for_backend_review &&
           (
             // Regular PRs with approvals (not from backend reviewers)
             (pr.approval_summary && 
@@ -360,7 +362,9 @@ function Dashboard() {
           !(pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))) &&
           !pr.draft &&
           // Exclude PRs with exempt-be-review label
-          !(pr.labels && pr.labels.includes('exempt-be-review'))
+          !(pr.labels && pr.labels.includes('exempt-be-review')) &&
+          // Exclude PRs that already have approvals (they should be in "Ready for Review")
+          !(pr.approval_summary && pr.approval_summary.approved_count > 0)
         )
         break
       case 'exempt':
@@ -595,6 +599,8 @@ function Dashboard() {
                         !(pr.labels && pr.labels.includes('exempt-be-review')) &&
                         // Exclude PRs with failing CI checks
                         !(pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) &&
+                        // Must be ready for backend review
+                        pr.ready_for_backend_review &&
                         (
                           // Regular PRs with approvals (not from backend reviewers)
                           (pr.approval_summary && 
@@ -689,7 +695,9 @@ function Dashboard() {
                         !(pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))) &&
                         !pr.draft &&
                         // Exclude PRs with exempt-be-review label
-                        !(pr.labels && pr.labels.includes('exempt-be-review'))
+                        !(pr.labels && pr.labels.includes('exempt-be-review')) &&
+                        // Exclude PRs that already have approvals (they should be in "Ready for Review")
+                        !(pr.approval_summary && pr.approval_summary.approved_count > 0)
                       ).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
