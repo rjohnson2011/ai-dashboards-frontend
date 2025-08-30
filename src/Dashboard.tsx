@@ -326,6 +326,8 @@ function Dashboard() {
         filtered = filtered.filter(pr => 
           !pr.draft &&
           pr.backend_approval_status !== 'approved' &&
+          // Exclude PRs with exempt-be-review label (they should be in "Exempt BE Review" section)
+          !(pr.labels && pr.labels.includes('exempt-be-review')) &&
           // Exclude PRs with failing CI checks (they should be in "Failing CI" section)
           !(pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) &&
           (
@@ -356,7 +358,9 @@ function Dashboard() {
         filtered = filtered.filter(pr => 
           pr.backend_approval_status !== 'approved' && 
           !(pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))) &&
-          !pr.draft
+          !pr.draft &&
+          // Exclude PRs with exempt-be-review label
+          !(pr.labels && pr.labels.includes('exempt-be-review'))
         )
         break
       case 'exempt':
@@ -587,6 +591,8 @@ function Dashboard() {
                       {pullRequests.filter(pr => 
                         !pr.draft &&
                         pr.backend_approval_status !== 'approved' &&
+                        // Exclude PRs with exempt-be-review label
+                        !(pr.labels && pr.labels.includes('exempt-be-review')) &&
                         // Exclude PRs with failing CI checks
                         !(pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) &&
                         (
@@ -681,7 +687,9 @@ function Dashboard() {
                       {pullRequests.filter(pr => 
                         pr.backend_approval_status !== 'approved' && 
                         !(pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))) &&
-                        !pr.draft
+                        !pr.draft &&
+                        // Exclude PRs with exempt-be-review label
+                        !(pr.labels && pr.labels.includes('exempt-be-review'))
                       ).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
