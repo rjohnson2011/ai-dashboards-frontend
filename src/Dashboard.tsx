@@ -352,7 +352,7 @@ function Dashboard() {
         }
         break
       case 'failing':
-        filtered = filtered.filter(pr => pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr))
+        filtered = filtered.filter(pr => !pr.draft && pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr))
         break
       case 'draft':
         filtered = filtered.filter(pr => pr.draft)
@@ -370,18 +370,20 @@ function Dashboard() {
         break
       case 'exempt':
         filtered = filtered.filter(pr => 
-          pr.labels && pr.labels.includes('exempt-be-review')
+          !pr.draft && pr.labels && pr.labels.includes('exempt-be-review')
         )
         break
       case 'finished':
         filtered = filtered.filter(pr => 
-          pr.backend_approval_status === 'approved' || 
-          (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
+          !pr.draft && (
+            pr.backend_approval_status === 'approved' || 
+            (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
+          )
         )
         break
       case 'dependabot':
         filtered = filtered.filter(pr => 
-          pr.author === 'dependabot[bot]'
+          !pr.draft && pr.author === 'dependabot[bot]'
         )
         break
     }
@@ -634,8 +636,10 @@ function Dashboard() {
                     <div className="text-2xl font-bold">{pullRequests.length}</div>
                     <p className="text-xs text-muted-foreground">
                       {pullRequests.filter(pr => 
-                        pr.backend_approval_status === 'approved' || 
-                        (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
+                        !pr.draft && (
+                          pr.backend_approval_status === 'approved' || 
+                          (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
+                        )
                       ).length} backend reviewed
                     </p>
                   </CardContent>
@@ -653,7 +657,7 @@ function Dashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {pullRequests.filter(pr => pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)).length}
+                      {pullRequests.filter(pr => !pr.draft && pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Failing multiple checks
@@ -722,7 +726,7 @@ function Dashboard() {
                   <CardContent>
                     <div className="text-2xl font-bold">
                       {pullRequests.filter(pr => 
-                        pr.labels && pr.labels.includes('exempt-be-review')
+                        !pr.draft && pr.labels && pr.labels.includes('exempt-be-review')
                       ).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -744,8 +748,10 @@ function Dashboard() {
                   <CardContent>
                     <div className="text-2xl font-bold">
                       {pullRequests.filter(pr => 
-                        pr.backend_approval_status === 'approved' || 
-                        (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
+                        !pr.draft && (
+                          pr.backend_approval_status === 'approved' || 
+                          (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
+                        )
                       ).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -767,7 +773,7 @@ function Dashboard() {
                   <CardContent>
                     <div className="text-2xl font-bold">
                       {pullRequests.filter(pr => 
-                        pr.author === 'dependabot[bot]'
+                        !pr.draft && pr.author === 'dependabot[bot]'
                       ).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
