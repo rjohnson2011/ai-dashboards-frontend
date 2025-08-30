@@ -41,9 +41,6 @@ import {
   Clock,
   RefreshCw,
   Search,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
   TrendingUp,
   Bot
 } from 'lucide-react'
@@ -246,7 +243,13 @@ function Dashboard() {
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+      if (sortDirection === 'asc') {
+        setSortDirection('desc')
+      } else if (sortDirection === 'desc') {
+        // Third click: reset to default order
+        setSortColumn(null)
+        setSortDirection('asc')
+      }
     } else {
       setSortColumn(column)
       setSortDirection('asc')
@@ -797,80 +800,56 @@ function Dashboard() {
                         <TableRow>
                           <TableHead className="w-[100px]">
                             <button
-                              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+                              className={`table-header-sortable ${sortColumn === 'number' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('number')}
+                              aria-sort={sortColumn === 'number' ? sortDirection : 'none'}
                             >
                               PR
-                              {sortColumn === 'number' ? (
-                                sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
-                              ) : (
-                                <ArrowUpDown className="h-4 w-4 opacity-50" />
-                              )}
                             </button>
                           </TableHead>
                           <TableHead className="max-w-[250px]">
                             <button
-                              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+                              className={`table-header-sortable ${sortColumn === 'title' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('title')}
+                              aria-sort={sortColumn === 'title' ? sortDirection : 'none'}
                             >
                               Title
-                              {sortColumn === 'title' ? (
-                                sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
-                              ) : (
-                                <ArrowUpDown className="h-4 w-4 opacity-50" />
-                              )}
                             </button>
                           </TableHead>
                           <TableHead>
                             <button
-                              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+                              className={`table-header-sortable ${sortColumn === 'author' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('author')}
+                              aria-sort={sortColumn === 'author' ? sortDirection : 'none'}
                             >
                               Author
-                              {sortColumn === 'author' ? (
-                                sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
-                              ) : (
-                                <ArrowUpDown className="h-4 w-4 opacity-50" />
-                              )}
                             </button>
                           </TableHead>
                           <TableHead>
                             <button
-                              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+                              className={`table-header-sortable ${sortColumn === 'ci_status' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('ci_status')}
+                              aria-sort={sortColumn === 'ci_status' ? sortDirection : 'none'}
                             >
                               CI Status
-                              {sortColumn === 'ci_status' ? (
-                                sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
-                              ) : (
-                                <ArrowUpDown className="h-4 w-4 opacity-50" />
-                              )}
                             </button>
                           </TableHead>
                           <TableHead>
                             <button
-                              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+                              className={`table-header-sortable ${sortColumn === 'failures' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('failures')}
+                              aria-sort={sortColumn === 'failures' ? sortDirection : 'none'}
                             >
                               CI Failures
-                              {sortColumn === 'failures' ? (
-                                sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
-                              ) : (
-                                <ArrowUpDown className="h-4 w-4 opacity-50" />
-                              )}
                             </button>
                           </TableHead>
                           <TableHead>
                             <button
-                              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+                              className={`table-header-sortable ${sortColumn === 'approvals' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('approvals')}
+                              aria-sort={sortColumn === 'approvals' ? sortDirection : 'none'}
                             >
                               Approvals
-                              {sortColumn === 'approvals' ? (
-                                sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
-                              ) : (
-                                <ArrowUpDown className="h-4 w-4 opacity-50" />
-                              )}
                             </button>
                           </TableHead>
                           <TableHead>

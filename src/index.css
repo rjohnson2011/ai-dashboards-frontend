@@ -279,4 +279,51 @@
   .dark .table-row-hover:hover {
     background-color: rgba(255, 255, 255, 0.02);
   }
+  
+  /* Table header sorting styles */
+  .table-header-sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+    position: relative;
+    padding-bottom: 2px;
+  }
+  
+  .table-header-sortable:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    border-radius: 4px;
+  }
+  
+  .dark .table-header-sortable:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+  }
+  
+  .table-header-sorted {
+    color: rgb(59, 130, 246);
+    font-weight: 600;
+  }
+  
+  .table-header-sorted::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgb(59, 130, 246), transparent);
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+  
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  
+  .dark .table-header-sorted {
+    color: rgb(147, 197, 253);
+  }
 }
