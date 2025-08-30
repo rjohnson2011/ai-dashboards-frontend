@@ -503,6 +503,7 @@ function Dashboard() {
               <p className="text-muted-foreground">Your pull request overview and insights</p>
             </div>
             <div className="flex items-center space-x-4">
+              {/* Repository selector temporarily hidden - to be removed later
               <Select 
                 value={selectedRepository?.name || ''} 
                 onValueChange={(value) => {
@@ -511,9 +512,8 @@ function Dashboard() {
                     navigate(`/dashboard/${repo.name}`)
                   }
                 }}
-                disabled
               >
-                <SelectTrigger className="w-[280px] opacity-50 cursor-not-allowed">
+                <SelectTrigger className="w-[280px]">
                   <SelectValue placeholder="Select a repository" />
                 </SelectTrigger>
                 <SelectContent>
@@ -524,6 +524,7 @@ function Dashboard() {
                   ))}
                 </SelectContent>
               </Select>
+              */}
               <div className="flex items-center space-x-2">
               {showSearch ? (
                 <div className="flex items-center space-x-2">
