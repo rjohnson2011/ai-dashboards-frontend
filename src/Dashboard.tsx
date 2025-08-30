@@ -1000,10 +1000,10 @@ function Dashboard() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="block text-xs text-red-600 hover:underline truncate max-w-[200px]"
-                                    title={check.name}
+                                    title={check.name === 'Status Checks' ? 'Danger' : check.name}
                                     onClick={(e) => e.stopPropagation()}
                                   >
-                                    {check.name}
+                                    {check.name === 'Status Checks' ? 'Danger' : check.name}
                                   </a>
                                 ))
                               ) : (
