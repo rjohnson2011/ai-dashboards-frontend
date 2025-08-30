@@ -511,8 +511,9 @@ function Dashboard() {
                     navigate(`/dashboard/${repo.name}`)
                   }
                 }}
+                disabled
               >
-                <SelectTrigger className="w-[280px]">
+                <SelectTrigger className="w-[280px] opacity-50 cursor-not-allowed">
                   <SelectValue placeholder="Select a repository" />
                 </SelectTrigger>
                 <SelectContent>
