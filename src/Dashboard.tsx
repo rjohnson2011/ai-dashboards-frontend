@@ -436,10 +436,10 @@ function Dashboard() {
   return (
     <TooltipProvider>
       <div className="flex-col md:flex min-h-screen gradient-bg">
-        <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 card-shadow-sm">
           <div className="flex h-16 items-center px-4">
-            <GitPullRequest className="mr-2 h-5 w-5" />
-            <h2 className="text-lg font-semibold">Pull Request Dashboard</h2>
+            <GitPullRequest className="mr-2 h-5 w-5 icon-shadow" />
+            <h2 className="text-lg font-semibold text-shadow">Pull Request Dashboard</h2>
             <div className="ml-auto flex items-center space-x-4">
               {/* Authentication UI - Temporarily disabled during OAuth setup */}
               {/* {authService.isAuthenticated() ? (
@@ -502,8 +502,8 @@ function Dashboard() {
         <div className="flex-1 space-y-4 p-8 pt-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-              <p className="text-muted-foreground">Your pull request overview and insights</p>
+              <h2 className="text-3xl font-bold tracking-tight text-shadow gradient-text">Dashboard</h2>
+              <p className="text-muted-foreground text-shadow-sm">Your pull request overview and insights</p>
             </div>
             <div className="flex items-center space-x-4">
               {/* Repository selector temporarily hidden - to be removed later
@@ -554,8 +554,9 @@ function Dashboard() {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowSearch(true)}
+                  className="button-glow"
                 >
-                  <Search className="mr-2 h-4 w-4" />
+                  <Search className="mr-2 h-4 w-4 icon-shadow" />
                   Search
                 </Button>
               )}
@@ -567,9 +568,9 @@ function Dashboard() {
               variant={showChart ? "default" : "outline"}
               size="sm"
               onClick={() => setShowChart(!showChart)}
-              className="mb-4"
+              className={`mb-4 button-glow ${showChart ? 'gradient-border-active' : ''}`}
             >
-              <TrendingUp className="mr-2 h-4 w-4" />
+              <TrendingUp className="mr-2 h-4 w-4 icon-shadow" />
               PR Trends
             </Button>
           </div>
@@ -586,17 +587,17 @@ function Dashboard() {
               <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-8">
                 <Card 
                   data-slot="card" 
-                  className={`card-gradient-success cursor-pointer transition-all hover:scale-105 ${activeFilter === 'ready' ? 'ring-2 ring-green-500' : ''}`}
+                  className={`card-gradient-success card-shadow-sm card-hover cursor-pointer ${activeFilter === 'ready' ? 'ring-2 ring-green-500 card-shadow-hover' : ''}`}
                   onClick={() => setActiveFilter('ready')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
+                    <CardTitle className="text-sm font-medium text-shadow-sm">
                       Ready for Review
                     </CardTitle>
-                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+                    <CheckCircle2 className="h-5 w-5 text-green-500 icon-shadow" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">
+                    <div className="text-2xl font-bold gradient-text-success">
                       {pullRequests.filter(pr => 
                         !pr.draft &&
                         pr.backend_approval_status !== 'approved' &&
@@ -623,17 +624,17 @@ function Dashboard() {
                 </Card>
                 <Card 
                   data-slot="card" 
-                  className={`card-gradient-subtle cursor-pointer transition-all hover:scale-105 ${activeFilter === 'all' ? 'ring-2 ring-primary' : ''}`}
+                  className={`card-gradient-subtle card-shadow-sm card-hover cursor-pointer ${activeFilter === 'all' ? 'ring-2 ring-primary gradient-border-active' : ''}`}
                   onClick={() => setActiveFilter('all')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
+                    <CardTitle className="text-sm font-medium text-shadow-sm">
                       Total Pull Requests
                     </CardTitle>
-                    <GitPullRequest className="h-5 w-5 text-muted-foreground" />
+                    <GitPullRequest className="h-5 w-5 text-muted-foreground icon-shadow" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{pullRequests.length}</div>
+                    <div className="text-2xl font-bold gradient-text">{pullRequests.length}</div>
                     <p className="text-xs text-muted-foreground">
                       {pullRequests.filter(pr => 
                         !pr.draft && (
@@ -646,17 +647,17 @@ function Dashboard() {
                 </Card>
                 <Card 
                   data-slot="card" 
-                  className={`card-gradient-destructive cursor-pointer transition-all hover:scale-105 ${activeFilter === 'failing' ? 'ring-2 ring-red-500' : ''}`}
+                  className={`card-gradient-destructive card-shadow-sm card-hover cursor-pointer ${activeFilter === 'failing' ? 'ring-2 ring-red-500 card-shadow-hover' : ''}`}
                   onClick={() => setActiveFilter('failing')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
+                    <CardTitle className="text-sm font-medium text-shadow-sm">
                       Failing CI
                     </CardTitle>
-                    <XCircle className="h-5 w-5 text-destructive" />
+                    <XCircle className="h-5 w-5 text-destructive icon-shadow" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">
+                    <div className="text-2xl font-bold gradient-text-danger">
                       {pullRequests.filter(pr => !pr.draft && pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -666,14 +667,14 @@ function Dashboard() {
                 </Card>
                 <Card 
                   data-slot="card" 
-                  className={`card-gradient-subtle cursor-pointer transition-all hover:scale-105 ${activeFilter === 'draft' ? 'ring-2 ring-gray-500' : ''}`}
+                  className={`card-gradient-subtle card-shadow-sm card-hover cursor-pointer ${activeFilter === 'draft' ? 'ring-2 ring-gray-500 card-shadow-hover' : ''}`}
                   onClick={() => setActiveFilter('draft')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
+                    <CardTitle className="text-sm font-medium text-shadow-sm">
                       Draft PRs
                     </CardTitle>
-                    <Clock className="h-5 w-5 text-muted-foreground" />
+                    <Clock className="h-5 w-5 text-muted-foreground icon-shadow" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
@@ -686,14 +687,14 @@ function Dashboard() {
                 </Card>
                 <Card 
                   data-slot="card" 
-                  className={`card-gradient-warning cursor-pointer transition-all hover:scale-105 ${activeFilter === 'reviewed-today' ? 'ring-2 ring-yellow-500' : ''}`}
+                  className={`card-gradient-warning card-shadow-sm card-hover cursor-pointer ${activeFilter === 'reviewed-today' ? 'ring-2 ring-yellow-500 card-shadow-hover' : ''}`}
                   onClick={() => setActiveFilter('reviewed-today')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
+                    <CardTitle className="text-sm font-medium text-shadow-sm">
                       PRs Needing Team Review
                     </CardTitle>
-                    <Clock className="h-5 w-5 text-yellow-500" />
+                    <Clock className="h-5 w-5 text-yellow-500 icon-shadow" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
@@ -714,11 +715,11 @@ function Dashboard() {
                 </Card>
                 <Card 
                   data-slot="card" 
-                  className={`cursor-pointer transition-all hover:scale-105 ${activeFilter === 'exempt' ? 'ring-2 ring-blue-500' : ''}`}
+                  className={`card-gradient-primary card-shadow-sm card-hover cursor-pointer ${activeFilter === 'exempt' ? 'ring-2 ring-blue-500 card-shadow-hover' : ''}`}
                   onClick={() => setActiveFilter('exempt')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
+                    <CardTitle className="text-sm font-medium text-shadow-sm">
                       Exempt BE Review
                     </CardTitle>
                     <Badge variant="secondary" className="text-xs">Exempt</Badge>
@@ -736,14 +737,14 @@ function Dashboard() {
                 </Card>
                 <Card 
                   data-slot="card" 
-                  className={`cursor-pointer transition-all hover:scale-105 ${activeFilter === 'finished' ? 'ring-2 ring-purple-500' : ''}`}
+                  className={`card-gradient card-shadow-sm card-hover cursor-pointer ${activeFilter === 'finished' ? 'ring-2 ring-purple-500 card-shadow-hover gradient-border-active' : ''}`}
                   onClick={() => setActiveFilter('finished')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
+                    <CardTitle className="text-sm font-medium text-shadow-sm">
                       Finished but Unmerged
                     </CardTitle>
-                    <CheckCircle2 className="h-5 w-5 text-purple-500" />
+                    <CheckCircle2 className="h-5 w-5 text-purple-500 icon-shadow" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
@@ -761,14 +762,14 @@ function Dashboard() {
                 </Card>
                 <Card 
                   data-slot="card" 
-                  className={`cursor-pointer transition-all hover:scale-105 ${activeFilter === 'dependabot' ? 'ring-2 ring-blue-500' : ''}`}
+                  className={`card-gradient-primary card-shadow-sm card-hover cursor-pointer ${activeFilter === 'dependabot' ? 'ring-2 ring-blue-500 card-shadow-hover' : ''}`}
                   onClick={() => setActiveFilter('dependabot')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
+                    <CardTitle className="text-sm font-medium text-shadow-sm">
                       Dependabot PRs
                     </CardTitle>
-                    <Bot className="h-5 w-5 text-blue-500" />
+                    <Bot className="h-5 w-5 text-blue-500 icon-shadow" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
@@ -782,9 +783,9 @@ function Dashboard() {
                   </CardContent>
                 </Card>
               </div>
-              <Card>
+              <Card className="card-shadow">
                 <CardHeader>
-                  <CardTitle>Pull Requests</CardTitle>
+                  <CardTitle className="text-shadow">Pull Requests</CardTitle>
                   <CardDescription>
                     A list of all pull requests in the repository.
                   </CardDescription>
