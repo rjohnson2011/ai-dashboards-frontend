@@ -514,12 +514,6 @@ function Dashboard() {
                     </>
                   )}
                 </div>
-                {isUpdating && (
-                  <div className="flex items-center space-x-2">
-                    <RefreshCw className="h-4 w-4 animate-spin text-primary" />
-                    <span className="text-sm text-muted-foreground">Updating...</span>
-                  </div>
-                )}
                 <Button
                   variant="ghost"
                   size="sm"
