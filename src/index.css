@@ -3,54 +3,54 @@
 
 @layer base {
   :root {
-    /* Base colors */
-    --background: 0 0% 100%;
-    --foreground: 206 14% 16%; /* #24292f */
-    --card: 0 0% 100%;
-    --card-foreground: 206 14% 16%;
+    /* Base colors - shadcn/ui system */
+    --background: 0 0% 100%; /* #ffffff */
+    --foreground: 222.2 84% 4.9%; /* #020617 */
+    --card: 0 0% 100%; /* #ffffff */
+    --card-foreground: 222.2 84% 4.9%; /* #020617 */
     --popover: 0 0% 100%;
-    --popover-foreground: 206 14% 16%;
+    --popover-foreground: 222.2 84% 4.9%;
     
-    /* Primary brand color - Deep blue */
-    --primary: 211 65% 45%; /* #0969da */
+    /* Primary - Almost black */
+    --primary: 222.2 47.4% 11.2%; /* #0f172a */
     --primary-foreground: 0 0% 100%;
     
     /* Secondary colors */
-    --secondary: 210 12% 97%; /* #f6f8fa */
-    --secondary-foreground: 206 14% 16%;
-    --muted: 210 18% 97%; /* #f6f8fa */
-    --muted-foreground: 210 12% 45%; /* #6e7781 */
-    --accent: 211 65% 45%; /* Same as primary */
-    --accent-foreground: 0 0% 100%;
+    --secondary: 210 40% 96.1%; /* #f8fafc */
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%; /* #f8fafc */
+    --muted-foreground: 215.4 16.3% 46.9%; /* #64748b */
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
     
-    /* Semantic colors */
-    --success: 140 57% 35%; /* #1a7f37 */
+    /* Semantic colors - shadcn/ui palette */
+    --success: 142.1 76.2% 36.3%; /* #22c55e */
     --success-foreground: 0 0% 100%;
-    --warning: 33 100% 40%; /* #bf8700 */
+    --warning: 45 93.4% 47.4%; /* #eab308 */
     --warning-foreground: 0 0% 100%;
-    --destructive: 355 70% 50%; /* #cf222e */
+    --destructive: 0 84.2% 60.2%; /* #ef4444 */
     --destructive-foreground: 0 0% 100%;
-    --info: 211 65% 45%; /* #0969da */
+    --info: 217.2 91.2% 59.8%; /* #3b82f6 */
     --info-foreground: 0 0% 100%;
     
     /* Text hierarchy */
-    --text-primary: 206 14% 16%; /* #24292f */
-    --text-secondary: 210 10% 40%; /* #57606a */
-    --text-tertiary: 210 12% 45%; /* #6e7781 */
+    --text-primary: 222.2 84% 4.9%; /* #020617 */
+    --text-secondary: 215.4 16.3% 46.9%; /* #64748b */
+    --text-tertiary: 213.7 19% 63.7%; /* #94a3b8 */
     
     /* UI elements */
-    --border: 210 18% 91%; /* #e1e4e8 */
-    --input: 210 18% 91%;
-    --ring: 211 65% 45%;
+    --border: 214.3 31.8% 91.4%; /* #e2e8f0 */
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
     
-    /* Charts - Updated to match semantic colors */
-    --chart-1: 140 57% 35%; /* Success green */
-    --chart-2: 211 65% 45%; /* Primary blue */
-    --chart-3: 355 70% 50%; /* Error red */
-    --chart-4: 33 100% 40%; /* Warning amber */
-    --chart-5: 210 12% 45%; /* Neutral gray */
+    /* Charts - Subtle colors */
+    --chart-1: 142.1 76.2% 36.3%; /* Success green */
+    --chart-2: 217.2 91.2% 59.8%; /* Info blue */
+    --chart-3: 0 84.2% 60.2%; /* Error red */
+    --chart-4: 45 93.4% 47.4%; /* Warning yellow */
+    --chart-5: 213.7 19% 63.7%; /* Neutral gray */
     
-    --radius: 0.375rem;
+    --radius: 0.5rem;
   }
   
   .dark {
@@ -96,121 +96,62 @@
 }
 
 @layer utilities {
-  .gradient-bg {
-    background: #fafbfc;
-    background-attachment: fixed;
-    position: relative;
+  /* Minimal background */
+  .minimal-bg {
+    background: #fafafa;
   }
   
-  .dark .gradient-bg {
+  .dark .minimal-bg {
     background: hsl(var(--background));
   }
   
-  .table-header-bg {
-    background-color: rgb(249 250 251);
+  /* shadcn/ui card style */
+  .card-minimal {
+    background: white;
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   }
   
-  .dark .table-header-bg {
-    background-color: rgb(17 24 39 / 0.5);
+  .card-minimal:hover {
+    border-color: hsl(var(--border) / 0.8);
   }
   
-  /* Clean card design with subtle status indicators */
-  .card-base {
-    background: #ffffff;
-    border: 1px solid #e1e4e8;
-    position: relative;
-    overflow: hidden;
+  /* Status dots for minimal indicators */
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
   }
   
-  /* Subtle status accent - left border only */
-  .card-accent-primary {
-    border-left: 3px solid hsl(var(--primary));
+  .status-dot-success {
+    background-color: hsl(var(--success));
   }
   
-  .card-accent-success {
-    border-left: 3px solid hsl(var(--success));
+  .status-dot-warning {
+    background-color: hsl(var(--warning));
   }
   
-  .card-accent-warning {
-    border-left: 3px solid hsl(var(--warning));
+  .status-dot-error {
+    background-color: hsl(var(--destructive));
   }
   
-  .card-accent-destructive {
-    border-left: 3px solid hsl(var(--destructive));
+  .status-dot-info {
+    background-color: hsl(var(--info));
   }
   
-  .card-accent-info {
-    border-left: 3px solid hsl(var(--info));
+  .status-dot-neutral {
+    background-color: hsl(var(--muted-foreground));
   }
   
-  .card-accent-neutral {
-    border-left: 3px solid hsl(var(--muted-foreground));
+  /* Minimal hover state */
+  .hover-border {
+    transition: border-color 0.2s ease;
   }
   
-  /* Very subtle background tints */
-  .card-bg-primary {
-    background-color: hsl(var(--primary) / 0.05);
-  }
-  
-  .card-bg-success {
-    background-color: hsl(var(--success) / 0.05);
-  }
-  
-  .card-bg-warning {
-    background-color: hsl(var(--warning) / 0.05);
-  }
-  
-  .card-bg-destructive {
-    background-color: hsl(var(--destructive) / 0.05);
-  }
-  
-  .card-bg-info {
-    background-color: hsl(var(--info) / 0.05);
-  }
-  
-  .card-bg-neutral {
-    background-color: hsl(var(--muted));
-  }
-  
-  /* Modern layered shadows for depth */
-  .card-shadow {
-    box-shadow: 
-      0 0.5px 2.2px rgba(0, 0, 0, 0.02),
-      0 1.3px 5.3px rgba(0, 0, 0, 0.028),
-      0 2.4px 10px rgba(0, 0, 0, 0.035),
-      0 4.2px 17.9px rgba(0, 0, 0, 0.042),
-      0 7.9px 33.4px rgba(0, 0, 0, 0.05),
-      0 19px 80px rgba(0, 0, 0, 0.07);
-  }
-  
-  .card-shadow-sm {
-    box-shadow: 
-      0 0.3px 0.7px rgba(0, 0, 0, 0.02),
-      0 0.7px 1.7px rgba(0, 0, 0, 0.028),
-      0 1.3px 3.1px rgba(0, 0, 0, 0.035),
-      0 2.2px 5.6px rgba(0, 0, 0, 0.042),
-      0 4.2px 10.4px rgba(0, 0, 0, 0.05),
-      0 10px 25px rgba(0, 0, 0, 0.07);
-  }
-  
-  .card-shadow-hover {
-    box-shadow: 
-      0 0.7px 2.9px rgba(0, 0, 0, 0.024),
-      0 1.7px 6.9px rgba(0, 0, 0, 0.034),
-      0 3.1px 13px rgba(0, 0, 0, 0.043),
-      0 5.6px 23.3px rgba(0, 0, 0, 0.052),
-      0 10.4px 43.5px rgba(0, 0, 0, 0.061),
-      0 25px 104px rgba(0, 0, 0, 0.085);
-  }
-  
-  /* Interactive hover states */
-  .card-hover {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform-style: preserve-3d;
-  }
-  
-  .card-hover:hover {
-    transform: translateY(-2px) scale(1.02);
+  .hover-border:hover {
+    border-color: hsl(var(--border) / 0.6);
   }
   
   /* Text colors using CSS variables for consistency */
@@ -242,183 +183,37 @@
     color: hsl(var(--info));
   }
   
-  /* Icon shadows */
-  .icon-shadow {
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-  }
-  
-  /* Text shadows for depth */
-  .text-shadow-sm {
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  }
-  
-  .text-shadow {
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Dark mode adjustments */
-  .dark .card-shadow {
-    box-shadow: 
-      0 0.5px 2.2px rgba(0, 0, 0, 0.2),
-      0 1.3px 5.3px rgba(0, 0, 0, 0.28),
-      0 2.4px 10px rgba(0, 0, 0, 0.35),
-      0 4.2px 17.9px rgba(0, 0, 0, 0.42),
-      0 7.9px 33.4px rgba(0, 0, 0, 0.5),
-      0 19px 80px rgba(0, 0, 0, 0.7);
-  }
-  
-  .dark .gradient-bg {
-    background: radial-gradient(ellipse at top left, hsl(var(--background)) 0%, hsl(var(--muted) / 0.6) 100%);
-  }
-  
-  /* Gradient borders for active states */
-  .gradient-border-active {
-    position: relative;
-    background: linear-gradient(white, white) padding-box,
-                linear-gradient(135deg, #667eea 0%, #764ba2 100%) border-box;
-    border: 2px solid transparent;
-  }
-  
-  /* Enhanced button styles */
-  .button-glow {
-    box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-  }
-  
-  .button-glow:hover {
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-    transform: translateY(-1px);
-  }
-  
-  /* Status icon animations */
-  @keyframes pulse {
-    0%, 100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.5;
-    }
-  }
-  
-  .animate-pulse-slow {
-    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-  
-  /* Table enhancements */
+  /* Table row hover - minimal */
   .table-row-hover {
-    transition: all 0.2s ease;
+    transition: background-color 0.15s ease;
   }
   
   .table-row-hover:hover {
-    background-color: rgba(0, 0, 0, 0.02);
-    transform: scale(1.005);
+    background-color: hsl(var(--muted));
   }
   
-  .dark .table-row-hover:hover {
-    background-color: rgba(255, 255, 255, 0.02);
-  }
-  
-  /* Table header sorting styles */
+  /* Table header sorting styles - minimal */
   .table-header-sortable {
     cursor: pointer;
     user-select: none;
-    transition: all 0.2s ease;
-    position: relative;
-    padding-bottom: 2px;
+    transition: color 0.15s ease;
   }
   
   .table-header-sortable:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-    border-radius: 4px;
-  }
-  
-  .dark .table-header-sortable:hover {
-    background-color: rgba(255, 255, 255, 0.04);
+    color: hsl(var(--foreground));
   }
   
   .table-header-sorted {
-    color: hsl(var(--primary));
-    font-weight: 600;
+    color: hsl(var(--foreground));
+    font-weight: 500;
   }
   
-  .table-header-sorted::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, hsl(var(--primary)), transparent);
-    animation: shimmer 1.5s ease-in-out infinite;
-  }
-  
-  @keyframes shimmer {
-    0% {
-      transform: translateX(-100%);
-    }
-    100% {
-      transform: translateX(100%);
-    }
-  }
-  
-  .dark .table-header-sorted {
-    color: hsl(var(--primary));
-  }
-  
-  /* Gradient text effects for special elements */
-  .gradient-text-primary {
-    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--info)) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  
-  .gradient-text-success {
-    background: linear-gradient(135deg, hsl(var(--success)) 0%, hsl(var(--success) / 0.8) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  
-  .gradient-text-danger {
-    background: linear-gradient(135deg, hsl(var(--destructive)) 0%, hsl(var(--destructive) / 0.8) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  
-  /* Badge styles using color system */
-  .badge-primary {
-    background-color: hsl(var(--primary) / 0.1);
-    color: hsl(var(--primary));
-    border: 1px solid hsl(var(--primary) / 0.2);
-  }
-  
-  .badge-success {
-    background-color: hsl(var(--success) / 0.1);
-    color: hsl(var(--success));
-    border: 1px solid hsl(var(--success) / 0.2);
-  }
-  
-  .badge-warning {
-    background-color: hsl(var(--warning) / 0.1);
-    color: hsl(var(--warning));
-    border: 1px solid hsl(var(--warning) / 0.2);
-  }
-  
-  .badge-destructive {
-    background-color: hsl(var(--destructive) / 0.1);
-    color: hsl(var(--destructive));
-    border: 1px solid hsl(var(--destructive) / 0.2);
-  }
-  
-  /* Consistent focus styles */
-  .focus-ring {
-    outline: 2px solid transparent;
-    outline-offset: 2px;
-  }
-  
-  .focus-ring:focus-visible {
-    outline-color: hsl(var(--primary));
+  /* Minimal badge styles */
+  .badge-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: hsl(var(--muted-foreground));
   }
 }
