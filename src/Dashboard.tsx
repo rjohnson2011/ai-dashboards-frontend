@@ -675,7 +675,27 @@ function Dashboard() {
                       ).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Can be reviewed
+                      Approved by team member, passing all checks
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card 
+                  className={`gradient-card gradient-dependabot cursor-pointer ${activeFilter === 'dependabot' ? 'selected' : ''}`}
+                  onClick={() => setActiveFilter('dependabot')}
+                >
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      Dependabot PRs
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-semibold">
+                      {pullRequests.filter(pr => 
+                        !pr.draft && pr.author === 'dependabot[bot]'
+                      ).length}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Automated updates
                     </p>
                   </CardContent>
                 </Card>
@@ -691,12 +711,7 @@ function Dashboard() {
                   <CardContent>
                     <div className="text-2xl font-semibold">{pullRequests.length}</div>
                     <p className="text-xs text-muted-foreground">
-                      {pullRequests.filter(pr => 
-                        !pr.draft && (
-                          pr.backend_approval_status === 'approved' || 
-                          (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
-                        )
-                      ).length} backend reviewed
+                      All open PRs
                     </p>
                   </CardContent>
                 </Card>
@@ -758,7 +773,7 @@ function Dashboard() {
                       ).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Awaiting backend review
+                      Awaiting team review
                     </p>
                   </CardContent>
                 </Card>
@@ -802,26 +817,6 @@ function Dashboard() {
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Ready to merge
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card 
-                  className={`gradient-card gradient-dependabot cursor-pointer ${activeFilter === 'dependabot' ? 'selected' : ''}`}
-                  onClick={() => setActiveFilter('dependabot')}
-                >
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Dependabot PRs
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-semibold">
-                      {pullRequests.filter(pr => 
-                        !pr.draft && pr.author === 'dependabot[bot]'
-                      ).length}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Automated updates
                     </p>
                   </CardContent>
                 </Card>
