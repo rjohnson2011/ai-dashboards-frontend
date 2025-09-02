@@ -90,7 +90,8 @@
     font-feature-settings: "rlig" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: hsl(var(--background));
+    background: linear-gradient(to bottom, #fafafa, #f3f4f6);
+    min-height: 100vh;
     color: hsl(var(--foreground));
   }
 }
@@ -223,5 +224,139 @@
     gap: 0.5rem;
     font-size: 0.875rem;
     color: hsl(var(--muted-foreground));
+  }
+  
+  /* Modern gradient card system */
+  .gradient-card {
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+  }
+  
+  .gradient-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.4;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  
+  .gradient-card:hover::before {
+    opacity: 0.6;
+  }
+  
+  .gradient-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Ready for Review - Gray-green gradient */
+  .gradient-ready-review {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(134, 239, 172, 0.2);
+    box-shadow: 0 4px 20px -5px rgba(134, 239, 172, 0.15);
+  }
+  
+  .gradient-ready-review::before {
+    background: linear-gradient(135deg, 
+      rgba(243, 244, 246, 0.8) 0%, 
+      rgba(134, 239, 172, 0.1) 100%
+    );
+  }
+  
+  .gradient-ready-review:hover {
+    border-color: rgba(134, 239, 172, 0.3);
+  }
+  
+  /* Total PRs - Gray-blue gradient */
+  .gradient-total-prs {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(147, 197, 253, 0.2);
+    box-shadow: 0 4px 20px -5px rgba(147, 197, 253, 0.15);
+  }
+  
+  .gradient-total-prs::before {
+    background: linear-gradient(135deg, 
+      rgba(243, 244, 246, 0.8) 0%, 
+      rgba(147, 197, 253, 0.1) 100%
+    );
+  }
+  
+  .gradient-total-prs:hover {
+    border-color: rgba(147, 197, 253, 0.3);
+  }
+  
+  /* PRs Needing Team Review - Gray-purple gradient */
+  .gradient-needs-review {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(196, 181, 253, 0.2);
+    box-shadow: 0 4px 20px -5px rgba(196, 181, 253, 0.15);
+  }
+  
+  .gradient-needs-review::before {
+    background: linear-gradient(135deg, 
+      rgba(243, 244, 246, 0.8) 0%, 
+      rgba(196, 181, 253, 0.1) 100%
+    );
+  }
+  
+  .gradient-needs-review:hover {
+    border-color: rgba(196, 181, 253, 0.3);
+  }
+  
+  /* Finished but Unmerged - Gray-orange gradient */
+  .gradient-finished {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(253, 186, 116, 0.2);
+    box-shadow: 0 4px 20px -5px rgba(253, 186, 116, 0.15);
+  }
+  
+  .gradient-finished::before {
+    background: linear-gradient(135deg, 
+      rgba(243, 244, 246, 0.8) 0%, 
+      rgba(253, 186, 116, 0.1) 100%
+    );
+  }
+  
+  .gradient-finished:hover {
+    border-color: rgba(253, 186, 116, 0.3);
+  }
+  
+  /* Drafts - Pure gray gradient */
+  .gradient-drafts {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(209, 213, 219, 0.3);
+    box-shadow: 0 4px 20px -5px rgba(107, 114, 128, 0.1);
+  }
+  
+  .gradient-drafts::before {
+    background: linear-gradient(135deg, 
+      rgba(243, 244, 246, 0.8) 0%, 
+      rgba(229, 231, 235, 0.4) 100%
+    );
+  }
+  
+  .gradient-drafts:hover {
+    border-color: rgba(209, 213, 219, 0.5);
+  }
+  
+  /* CI Failures - Gray-red gradient */
+  .gradient-ci-failures {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(252, 165, 165, 0.2);
+    box-shadow: 0 4px 20px -5px rgba(252, 165, 165, 0.15);
+  }
+  
+  .gradient-ci-failures::before {
+    background: linear-gradient(135deg, 
+      rgba(243, 244, 246, 0.8) 0%, 
+      rgba(252, 165, 165, 0.1) 100%
+    );
+  }
+  
+  .gradient-ci-failures:hover {
+    border-color: rgba(252, 165, 165, 0.3);
   }
 }
