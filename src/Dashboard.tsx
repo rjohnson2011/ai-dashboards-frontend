@@ -847,7 +847,7 @@ function Dashboard() {
                             <button
                               className={`table-header-sortable ${sortColumn === 'number' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('number')}
-                              aria-sort={sortColumn === 'number' ? sortDirection : 'none'}
+                              aria-sort={sortColumn === 'number' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
                             >
                               PR
                             </button>
@@ -856,7 +856,7 @@ function Dashboard() {
                             <button
                               className={`table-header-sortable ${sortColumn === 'title' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('title')}
-                              aria-sort={sortColumn === 'title' ? sortDirection : 'none'}
+                              aria-sort={sortColumn === 'title' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
                             >
                               Title
                             </button>
@@ -865,7 +865,7 @@ function Dashboard() {
                             <button
                               className={`table-header-sortable ${sortColumn === 'author' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('author')}
-                              aria-sort={sortColumn === 'author' ? sortDirection : 'none'}
+                              aria-sort={sortColumn === 'author' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
                             >
                               Author
                             </button>
@@ -874,7 +874,7 @@ function Dashboard() {
                             <button
                               className={`table-header-sortable ${sortColumn === 'ci_status' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('ci_status')}
-                              aria-sort={sortColumn === 'ci_status' ? sortDirection : 'none'}
+                              aria-sort={sortColumn === 'ci_status' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
                             >
                               CI Status
                             </button>
@@ -883,7 +883,7 @@ function Dashboard() {
                             <button
                               className={`table-header-sortable ${sortColumn === 'failures' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('failures')}
-                              aria-sort={sortColumn === 'failures' ? sortDirection : 'none'}
+                              aria-sort={sortColumn === 'failures' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
                             >
                               CI Failures
                             </button>
@@ -892,7 +892,7 @@ function Dashboard() {
                             <button
                               className={`table-header-sortable ${sortColumn === 'approvals' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('approvals')}
-                              aria-sort={sortColumn === 'approvals' ? sortDirection : 'none'}
+                              aria-sort={sortColumn === 'approvals' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
                             >
                               Approvals
                             </button>
