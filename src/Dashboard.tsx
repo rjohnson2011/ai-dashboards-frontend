@@ -947,7 +947,7 @@ function Dashboard() {
                         {filteredPullRequests.map((pr) => (
                           <TableRow 
                             key={pr.id || `${pr.number}-${pr.id}`}
-                            className="cursor-pointer"
+                            className="cursor-pointer table-row-hover table-row-stripe"
                           >
                           <TableCell className="font-medium">
                             <a

@@ -195,6 +195,11 @@
     background-color: hsl(var(--muted));
   }
   
+  /* Alternating row colors */
+  .table-row-stripe:nth-child(even) {
+    background-color: hsl(var(--muted) / 0.3);
+  }
+  
   /* Table header sorting styles - minimal */
   .table-header-sortable {
     cursor: pointer;
