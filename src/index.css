@@ -105,16 +105,19 @@
     background: hsl(var(--background));
   }
   
-  /* shadcn/ui card style */
+  /* shadcn/ui card style with better shadows */
   .card-minimal {
     background: white;
     border: 1px solid hsl(var(--border));
     border-radius: 0.5rem;
-    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    transition: all 0.2s ease;
   }
   
   .card-minimal:hover {
     border-color: hsl(var(--border) / 0.8);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    transform: translateY(-2px);
   }
   
   /* Status dots for minimal indicators */

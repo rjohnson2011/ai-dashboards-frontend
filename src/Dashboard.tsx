@@ -644,7 +644,7 @@ function Dashboard() {
           <div className="space-y-8">
               <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-8">
                 <Card 
-                  className={`cursor-pointer transition-all ${activeFilter === 'ready' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
+                  className={`card-minimal cursor-pointer ${activeFilter === 'ready' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
                   onClick={() => setActiveFilter('ready')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -680,7 +680,7 @@ function Dashboard() {
                   </CardContent>
                 </Card>
                 <Card 
-                  className={`cursor-pointer transition-all ${activeFilter === 'all' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
+                  className={`card-minimal cursor-pointer ${activeFilter === 'all' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
                   onClick={() => setActiveFilter('all')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -702,7 +702,7 @@ function Dashboard() {
                   </CardContent>
                 </Card>
                 <Card 
-                  className={`cursor-pointer transition-all ${activeFilter === 'failing' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
+                  className={`card-minimal cursor-pointer ${activeFilter === 'failing' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
                   onClick={() => setActiveFilter('failing')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -721,7 +721,7 @@ function Dashboard() {
                   </CardContent>
                 </Card>
                 <Card 
-                  className={`cursor-pointer transition-all ${activeFilter === 'draft' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
+                  className={`card-minimal cursor-pointer ${activeFilter === 'draft' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
                   onClick={() => setActiveFilter('draft')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -740,7 +740,7 @@ function Dashboard() {
                   </CardContent>
                 </Card>
                 <Card 
-                  className={`cursor-pointer transition-all ${activeFilter === 'reviewed-today' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
+                  className={`card-minimal cursor-pointer ${activeFilter === 'reviewed-today' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
                   onClick={() => setActiveFilter('reviewed-today')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -767,7 +767,7 @@ function Dashboard() {
                   </CardContent>
                 </Card>
                 <Card 
-                  className={`cursor-pointer transition-all ${activeFilter === 'exempt' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
+                  className={`card-minimal cursor-pointer ${activeFilter === 'exempt' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
                   onClick={() => setActiveFilter('exempt')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -788,7 +788,7 @@ function Dashboard() {
                   </CardContent>
                 </Card>
                 <Card 
-                  className={`cursor-pointer transition-all ${activeFilter === 'finished' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
+                  className={`card-minimal cursor-pointer ${activeFilter === 'finished' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
                   onClick={() => setActiveFilter('finished')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -812,7 +812,7 @@ function Dashboard() {
                   </CardContent>
                 </Card>
                 <Card 
-                  className={`cursor-pointer transition-all ${activeFilter === 'dependabot' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
+                  className={`card-minimal cursor-pointer ${activeFilter === 'dependabot' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
                   onClick={() => setActiveFilter('dependabot')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -1086,7 +1086,7 @@ function Dashboard() {
                           </TableCell>
                           <TableCell className="min-w-[200px]">
                             <div className="space-y-1">
-                              {pr.recent_timeline?.map((event, idx) => (
+                              {pr.recent_timeline?.slice(-2).map((event, idx) => (
                                 <div key={idx} className="text-xs text-muted-foreground">
                                   {event}
                                 </div>
