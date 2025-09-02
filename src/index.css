@@ -442,4 +442,64 @@
       rgba(252, 165, 165, 0.4) 100%
     );
   }
+  
+  /* Exempt BE Review - Gray-cyan gradient */
+  .gradient-exempt {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(103, 232, 249, 0.2);
+    box-shadow: 0 4px 20px -5px rgba(103, 232, 249, 0.15);
+  }
+  
+  .gradient-exempt::before {
+    background: linear-gradient(135deg, 
+      rgba(243, 244, 246, 0.8) 0%, 
+      rgba(103, 232, 249, 0.1) 100%
+    );
+  }
+  
+  .gradient-exempt:hover {
+    border-color: rgba(103, 232, 249, 0.3);
+  }
+  
+  .gradient-exempt.selected {
+    background: rgba(103, 232, 249, 0.15);
+    border-color: rgba(103, 232, 249, 0.4);
+  }
+  
+  .gradient-exempt.selected::before {
+    background: linear-gradient(135deg, 
+      rgba(103, 232, 249, 0.2) 0%, 
+      rgba(103, 232, 249, 0.4) 100%
+    );
+  }
+  
+  /* Dependabot - Gray-amber gradient */
+  .gradient-dependabot {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(251, 191, 36, 0.2);
+    box-shadow: 0 4px 20px -5px rgba(251, 191, 36, 0.15);
+  }
+  
+  .gradient-dependabot::before {
+    background: linear-gradient(135deg, 
+      rgba(243, 244, 246, 0.8) 0%, 
+      rgba(251, 191, 36, 0.1) 100%
+    );
+  }
+  
+  .gradient-dependabot:hover {
+    border-color: rgba(251, 191, 36, 0.3);
+  }
+  
+  .gradient-dependabot.selected {
+    background: rgba(251, 191, 36, 0.15);
+    border-color: rgba(251, 191, 36, 0.4);
+  }
+  
+  .gradient-dependabot.selected::before {
+    background: linear-gradient(135deg, 
+      rgba(251, 191, 36, 0.2) 0%, 
+      rgba(251, 191, 36, 0.4) 100%
+    );
+  }
 }

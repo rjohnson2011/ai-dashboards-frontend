@@ -768,7 +768,7 @@ function Dashboard() {
                   </CardContent>
                 </Card>
                 <Card 
-                  className={`gradient-card gradient-total-prs cursor-pointer ${activeFilter === 'exempt' ? 'selected' : ''}`}
+                  className={`gradient-card gradient-exempt cursor-pointer ${activeFilter === 'exempt' ? 'selected' : ''}`}
                   onClick={() => setActiveFilter('exempt')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -813,7 +813,7 @@ function Dashboard() {
                   </CardContent>
                 </Card>
                 <Card 
-                  className={`gradient-card gradient-total-prs cursor-pointer ${activeFilter === 'dependabot' ? 'selected' : ''}`}
+                  className={`gradient-card gradient-dependabot cursor-pointer ${activeFilter === 'dependabot' ? 'selected' : ''}`}
                   onClick={() => setActiveFilter('dependabot')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
