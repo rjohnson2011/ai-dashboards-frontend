@@ -131,6 +131,8 @@ function Dashboard() {
   const [showSearch, setShowSearch] = useState(false)
   const [repositories, setRepositories] = useState<Repository[]>([])
   const [selectedRepository, setSelectedRepository] = useState<Repository | null>(null)
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [autoRefresh, setAutoRefresh] = useState(true)
   const { repositoryName } = useParams<{ repositoryName: string }>()
   const navigate = useNavigate()
 
@@ -157,6 +159,20 @@ function Dashboard() {
     }
   }, [selectedRepository])
 
+  // Polling effect for auto-refresh
+  useEffect(() => {
+    if (!selectedRepository || !autoRefresh) return
+    
+    // Poll every 5 seconds when updating, every 30 seconds otherwise
+    const interval = isUpdating ? 5000 : 30000
+    
+    const timer = setInterval(() => {
+      fetchPullRequests(true)
+    }, interval)
+    
+    return () => clearInterval(timer)
+  }, [selectedRepository, autoRefresh, isUpdating, lastUpdated])
+
   const fetchRepositories = async () => {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/repositories`, {
@@ -176,10 +192,13 @@ function Dashboard() {
     }
   }
   
-  const fetchPullRequests = async () => {
+  const fetchPullRequests = async (isPolling = false) => {
     if (!selectedRepository) return
     
-    setLoading(true)
+    if (!isPolling) {
+      setLoading(true)
+    }
+    
     try {
       const params = new URLSearchParams({
         repository_owner: selectedRepository.owner,
@@ -194,16 +213,27 @@ function Dashboard() {
         throw new Error('Failed to fetch pull requests')
       }
       const data: ApiResponse = await response.json()
-      // Combine both regular and approved pull requests
-      const allPRs = [...(data.pull_requests || []), ...(data.approved_pull_requests || [])]
-      setPullRequests(allPRs)
-      setRepository(data.repository)
-      setLastUpdated(data.last_updated)
-      setRateLimit(data.rate_limit || null)
+      
+      // Update the updating status
+      setIsUpdating(data.updating || false)
+      
+      // Only update data if it has changed
+      if (!isPolling || data.last_updated !== lastUpdated) {
+        // Combine both regular and approved pull requests
+        const allPRs = [...(data.pull_requests || []), ...(data.approved_pull_requests || [])]
+        setPullRequests(allPRs)
+        setRepository(data.repository)
+        setLastUpdated(data.last_updated)
+        setRateLimit(data.rate_limit || null)
+      }
+      
       setLoading(false)
+      setError(null)
     } catch (err) {
       console.error('Error fetching PRs:', err)
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      if (!isPolling) {
+        setError(err instanceof Error ? err.message : 'An error occurred')
+      }
       setLoading(false)
     }
   }
@@ -450,36 +480,52 @@ function Dashboard() {
               ) : (
                 <LoginButton />
               )} */}
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-muted-foreground">
-                  {repository}
-                </span>
-                {lastUpdated && (
-                  <>
-                    <span className="text-sm text-muted-foreground">
-                      • Last updated {formatTimeAgo(lastUpdated)} ({new Date(lastUpdated).toLocaleString('en-US', { 
-                        timeZone: 'America/New_York',
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                        hour: 'numeric',
-                        minute: '2-digit',
-                        hour12: true
-                      })} EST)
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      • Version {APP_VERSION.version} ({new Date(APP_VERSION.timestamp).toLocaleString('en-US', { 
-                        timeZone: 'America/New_York',
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                        hour: 'numeric',
-                        minute: '2-digit',
-                        hour12: true
-                      })} EST)
-                    </span>
-                  </>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-muted-foreground">
+                    {repository}
+                  </span>
+                  {lastUpdated && (
+                    <>
+                      <span className="text-sm text-muted-foreground">
+                        • Last updated {formatTimeAgo(lastUpdated)} ({new Date(lastUpdated).toLocaleString('en-US', { 
+                          timeZone: 'America/New_York',
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          hour12: true
+                        })} EST)
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        • Version {APP_VERSION.version} ({new Date(APP_VERSION.timestamp).toLocaleString('en-US', { 
+                          timeZone: 'America/New_York',
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          hour12: true
+                        })} EST)
+                      </span>
+                    </>
+                  )}
+                </div>
+                {isUpdating && (
+                  <div className="flex items-center space-x-2">
+                    <RefreshCw className="h-4 w-4 animate-spin text-primary" />
+                    <span className="text-sm text-muted-foreground">Updating...</span>
+                  </div>
                 )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setAutoRefresh(!autoRefresh)}
+                  className="text-xs"
+                >
+                  {autoRefresh ? 'Auto-refresh ON' : 'Auto-refresh OFF'}
+                </Button>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -562,6 +608,14 @@ function Dashboard() {
                   Search
                 </Button>
               )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fetchPullRequests(false)}
+                disabled={loading}
+              >
+                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              </Button>
               </div>
             </div>
           </div>
