@@ -645,7 +645,7 @@ function Dashboard() {
           <div className="space-y-8">
               <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-8">
                 <Card 
-                  className={`gradient-card gradient-ready-review cursor-pointer ${activeFilter === 'ready' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
+                  className={`gradient-card gradient-ready-review cursor-pointer ${activeFilter === 'ready' ? 'selected' : ''}`}
                   onClick={() => setActiveFilter('ready')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -681,7 +681,7 @@ function Dashboard() {
                   </CardContent>
                 </Card>
                 <Card 
-                  className={`gradient-card gradient-total-prs cursor-pointer ${activeFilter === 'all' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
+                  className={`gradient-card gradient-total-prs cursor-pointer ${activeFilter === 'all' ? 'selected' : ''}`}
                   onClick={() => setActiveFilter('all')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -703,7 +703,7 @@ function Dashboard() {
                   </CardContent>
                 </Card>
                 <Card 
-                  className={`gradient-card gradient-ci-failures cursor-pointer ${activeFilter === 'failing' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
+                  className={`gradient-card gradient-ci-failures cursor-pointer ${activeFilter === 'failing' ? 'selected' : ''}`}
                   onClick={() => setActiveFilter('failing')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -722,7 +722,7 @@ function Dashboard() {
                   </CardContent>
                 </Card>
                 <Card 
-                  className={`gradient-card gradient-drafts cursor-pointer ${activeFilter === 'draft' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
+                  className={`gradient-card gradient-drafts cursor-pointer ${activeFilter === 'draft' ? 'selected' : ''}`}
                   onClick={() => setActiveFilter('draft')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -741,7 +741,7 @@ function Dashboard() {
                   </CardContent>
                 </Card>
                 <Card 
-                  className={`gradient-card gradient-needs-review cursor-pointer ${activeFilter === 'reviewed-today' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
+                  className={`gradient-card gradient-needs-review cursor-pointer ${activeFilter === 'reviewed-today' ? 'selected' : ''}`}
                   onClick={() => setActiveFilter('reviewed-today')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -768,7 +768,7 @@ function Dashboard() {
                   </CardContent>
                 </Card>
                 <Card 
-                  className={`gradient-card gradient-total-prs cursor-pointer ${activeFilter === 'exempt' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
+                  className={`gradient-card gradient-total-prs cursor-pointer ${activeFilter === 'exempt' ? 'selected' : ''}`}
                   onClick={() => setActiveFilter('exempt')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -789,7 +789,7 @@ function Dashboard() {
                   </CardContent>
                 </Card>
                 <Card 
-                  className={`gradient-card gradient-finished cursor-pointer ${activeFilter === 'finished' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
+                  className={`gradient-card gradient-finished cursor-pointer ${activeFilter === 'finished' ? 'selected' : ''}`}
                   onClick={() => setActiveFilter('finished')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -813,7 +813,7 @@ function Dashboard() {
                   </CardContent>
                 </Card>
                 <Card 
-                  className={`gradient-card gradient-total-prs cursor-pointer ${activeFilter === 'dependabot' ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
+                  className={`gradient-card gradient-total-prs cursor-pointer ${activeFilter === 'dependabot' ? 'selected' : ''}`}
                   onClick={() => setActiveFilter('dependabot')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
