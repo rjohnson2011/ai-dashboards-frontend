@@ -652,7 +652,6 @@ function Dashboard() {
                     <CardTitle className="text-sm font-medium">
                       Ready for Review
                     </CardTitle>
-                    <div className="status-dot status-dot-success" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-semibold">
@@ -688,7 +687,6 @@ function Dashboard() {
                     <CardTitle className="text-sm font-medium">
                       Total Pull Requests
                     </CardTitle>
-                    <GitPullRequest className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-semibold">{pullRequests.length}</div>
@@ -710,7 +708,6 @@ function Dashboard() {
                     <CardTitle className="text-sm font-medium">
                       Failing CI
                     </CardTitle>
-                    <div className="status-dot status-dot-error" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-semibold">
@@ -729,7 +726,6 @@ function Dashboard() {
                     <CardTitle className="text-sm font-medium">
                       Draft PRs
                     </CardTitle>
-                    <div className="status-dot status-dot-neutral" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-semibold">
@@ -748,7 +744,6 @@ function Dashboard() {
                     <CardTitle className="text-sm font-medium">
                       PRs Needing Team Review
                     </CardTitle>
-                    <div className="status-dot status-dot-warning" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-semibold">
@@ -775,7 +770,6 @@ function Dashboard() {
                     <CardTitle className="text-sm font-medium">
                       Exempt BE Review
                     </CardTitle>
-                    <div className="status-dot status-dot-info" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-semibold">
@@ -796,7 +790,6 @@ function Dashboard() {
                     <CardTitle className="text-sm font-medium">
                       Finished but Unmerged
                     </CardTitle>
-                    <div className="status-dot status-dot-success" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-semibold">
@@ -820,7 +813,6 @@ function Dashboard() {
                     <CardTitle className="text-sm font-medium">
                       Dependabot PRs
                     </CardTitle>
-                    <div className="status-dot status-dot-info" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-semibold">

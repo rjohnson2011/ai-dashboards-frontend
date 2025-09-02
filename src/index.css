@@ -255,7 +255,7 @@
   /* Ready for Review - Gray-green gradient */
   .gradient-ready-review {
     background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(134, 239, 172, 0.2);
+    border: 1px solid rgba(107, 114, 128, 0.3);
     box-shadow: 0 4px 20px -5px rgba(134, 239, 172, 0.15);
   }
   
@@ -267,13 +267,13 @@
   }
   
   .gradient-ready-review:hover {
-    border-color: rgba(134, 239, 172, 0.3);
+    border-color: rgba(107, 114, 128, 0.5);
   }
   
   /* Total PRs - Gray-blue gradient */
   .gradient-total-prs {
     background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(147, 197, 253, 0.2);
+    border: 1px solid rgba(107, 114, 128, 0.3);
     box-shadow: 0 4px 20px -5px rgba(147, 197, 253, 0.15);
   }
   
@@ -285,13 +285,13 @@
   }
   
   .gradient-total-prs:hover {
-    border-color: rgba(147, 197, 253, 0.3);
+    border-color: rgba(107, 114, 128, 0.5);
   }
   
   /* PRs Needing Team Review - Gray-purple gradient */
   .gradient-needs-review {
     background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(196, 181, 253, 0.2);
+    border: 1px solid rgba(107, 114, 128, 0.3);
     box-shadow: 0 4px 20px -5px rgba(196, 181, 253, 0.15);
   }
   
@@ -303,13 +303,13 @@
   }
   
   .gradient-needs-review:hover {
-    border-color: rgba(196, 181, 253, 0.3);
+    border-color: rgba(107, 114, 128, 0.5);
   }
   
   /* Finished but Unmerged - Gray-orange gradient */
   .gradient-finished {
     background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(253, 186, 116, 0.2);
+    border: 1px solid rgba(107, 114, 128, 0.3);
     box-shadow: 0 4px 20px -5px rgba(253, 186, 116, 0.15);
   }
   
@@ -321,13 +321,13 @@
   }
   
   .gradient-finished:hover {
-    border-color: rgba(253, 186, 116, 0.3);
+    border-color: rgba(107, 114, 128, 0.5);
   }
   
   /* Drafts - Pure gray gradient */
   .gradient-drafts {
     background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(209, 213, 219, 0.3);
+    border: 1px solid rgba(107, 114, 128, 0.3);
     box-shadow: 0 4px 20px -5px rgba(107, 114, 128, 0.1);
   }
   
@@ -339,13 +339,13 @@
   }
   
   .gradient-drafts:hover {
-    border-color: rgba(209, 213, 219, 0.5);
+    border-color: rgba(107, 114, 128, 0.5);
   }
   
   /* CI Failures - Gray-red gradient */
   .gradient-ci-failures {
     background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(252, 165, 165, 0.2);
+    border: 1px solid rgba(107, 114, 128, 0.3);
     box-shadow: 0 4px 20px -5px rgba(252, 165, 165, 0.15);
   }
   
@@ -357,7 +357,7 @@
   }
   
   .gradient-ci-failures:hover {
-    border-color: rgba(252, 165, 165, 0.3);
+    border-color: rgba(107, 114, 128, 0.5);
   }
   
   /* Selected state for gradient cards */
@@ -446,7 +446,7 @@
   /* Exempt BE Review - Gray-cyan gradient */
   .gradient-exempt {
     background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(103, 232, 249, 0.2);
+    border: 1px solid rgba(107, 114, 128, 0.3);
     box-shadow: 0 4px 20px -5px rgba(103, 232, 249, 0.15);
   }
   
@@ -458,7 +458,7 @@
   }
   
   .gradient-exempt:hover {
-    border-color: rgba(103, 232, 249, 0.3);
+    border-color: rgba(107, 114, 128, 0.5);
   }
   
   .gradient-exempt.selected {
@@ -476,7 +476,7 @@
   /* Dependabot - Gray-amber gradient */
   .gradient-dependabot {
     background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(251, 191, 36, 0.2);
+    border: 1px solid rgba(107, 114, 128, 0.3);
     box-shadow: 0 4px 20px -5px rgba(251, 191, 36, 0.15);
   }
   
@@ -488,7 +488,7 @@
   }
   
   .gradient-dependabot:hover {
-    border-color: rgba(251, 191, 36, 0.3);
+    border-color: rgba(107, 114, 128, 0.5);
   }
   
   .gradient-dependabot.selected {
