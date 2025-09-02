@@ -505,7 +505,7 @@ function Dashboard() {
                           hour: 'numeric',
                           minute: '2-digit',
                           hour12: true
-                        })} EST)
+                        })} ET)
                       </span>
                       <span className="text-sm text-muted-foreground">
                         • Version {APP_VERSION.version} ({new Date(APP_VERSION.timestamp).toLocaleString('en-US', { 
@@ -516,7 +516,7 @@ function Dashboard() {
                           hour: 'numeric',
                           minute: '2-digit',
                           hour12: true
-                        })} EST)
+                        })} ET)
                       </span>
                     </>
                   )}
