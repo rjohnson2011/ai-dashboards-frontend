@@ -212,13 +212,13 @@ function Dashboard() {
   const getCIStatusIcon = (status: string) => {
     switch (status) {
       case 'success':
-        return <CheckCircle2 className="h-4 w-4 text-green-500" />
+        return <CheckCircle2 className="h-4 w-4 text-success" />
       case 'failure':
-        return <XCircle className="h-4 w-4 text-red-500" />
+        return <XCircle className="h-4 w-4 text-danger" />
       case 'pending':
-        return <Clock className="h-4 w-4 text-yellow-500" />
+        return <Clock className="h-4 w-4 text-warning" />
       default:
-        return <AlertCircle className="h-4 w-4 text-gray-500" />
+        return <AlertCircle className="h-4 w-4 text-tertiary" />
     }
   }
 
@@ -439,10 +439,10 @@ function Dashboard() {
   return (
     <TooltipProvider>
       <div className="flex-col md:flex min-h-screen gradient-bg">
-        <div className="border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 card-shadow-sm">
+        <div className="border-b bg-white">
           <div className="flex h-16 items-center px-4">
-            <GitPullRequest className="mr-2 h-5 w-5 icon-shadow" />
-            <h2 className="text-lg font-semibold text-shadow">Pull Request Dashboard</h2>
+            <GitPullRequest className="mr-2 h-5 w-5 text-primary icon-shadow" />
+            <h2 className="text-lg font-semibold text-primary">Pull Request Dashboard</h2>
             <div className="ml-auto flex items-center space-x-4">
               {/* Authentication UI - Temporarily disabled during OAuth setup */}
               {/* {authService.isAuthenticated() ? (
@@ -505,8 +505,8 @@ function Dashboard() {
         <div className="flex-1 space-y-4 p-8 pt-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-3xl font-bold tracking-tight text-shadow gradient-text">Dashboard</h2>
-              <p className="text-muted-foreground text-shadow-sm">Your pull request overview and insights</p>
+              <h2 className="text-3xl font-bold tracking-tight gradient-text-primary">Dashboard</h2>
+              <p className="text-secondary">Your pull request overview and insights</p>
             </div>
             <div className="flex items-center space-x-4">
               {/* Repository selector temporarily hidden - to be removed later
@@ -590,14 +590,14 @@ function Dashboard() {
               <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-8">
                 <Card 
                   data-slot="card" 
-                  className={`card-gradient-success card-shadow-sm card-hover cursor-pointer ${activeFilter === 'ready' ? 'ring-2 ring-green-500 card-shadow-hover' : ''}`}
+                  className={`card-base card-bg-success card-accent-success card-shadow-sm card-hover cursor-pointer ${activeFilter === 'ready' ? 'ring-2 ring-offset-2 ring-[#1a7f37]' : ''}`}
                   onClick={() => setActiveFilter('ready')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-shadow-sm">
                       Ready for Review
                     </CardTitle>
-                    <CheckCircle2 className="h-5 w-5 text-green-500 icon-shadow" />
+                    <CheckCircle2 className="h-5 w-5 text-success icon-shadow" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold gradient-text-success">
@@ -627,17 +627,17 @@ function Dashboard() {
                 </Card>
                 <Card 
                   data-slot="card" 
-                  className={`card-gradient-subtle card-shadow-sm card-hover cursor-pointer ${activeFilter === 'all' ? 'ring-2 ring-primary gradient-border-active' : ''}`}
+                  className={`card-base card-bg-neutral card-accent-neutral card-shadow-sm card-hover cursor-pointer ${activeFilter === 'all' ? 'ring-2 ring-offset-2 ring-[#0969da]' : ''}`}
                   onClick={() => setActiveFilter('all')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-shadow-sm">
                       Total Pull Requests
                     </CardTitle>
-                    <GitPullRequest className="h-5 w-5 text-muted-foreground icon-shadow" />
+                    <GitPullRequest className="h-5 w-5 text-tertiary" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold gradient-text">{pullRequests.length}</div>
+                    <div className="text-2xl font-bold text-primary">{pullRequests.length}</div>
                     <p className="text-xs text-muted-foreground">
                       {pullRequests.filter(pr => 
                         !pr.draft && (
@@ -650,17 +650,17 @@ function Dashboard() {
                 </Card>
                 <Card 
                   data-slot="card" 
-                  className={`card-gradient-destructive card-shadow-sm card-hover cursor-pointer ${activeFilter === 'failing' ? 'ring-2 ring-red-500 card-shadow-hover' : ''}`}
+                  className={`card-base card-bg-destructive card-accent-destructive card-shadow-sm card-hover cursor-pointer ${activeFilter === 'failing' ? 'ring-2 ring-offset-2 ring-[#cf222e]' : ''}`}
                   onClick={() => setActiveFilter('failing')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-shadow-sm">
                       Failing CI
                     </CardTitle>
-                    <XCircle className="h-5 w-5 text-destructive icon-shadow" />
+                    <XCircle className="h-5 w-5 text-danger icon-shadow" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold gradient-text-danger">
+                    <div className="text-2xl font-bold text-danger">
                       {pullRequests.filter(pr => !pr.draft && pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -670,7 +670,7 @@ function Dashboard() {
                 </Card>
                 <Card 
                   data-slot="card" 
-                  className={`card-gradient-subtle card-shadow-sm card-hover cursor-pointer ${activeFilter === 'draft' ? 'ring-2 ring-gray-500 card-shadow-hover' : ''}`}
+                  className={`card-base card-bg-neutral card-accent-neutral card-shadow-sm card-hover cursor-pointer ${activeFilter === 'draft' ? 'ring-2 ring-[#6e7781] card-shadow-hover' : ''}`}
                   onClick={() => setActiveFilter('draft')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -690,14 +690,14 @@ function Dashboard() {
                 </Card>
                 <Card 
                   data-slot="card" 
-                  className={`card-gradient-warning card-shadow-sm card-hover cursor-pointer ${activeFilter === 'reviewed-today' ? 'ring-2 ring-yellow-500 card-shadow-hover' : ''}`}
+                  className={`card-base card-bg-warning card-accent-warning card-shadow-sm card-hover cursor-pointer ${activeFilter === 'reviewed-today' ? 'ring-2 ring-[#bf8700] card-shadow-hover' : ''}`}
                   onClick={() => setActiveFilter('reviewed-today')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-shadow-sm">
                       PRs Needing Team Review
                     </CardTitle>
-                    <Clock className="h-5 w-5 text-yellow-500 icon-shadow" />
+                    <Clock className="h-5 w-5 text-warning icon-shadow" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
@@ -718,7 +718,7 @@ function Dashboard() {
                 </Card>
                 <Card 
                   data-slot="card" 
-                  className={`card-gradient-primary card-shadow-sm card-hover cursor-pointer ${activeFilter === 'exempt' ? 'ring-2 ring-blue-500 card-shadow-hover' : ''}`}
+                  className={`card-base card-bg-info card-accent-info card-shadow-sm card-hover cursor-pointer ${activeFilter === 'exempt' ? 'ring-2 ring-[#0969da] card-shadow-hover' : ''}`}
                   onClick={() => setActiveFilter('exempt')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -740,14 +740,14 @@ function Dashboard() {
                 </Card>
                 <Card 
                   data-slot="card" 
-                  className={`card-gradient card-shadow-sm card-hover cursor-pointer ${activeFilter === 'finished' ? 'ring-2 ring-purple-500 card-shadow-hover gradient-border-active' : ''}`}
+                  className={`card-base card-bg-info card-accent-info card-shadow-sm card-hover cursor-pointer ${activeFilter === 'finished' ? 'ring-2 ring-[#0969da] card-shadow-hover' : ''}`}
                   onClick={() => setActiveFilter('finished')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-shadow-sm">
                       Finished but Unmerged
                     </CardTitle>
-                    <CheckCircle2 className="h-5 w-5 text-purple-500 icon-shadow" />
+                    <CheckCircle2 className="h-5 w-5 text-info icon-shadow" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
@@ -765,14 +765,14 @@ function Dashboard() {
                 </Card>
                 <Card 
                   data-slot="card" 
-                  className={`card-gradient-primary card-shadow-sm card-hover cursor-pointer ${activeFilter === 'dependabot' ? 'ring-2 ring-blue-500 card-shadow-hover' : ''}`}
+                  className={`card-base card-bg-primary card-accent-primary card-shadow-sm card-hover cursor-pointer ${activeFilter === 'dependabot' ? 'ring-2 ring-[#0969da] card-shadow-hover' : ''}`}
                   onClick={() => setActiveFilter('dependabot')}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-shadow-sm">
                       Dependabot PRs
                     </CardTitle>
-                    <Bot className="h-5 w-5 text-blue-500 icon-shadow" />
+                    <Bot className="h-5 w-5 text-info icon-shadow" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
@@ -929,7 +929,7 @@ function Dashboard() {
                               href={`https://github.com/${pr.author}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="hover:underline text-blue-600"
+                              className="hover:underline text-info"
                               onClick={(e) => e.stopPropagation()}
                             >
                               {pr.author}
@@ -948,11 +948,11 @@ function Dashboard() {
                                   {getCIStatusIcon(pr.ci_status)}
                                   <span className="text-sm">
                                     {pr.failed_checks > 0 ? (
-                                      <span className="text-red-600">{pr.failed_checks} failing</span>
+                                      <span className="text-danger">{pr.failed_checks} failing</span>
                                     ) : pr.total_checks - pr.successful_checks > 0 ? (
-                                      <span className="text-yellow-600">{pr.total_checks - pr.successful_checks} pending</span>
+                                      <span className="text-warning">{pr.total_checks - pr.successful_checks} pending</span>
                                     ) : (
-                                      <span className="text-green-600">All passing</span>
+                                      <span className="text-success">All passing</span>
                                     )}
                                   </span>
                                 </a>
@@ -971,7 +971,7 @@ function Dashboard() {
                           <TableCell>
                             <div className="space-y-1">
                               {pr.ci_status === 'pending' && pr.total_checks - pr.successful_checks === 1 && pr.failed_checks === 0 ? (
-                                <span className="text-xs font-medium text-yellow-600">Succeed if backend approval is confirmed</span>
+                                <span className="text-xs font-medium text-warning">Succeed if backend approval is confirmed</span>
                               ) : pr.failing_checks.length > 0 ? (
                                 pr.failing_checks.map((check, idx) => (
                                   <a
@@ -979,7 +979,7 @@ function Dashboard() {
                                     href={`${pr.url}#pullrequestreview-new_review_form`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="block text-xs text-red-600 hover:underline truncate max-w-[200px]"
+                                    className="block text-xs text-danger hover:underline truncate max-w-[200px]"
                                     title={check.name === 'Status Checks' ? 'Danger' : check.name}
                                     onClick={(e) => e.stopPropagation()}
                                   >
@@ -998,7 +998,7 @@ function Dashboard() {
                                   href={pr.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="block hover:underline text-blue-600"
+                                  className="block hover:underline text-info"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   {pr.approval_summary?.approved_users?.map((user, idx) => (
@@ -1019,7 +1019,7 @@ function Dashboard() {
                                 pr.approval_summary.approved_count > 0 &&
                                 pr.backend_approval_status !== 'approved' &&
                                 !(pr.approval_summary.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))) ? (
-                                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                                <CheckCircle2 className="h-5 w-5 text-success" />
                               ) : (
                                 <XCircle className="h-5 w-5 text-muted-foreground" />
                               )}
