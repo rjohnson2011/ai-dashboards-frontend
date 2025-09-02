@@ -838,7 +838,14 @@ function Dashboard() {
                 <CardHeader>
                   <CardTitle>Pull Requests</CardTitle>
                   <CardDescription>
-                    A list of all pull requests in the repository.
+                    {activeFilter === 'ready' && 'Ready for Review - PRs with team approvals awaiting backend review'}
+                    {activeFilter === 'all' && 'Total Pull Requests - All open PRs in the repository'}
+                    {activeFilter === 'failing' && 'Failing CI - PRs with failing CI checks that need attention'}
+                    {activeFilter === 'draft' && 'Draft PRs - Work in progress pull requests'}
+                    {activeFilter === 'reviewed-today' && 'PRs Needing Team Review - Awaiting initial team review'}
+                    {activeFilter === 'exempt' && 'Exempt BE Review - PRs that do not require backend review'}
+                    {activeFilter === 'finished' && 'Finished but Unmerged - Backend approved PRs ready to merge'}
+                    {activeFilter === 'dependabot' && 'Dependabot PRs - Automated dependency updates'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
