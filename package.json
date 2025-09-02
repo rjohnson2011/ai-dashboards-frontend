@@ -11,6 +11,8 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
+    "typecheck": "tsc -b --noEmit",
+    "check": "npm run typecheck && npm run lint",
     "postinstall": "cp node_modules/@department-of-veterans-affairs/web-components/dist/img/sprite.svg public/ || true",
     "bump-version": "node bump-version.cjs",
     "bump-version:major": "node bump-version.cjs major",

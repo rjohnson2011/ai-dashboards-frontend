@@ -42,7 +42,9 @@ import {
   RefreshCw,
   Search,
   TrendingUp,
-  Bot
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './components/ui/tooltip'
 import { PRHistoryChart } from './components/PRHistoryChart'
@@ -457,7 +459,7 @@ function Dashboard() {
           </CardHeader>
           <CardContent>
             <p>{error}</p>
-            <Button onClick={fetchPullRequests} className="mt-4">
+            <Button onClick={() => fetchPullRequests(false)} className="mt-4">
               Try Again
             </Button>
           </CardContent>
