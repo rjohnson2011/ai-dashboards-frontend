@@ -955,6 +955,7 @@ function Dashboard() {
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
+                              {pr.draft && <Badge variant="outline">Draft</Badge>}
                               <a
                                 href={pr.url}
                                 target="_blank"
@@ -963,7 +964,6 @@ function Dashboard() {
                               >
                                 {pr.title}
                               </a>
-                              {pr.draft && <Badge variant="outline">Draft</Badge>}
                             </div>
                           </TableCell>
                           <TableCell>
