@@ -452,12 +452,17 @@ function Dashboard() {
     const maxTabs = 20
     const prsToOpen = filteredPullRequests.slice(0, maxTabs)
     
-    prsToOpen.forEach((pr) => {
-      window.open(pr.url, '_blank')
+    // Open tabs with a small delay to avoid popup blockers
+    prsToOpen.forEach((pr, index) => {
+      setTimeout(() => {
+        window.open(pr.url, '_blank', 'noopener,noreferrer')
+      }, index * 100) // 100ms delay between each tab
     })
     
     if (filteredPullRequests.length > maxTabs) {
-      alert(`Opened first ${maxTabs} PRs. Total PRs: ${filteredPullRequests.length}`)
+      setTimeout(() => {
+        alert(`Opened first ${maxTabs} PRs. Total PRs: ${filteredPullRequests.length}`)
+      }, maxTabs * 100)
     }
   }
 
