@@ -44,7 +44,8 @@ import {
   TrendingUp,
   ArrowUp,
   ArrowDown,
-  ArrowUpDown
+  ArrowUpDown,
+  ExternalLink
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './components/ui/tooltip'
 import { PRHistoryChart } from './components/PRHistoryChart'
@@ -446,6 +447,20 @@ function Dashboard() {
 
   const filteredPullRequests = sortPullRequests(filterPullRequests(pullRequests))
 
+  const openAllPRs = () => {
+    // Limit to prevent opening too many tabs at once
+    const maxTabs = 20
+    const prsToOpen = filteredPullRequests.slice(0, maxTabs)
+    
+    prsToOpen.forEach((pr) => {
+      window.open(pr.url, '_blank')
+    })
+    
+    if (filteredPullRequests.length > maxTabs) {
+      alert(`Opened first ${maxTabs} PRs. Total PRs: ${filteredPullRequests.length}`)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -815,17 +830,30 @@ function Dashboard() {
               </div>
               <Card>
                 <CardHeader>
-                  <CardTitle>Pull Requests</CardTitle>
-                  <CardDescription>
-                    {activeFilter === 'ready' && 'Ready for Review - PRs with team approvals awaiting backend review'}
-                    {activeFilter === 'all' && 'Total Pull Requests - All open PRs in the repository'}
-                    {activeFilter === 'failing' && 'Failing CI - PRs with failing CI checks that need attention'}
-                    {activeFilter === 'draft' && 'Draft PRs - Work in progress pull requests'}
-                    {activeFilter === 'reviewed-today' && 'PRs Needing Team Review - Awaiting initial team review'}
-                    {activeFilter === 'exempt' && 'Exempt BE Review - PRs that do not require backend review'}
-                    {activeFilter === 'finished' && 'Finished but Unmerged - Backend approved PRs ready to merge'}
-                    {activeFilter === 'dependabot' && 'Dependabot PRs - Automated dependency updates'}
-                  </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Pull Requests</CardTitle>
+                      <CardDescription>
+                        {activeFilter === 'ready' && 'Ready for Review - PRs with team approvals awaiting backend review'}
+                        {activeFilter === 'all' && 'Total Pull Requests - All open PRs in the repository'}
+                        {activeFilter === 'failing' && 'Failing CI - PRs with failing CI checks that need attention'}
+                        {activeFilter === 'draft' && 'Draft PRs - Work in progress pull requests'}
+                        {activeFilter === 'reviewed-today' && 'PRs Needing Team Review - Awaiting initial team review'}
+                        {activeFilter === 'exempt' && 'Exempt BE Review - PRs that do not require backend review'}
+                        {activeFilter === 'finished' && 'Finished but Unmerged - Backend approved PRs ready to merge'}
+                        {activeFilter === 'dependabot' && 'Dependabot PRs - Automated dependency updates'}
+                      </CardDescription>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={openAllPRs}
+                      disabled={filteredPullRequests.length === 0}
+                    >
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      Open All ({filteredPullRequests.length})
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="rounded-md border overflow-hidden">
