@@ -611,14 +611,6 @@ function Dashboard() {
                   Search
                 </Button>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => fetchPullRequests(false)}
-                disabled={loading}
-              >
-                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              </Button>
               </div>
             </div>
           </div>
