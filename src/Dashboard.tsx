@@ -357,7 +357,9 @@ function Dashboard() {
   const hasNonReviewFailingChecks = (pr: PullRequest) => {
     return pr.failing_checks.some(check => 
       check.name !== 'Pull Request Ready for Review' && 
-      !check.name.toLowerCase().includes('backend')
+      !check.name.toLowerCase().includes('backend') &&
+      check.name !== 'Danger' &&
+      check.name !== 'Status Checks' // Status Checks is shown as 'Danger' in the UI
     )
   }
 
@@ -395,7 +397,13 @@ function Dashboard() {
         }
         break
       case 'failing':
-        filtered = filtered.filter(pr => !pr.draft && pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr))
+        filtered = filtered.filter(pr => 
+          !pr.draft && 
+          pr.ci_status === 'failure' && 
+          hasNonReviewFailingChecks(pr) &&
+          // Exclude PRs with exempt-be-review label (they should be in "Exempt BE Review" section)
+          !(pr.labels && pr.labels.includes('exempt-be-review'))
+        )
         break
       case 'draft':
         filtered = filtered.filter(pr => pr.draft)
@@ -418,7 +426,10 @@ function Dashboard() {
         break
       case 'finished':
         filtered = filtered.filter(pr => 
-          !pr.draft && (
+          !pr.draft && 
+          // Exclude PRs with exempt-be-review label (they should be in "Exempt BE Review" section)
+          !(pr.labels && pr.labels.includes('exempt-be-review')) &&
+          (
             pr.backend_approval_status === 'approved' || 
             (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
           )
