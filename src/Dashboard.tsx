@@ -9,14 +9,13 @@ import { Badge } from './components/ui/badge'
 import { Button } from './components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from './components/ui/avatar'
 import { Input } from './components/ui/input'
-// Temporarily commented out - to be removed with repository selector
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from './components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './components/ui/select'
 import {
   Table,
   TableBody,
@@ -592,7 +591,6 @@ function Dashboard() {
               <p className="text-sm text-muted-foreground mt-1">Your pull request overview and insights</p>
             </div>
             <div className="flex items-center space-x-4">
-              {/* Repository selector temporarily hidden - to be removed later
               <Select 
                 value={selectedRepository?.name || ''} 
                 onValueChange={(value) => {
@@ -613,7 +611,6 @@ function Dashboard() {
                   ))}
                 </SelectContent>
               </Select>
-              */}
               <div className="flex items-center space-x-2">
               {showSearch ? (
                 <div className="flex items-center space-x-2">
