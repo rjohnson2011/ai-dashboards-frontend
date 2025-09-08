@@ -9,14 +9,14 @@ function AppRouter() {
         {/* Auth callback route */}
         <Route path="/auth/callback" element={<AuthCallback />} />
         
-        {/* Default route redirects to vets-api */}
-        <Route path="/" element={<Navigate to="/dashboard/vets-api" replace />} />
+        {/* Default route redirects to dashboard */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
         
-        {/* Dynamic repository routes */}
-        <Route path="/dashboard/:repositoryName" element={<Dashboard />} />
+        {/* Dashboard route */}
+        <Route path="/dashboard" element={<Dashboard />} />
         
         {/* Catch-all redirect */}
-        <Route path="*" element={<Navigate to="/dashboard/vets-api" replace />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>
   )

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
 import { authService } from './services/auth'
 import { APP_VERSION } from './version'
@@ -9,13 +8,6 @@ import { Badge } from './components/ui/badge'
 import { Button } from './components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from './components/ui/avatar'
 import { Input } from './components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from './components/ui/select'
 import {
   Table,
   TableBody,
@@ -108,13 +100,6 @@ interface ApiResponse {
   }
 }
 
-interface Repository {
-  owner: string
-  name: string
-  display_name: string
-  full_name: string
-  backend_review_required: boolean
-}
 
 const BACKEND_REVIEWERS = ['ericboehs', 'LindseySaari', 'rmtolmach', 'stiehlrod', 'RachalCassity', 'rjohnson2011', 'stevenjcumming']
 
@@ -130,39 +115,17 @@ function Dashboard() {
   const [activeFilter, setActiveFilter] = useState<string>('ready')
   const [searchTerm, setSearchTerm] = useState('')
   const [showSearch, setShowSearch] = useState(false)
-  const [repositories, setRepositories] = useState<Repository[]>([])
-  const [selectedRepository, setSelectedRepository] = useState<Repository | null>(null)
   const [isUpdating, setIsUpdating] = useState(false)
   const [autoRefresh, setAutoRefresh] = useState(true)
-  const { repositoryName } = useParams<{ repositoryName: string }>()
-  const navigate = useNavigate()
 
   useEffect(() => {
-    fetchRepositories()
+    // Fetch PRs immediately on mount
+    fetchPullRequests()
   }, [])
-  
-  useEffect(() => {
-    // When repository changes in URL, update selected repository
-    if (repositories.length > 0 && repositoryName) {
-      const repo = repositories.find(r => r.name === repositoryName)
-      if (repo) {
-        setSelectedRepository(repo)
-      } else {
-        // If repository not found, redirect to vets-api
-        navigate('/dashboard/vets-api', { replace: true })
-      }
-    }
-  }, [repositoryName, repositories, navigate])
-  
-  useEffect(() => {
-    if (selectedRepository) {
-      fetchPullRequests()
-    }
-  }, [selectedRepository])
 
   // Polling effect for auto-refresh
   useEffect(() => {
-    if (!selectedRepository || !autoRefresh) return
+    if (!autoRefresh) return
     
     // Poll every 5 seconds when updating, every 30 seconds otherwise
     const interval = isUpdating ? 5000 : 30000
@@ -172,40 +135,17 @@ function Dashboard() {
     }, interval)
     
     return () => clearInterval(timer)
-  }, [selectedRepository, autoRefresh, isUpdating, lastUpdated])
+  }, [autoRefresh, isUpdating, lastUpdated])
 
-  const fetchRepositories = async () => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/repositories`, {
-        headers: {
-          ...authService.getAuthHeaders()
-        }
-      })
-      if (!response.ok) {
-        throw new Error('Failed to fetch repositories')
-      }
-      const data = await response.json()
-      setRepositories(data.repositories || [])
-      // Don't auto-select, let the URL param drive selection
-    } catch (err) {
-      console.error('Error fetching repositories:', err)
-      setError(err instanceof Error ? err.message : 'An error occurred')
-    }
-  }
   
   const fetchPullRequests = async (isPolling = false) => {
-    if (!selectedRepository) return
-    
     if (!isPolling) {
       setLoading(true)
     }
     
     try {
-      const params = new URLSearchParams({
-        repository_owner: selectedRepository.owner,
-        repository_name: selectedRepository.name
-      })
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/reviews?${params}`, {
+      // Fetch all repositories - no params needed
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/reviews`, {
         headers: {
           ...authService.getAuthHeaders()
         }
@@ -587,30 +527,10 @@ function Dashboard() {
         <div className="flex-1 space-y-8 p-8 pt-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-semibold tracking-tight">Dashboard</h2>
-              <p className="text-sm text-muted-foreground mt-1">Your pull request overview and insights</p>
+              <h2 className="text-2xl font-semibold tracking-tight">All Repositories Dashboard</h2>
+              <p className="text-sm text-muted-foreground mt-1">Pull requests across all configured repositories</p>
             </div>
             <div className="flex items-center space-x-4">
-              <Select 
-                value={selectedRepository?.name || ''} 
-                onValueChange={(value) => {
-                  const repo = repositories.find(r => r.name === value)
-                  if (repo) {
-                    navigate(`/dashboard/${repo.name}`)
-                  }
-                }}
-              >
-                <SelectTrigger className="w-[280px]">
-                  <SelectValue placeholder="Select a repository" />
-                </SelectTrigger>
-                <SelectContent>
-                  {repositories.map((repo) => (
-                    <SelectItem key={repo.name} value={repo.name}>
-                      {repo.display_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
               <div className="flex items-center space-x-2">
               {showSearch ? (
                 <div className="flex items-center space-x-2">
