@@ -676,7 +676,7 @@ function Dashboard() {
                       Ready for Review
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="h-[85px]">
                     <div className="text-2xl font-semibold">
                       {pullRequests.filter(pr => 
                         !pr.draft &&
@@ -711,7 +711,7 @@ function Dashboard() {
                       Dependabot PRs
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="h-[85px]">
                     <div className="text-2xl font-semibold">
                       {pullRequests.filter(pr => 
                         !pr.draft && pr.author === 'dependabot[bot]'
@@ -731,7 +731,7 @@ function Dashboard() {
                       Total Pull Requests
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="h-[85px]">
                     <div className="text-2xl font-semibold">{pullRequests.length}</div>
                     <p className="text-xs text-muted-foreground">
                       All open PRs
@@ -747,7 +747,7 @@ function Dashboard() {
                       Failing CI
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="h-[85px]">
                     <div className="text-2xl font-semibold">
                       {pullRequests.filter(pr => !pr.draft && pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)).length}
                     </div>
@@ -765,7 +765,7 @@ function Dashboard() {
                       Draft PRs
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="h-[85px]">
                     <div className="text-2xl font-semibold">
                       {pullRequests.filter(pr => pr.draft).length}
                     </div>
@@ -783,7 +783,7 @@ function Dashboard() {
                       PRs Needing Team Review
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="h-[85px]">
                     <div className="text-2xl font-semibold">
                       {pullRequests.filter(pr => 
                         pr.backend_approval_status !== 'approved' && 
@@ -809,7 +809,7 @@ function Dashboard() {
                       Exempt BE Review
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="h-[85px]">
                     <div className="text-2xl font-semibold">
                       {pullRequests.filter(pr => 
                         !pr.draft && pr.labels && pr.labels.includes('exempt-be-review')
@@ -829,7 +829,7 @@ function Dashboard() {
                       Finished but Unmerged
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="h-[85px]">
                     <div className="text-2xl font-semibold">
                       {pullRequests.filter(pr => 
                         !pr.draft && (
