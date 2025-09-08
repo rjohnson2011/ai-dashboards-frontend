@@ -90,6 +90,8 @@ interface PullRequest {
   }
   recent_timeline?: string[]
   labels?: string[]
+  repository_name?: string
+  repository_owner?: string
 }
 
 interface ApiResponse {
@@ -340,6 +342,10 @@ function Dashboard() {
         case 'updated':
           aValue = new Date(a.updated_at).getTime()
           bValue = new Date(b.updated_at).getTime()
+          break
+        case 'repository':
+          aValue = a.repository_name || 'vets-api'
+          bValue = b.repository_name || 'vets-api'
           break
         default:
           return 0
@@ -862,7 +868,16 @@ function Dashboard() {
                               PR
                             </button>
                           </TableHead>
-                          <TableHead className="w-[300px]">
+                          <TableHead className="w-[120px]">
+                            <button
+                              className={`table-header-sortable ${sortColumn === 'repository' ? 'table-header-sorted' : ''}`}
+                              onClick={() => handleSort('repository')}
+                              aria-sort={sortColumn === 'repository' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
+                            >
+                              Repo
+                            </button>
+                          </TableHead>
+                          <TableHead className="w-[280px]">
                             <button
                               className={`table-header-sortable ${sortColumn === 'title' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('title')}
@@ -965,6 +980,11 @@ function Dashboard() {
                             >
                               #{pr.number}
                             </a>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-sm text-muted-foreground">
+                              {pr.repository_name || 'vets-api'}
+                            </span>
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
