@@ -41,14 +41,12 @@ import {
   Clock,
   RefreshCw,
   Search,
-  TrendingUp,
   ArrowUp,
   ArrowDown,
   ArrowUpDown,
   ExternalLink
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './components/ui/tooltip'
-import { PRHistoryChart } from './components/PRHistoryChart'
 
 interface CheckRun {
   name: string
@@ -128,7 +126,6 @@ function Dashboard() {
   const [, setRateLimit] = useState<ApiResponse['rate_limit'] | null>(null)
   const [sortColumn, setSortColumn] = useState<string | null>('updated')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
-  const [showChart, setShowChart] = useState(false)
   const [activeFilter, setActiveFilter] = useState<string>('ready')
   const [searchTerm, setSearchTerm] = useState('')
   const [showSearch, setShowSearch] = useState(false)
@@ -645,26 +642,6 @@ function Dashboard() {
               </div>
             </div>
           </div>
-          <div className="flex justify-between items-center">
-            <Button
-              variant={showChart ? "default" : "outline"}
-              size="sm"
-              onClick={() => setShowChart(!showChart)}
-              className="mb-4"
-            >
-              <TrendingUp className="mr-2 h-4 w-4" />
-              PR Trends
-            </Button>
-          </div>
-          {showChart && (
-            <div className="mb-6">
-              <PRHistoryChart 
-                days={7} 
-                repositoryName={selectedRepository?.name}
-                repositoryOwner={selectedRepository?.owner}
-              />
-            </div>
-          )}
           <div className="space-y-8">
               <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-8">
                 <Card 
