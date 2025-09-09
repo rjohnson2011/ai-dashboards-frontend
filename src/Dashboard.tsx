@@ -302,7 +302,9 @@ function Dashboard() {
       check.name !== 'Pull Request Ready for Review' && 
       !check.name.toLowerCase().includes('backend') &&
       check.name !== 'Danger' &&
-      check.name !== 'Status Checks' // Status Checks is shown as 'Danger' in the UI
+      check.name !== 'Status Checks' && // Status Checks is shown as 'Danger' in the UI
+      check.name !== 'Get PR data' &&
+      !check.name.includes('Get PR Data (pull_request_review)')
     )
   }
 
