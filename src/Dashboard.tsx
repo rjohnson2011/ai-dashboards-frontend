@@ -527,8 +527,8 @@ function Dashboard() {
         <div className="flex-1 space-y-8 p-8 pt-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-semibold tracking-tight">All Repositories Dashboard</h2>
-              <p className="text-sm text-muted-foreground mt-1">Pull requests across all configured repositories</p>
+              <h2 className="text-2xl font-semibold tracking-tight">Repositories Dashboard</h2>
+              <p className="text-sm text-muted-foreground mt-1">Pull requests across configured repositories</p>
             </div>
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
