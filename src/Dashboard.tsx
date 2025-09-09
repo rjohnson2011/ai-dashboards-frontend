@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
 import { authService } from './services/auth'
 import { APP_VERSION } from './version'
+import { CHANGELOG } from './changelog'
 // import { LoginButton } from './components/LoginButton'
 // import { UserProfile } from './components/UserProfile'
 import { Badge } from './components/ui/badge'
@@ -1055,6 +1056,37 @@ function Dashboard() {
                 </CardContent>
               </Card>
           </div>
+        </div>
+        <div className="mt-8 pb-4 text-center">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-xs text-muted-foreground cursor-help">
+                  Version {APP_VERSION.version}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-md">
+                <div className="space-y-3 p-2">
+                  <p className="font-semibold text-sm">Recent Updates</p>
+                  {CHANGELOG.slice(0, 3).map((entry, index) => (
+                    <div key={index} className="border-t pt-2 first:border-t-0 first:pt-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-medium text-sm">v{entry.version}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(entry.date).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <ul className="text-xs space-y-0.5">
+                        {entry.changes.map((change, i) => (
+                          <li key={i} className="text-muted-foreground">• {change}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
     </TooltipProvider>
