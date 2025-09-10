@@ -6,8 +6,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: "2.1.4",
+    version: "2.1.5",
     date: new Date().toISOString(),
+    changes: [
+      "Removed Total Pull Requests card",
+      "Simplified dashboard to focus on actionable categories",
+      "Fixed pull request workflow triggers"
+    ]
+  },
+  {
+    version: "2.1.4",
+    date: "2025-01-09T19:00:00.000Z",
     changes: [
       "Platform-atlas PRs now go directly to Ready for Review",
       "All dependabot PRs now show in Dependabot section",

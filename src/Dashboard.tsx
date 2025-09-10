@@ -659,22 +659,6 @@ function Dashboard() {
                   </CardContent>
                 </Card>
                 <Card 
-                  className={`gradient-card gradient-total-prs cursor-pointer ${activeFilter === 'all' ? 'selected' : ''}`}
-                  onClick={() => setActiveFilter('all')}
-                >
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Total Pull Requests
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="h-[85px]">
-                    <div className="text-2xl font-semibold">{pullRequests.length}</div>
-                    <p className="text-xs text-muted-foreground">
-                      All open PRs
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card 
                   className={`gradient-card gradient-ci-failures cursor-pointer ${activeFilter === 'failing' ? 'selected' : ''}`}
                   onClick={() => setActiveFilter('failing')}
                 >
@@ -791,7 +775,6 @@ function Dashboard() {
                       <CardTitle>Pull Requests</CardTitle>
                       <CardDescription>
                         {activeFilter === 'ready' && 'Ready for Review - PRs with team approvals awaiting backend review'}
-                        {activeFilter === 'all' && 'Total Pull Requests - All open PRs in the repository'}
                         {activeFilter === 'failing' && 'Failing CI - PRs with failing CI checks that need attention'}
                         {activeFilter === 'draft' && 'Draft PRs - Work in progress pull requests'}
                         {activeFilter === 'reviewed-today' && 'PRs Needing Team Review - Awaiting initial team review'}
