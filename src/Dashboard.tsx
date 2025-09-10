@@ -298,14 +298,28 @@ function Dashboard() {
   }
 
   const hasNonReviewFailingChecks = (pr: PullRequest) => {
-    return pr.failing_checks.some(check => 
-      check.name !== 'Pull Request Ready for Review' && 
-      !check.name.toLowerCase().includes('backend') &&
-      check.name !== 'Danger' &&
-      check.name !== 'Status Checks' && // Status Checks is shown as 'Danger' in the UI
-      check.name !== 'Get PR data' &&
-      !check.name.includes('Get PR Data (pull_request_review)')
-    )
+    // List of checks that are review-related and shouldn't prevent Ready for Review
+    const reviewRelatedChecks = [
+      'Pull Request Ready for Review',
+      'Danger',
+      'Status Checks',
+      'Get PR data',
+      'Get PR Data'
+    ]
+    
+    return pr.failing_checks.some(check => {
+      // Check if it's a backend-related check
+      if (check.name.toLowerCase().includes('backend')) return false
+      
+      // Check if it's in our review-related list
+      if (reviewRelatedChecks.some(reviewCheck => check.name === reviewCheck)) return false
+      
+      // Check if it contains "Get PR Data" in any form
+      if (check.name.includes('Get PR Data')) return false
+      
+      // This is a non-review failing check
+      return true
+    })
   }
 
   const filterPullRequests = (prs: PullRequest[]) => {
