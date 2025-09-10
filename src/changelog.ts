@@ -9,8 +9,8 @@ export const CHANGELOG: ChangelogEntry[] = [
     version: "2.1.5",
     date: new Date().toISOString(),
     changes: [
-      "Removed Total Pull Requests card",
-      "Simplified dashboard to focus on actionable categories",
+      "Fixed header showing 'all' to show 'All repositories'",
+      "Restored Total Pull Requests card",
       "Fixed pull request workflow triggers"
     ]
   },
