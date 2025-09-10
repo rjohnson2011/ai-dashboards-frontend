@@ -308,7 +308,7 @@ function Dashboard() {
     ]
     
     return pr.failing_checks.some(check => {
-      // Check if it's a backend-related check
+      // Check if it's a backend-related check (including "Succeed if backend approval")
       if (check.name.toLowerCase().includes('backend')) return false
       
       // Check if it's in our review-related list
@@ -316,6 +316,9 @@ function Dashboard() {
       
       // Check if it contains "Get PR Data" in any form
       if (check.name.includes('Get PR Data')) return false
+      
+      // Check if it's the backend approval confirmation check
+      if (check.name.includes('Succeed if backend approval')) return false
       
       // This is a non-review failing check
       return true

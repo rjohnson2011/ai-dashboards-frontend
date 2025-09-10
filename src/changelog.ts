@@ -6,8 +6,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: "2.1.2",
+    version: "2.1.3",
     date: new Date().toISOString(),
+    changes: [
+      "Fixed PRs with only review checks showing in Failing CI",
+      "Added 'Succeed if backend approval' to review-related checks",
+      "PRs awaiting approval now show in correct sections"
+    ]
+  },
+  {
+    version: "2.1.2",
+    date: "2025-01-09T18:00:00.000Z",
     changes: [
       "Improved review-related check detection",
       "Added debugging for PR filtering issues",
