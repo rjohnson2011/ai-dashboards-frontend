@@ -6,8 +6,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: "2.1.3",
+    version: "2.1.4",
     date: new Date().toISOString(),
+    changes: [
+      "Platform-atlas PRs now go directly to Ready for Review",
+      "All dependabot PRs now show in Dependabot section",
+      "Fixed stale mockdata PRs in database"
+    ]
+  },
+  {
+    version: "2.1.3",
+    date: "2025-01-09T18:15:00.000Z",
     changes: [
       "Fixed PRs with only review checks showing in Failing CI",
       "Added 'Succeed if backend approval' to review-related checks",

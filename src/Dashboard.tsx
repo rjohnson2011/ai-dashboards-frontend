@@ -334,19 +334,25 @@ function Dashboard() {
         filtered = filtered.filter(pr => 
           !pr.draft &&
           pr.backend_approval_status !== 'approved' &&
+          // Exclude dependabot PRs (they have their own section)
+          pr.author !== 'dependabot[bot]' &&
           // Exclude PRs with exempt-be-review label (they should be in "Exempt BE Review" section)
           !(pr.labels && pr.labels.includes('exempt-be-review')) &&
           // Exclude PRs with failing CI checks (they should be in "Failing CI" section)
           !(pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) &&
-          // Must be ready for backend review
-          pr.ready_for_backend_review &&
           (
-            // Regular PRs with approvals (not from backend reviewers)
-            (pr.approval_summary && 
-             pr.approval_summary.approved_count > 0 &&
-             !(pr.approval_summary.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))) ||
-            // PRs from backend team members (auto-ready for review)
-            BACKEND_REVIEWERS.includes(pr.author)
+            // Special case: platform-atlas PRs don't need approval to be ready for review
+            pr.repository_name === 'platform-atlas' ||
+            // Must be ready for backend review
+            (pr.ready_for_backend_review &&
+             (
+               // Regular PRs with approvals (not from backend reviewers)
+               (pr.approval_summary && 
+                pr.approval_summary.approved_count > 0 &&
+                !(pr.approval_summary.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))) ||
+               // PRs from backend team members (auto-ready for review)
+               BACKEND_REVIEWERS.includes(pr.author)
+             ))
           )
         )
         // Default to showing newest updated PRs first for ready for review
@@ -375,6 +381,10 @@ function Dashboard() {
           pr.backend_approval_status !== 'approved' && 
           !(pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))) &&
           !pr.draft &&
+          // Exclude dependabot PRs (they have their own section)
+          pr.author !== 'dependabot[bot]' &&
+          // Exclude platform-atlas PRs (they go straight to Ready for Review)
+          pr.repository_name !== 'platform-atlas' &&
           // Exclude PRs with exempt-be-review label
           !(pr.labels && pr.labels.includes('exempt-be-review')) &&
           // Exclude PRs that already have approvals (they should be in "Ready for Review")
@@ -601,24 +611,30 @@ function Dashboard() {
                       {pullRequests.filter(pr => 
                         !pr.draft &&
                         pr.backend_approval_status !== 'approved' &&
+                        // Exclude dependabot PRs (they have their own section)
+                        pr.author !== 'dependabot[bot]' &&
                         // Exclude PRs with exempt-be-review label
                         !(pr.labels && pr.labels.includes('exempt-be-review')) &&
                         // Exclude PRs with failing CI checks
                         !(pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) &&
-                        // Must be ready for backend review
-                        pr.ready_for_backend_review &&
                         (
-                          // Regular PRs with approvals (not from backend reviewers)
-                          (pr.approval_summary && 
-                           pr.approval_summary.approved_count > 0 &&
-                           !(pr.approval_summary.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))) ||
-                          // PRs from backend team members (auto-ready for review)
-                          BACKEND_REVIEWERS.includes(pr.author)
+                          // Special case: platform-atlas PRs don't need approval to be ready for review
+                          pr.repository_name === 'platform-atlas' ||
+                          // Must be ready for backend review
+                          (pr.ready_for_backend_review &&
+                           (
+                             // Regular PRs with approvals (not from backend reviewers)
+                             (pr.approval_summary && 
+                              pr.approval_summary.approved_count > 0 &&
+                              !(pr.approval_summary.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))) ||
+                             // PRs from backend team members (auto-ready for review)
+                             BACKEND_REVIEWERS.includes(pr.author)
+                           ))
                         )
                       ).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Approved by team member, passing all checks
+                      Approved or platform-atlas PRs
                     </p>
                   </CardContent>
                 </Card>
@@ -709,6 +725,10 @@ function Dashboard() {
                         pr.backend_approval_status !== 'approved' && 
                         !(pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))) &&
                         !pr.draft &&
+                        // Exclude dependabot PRs (they have their own section)
+                        pr.author !== 'dependabot[bot]' &&
+                        // Exclude platform-atlas PRs (they go straight to Ready for Review)
+                        pr.repository_name !== 'platform-atlas' &&
                         // Exclude PRs with exempt-be-review label
                         !(pr.labels && pr.labels.includes('exempt-be-review')) &&
                         // Exclude PRs that already have approvals (they should be in "Ready for Review")
