@@ -7,7 +7,6 @@ import { CHANGELOG } from './changelog'
 // import { UserProfile } from './components/UserProfile'
 import { Badge } from './components/ui/badge'
 import { Button } from './components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from './components/ui/avatar'
 import { Input } from './components/ui/input'
 import {
   Table,
@@ -17,14 +16,6 @@ import {
   TableHeader,
   TableRow,
 } from './components/ui/table'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from './components/ui/dropdown-menu'
 import { 
   GitPullRequest, 
   AlertCircle, 
@@ -116,17 +107,14 @@ function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('')
   const [showSearch, setShowSearch] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
-  const [autoRefresh, setAutoRefresh] = useState(true)
 
   useEffect(() => {
     // Fetch PRs immediately on mount
     fetchPullRequests()
   }, [])
 
-  // Polling effect for auto-refresh
+  // Polling effect - always on
   useEffect(() => {
-    if (!autoRefresh) return
-    
     // Poll every 5 seconds when updating, every 30 seconds otherwise
     const interval = isUpdating ? 5000 : 30000
     
@@ -135,7 +123,7 @@ function Dashboard() {
     }, interval)
     
     return () => clearInterval(timer)
-  }, [autoRefresh, isUpdating, lastUpdated])
+  }, [isUpdating, lastUpdated])
 
   
   const fetchPullRequests = async (isPolling = false) => {
@@ -523,33 +511,10 @@ function Dashboard() {
                     </>
                   )}
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setAutoRefresh(!autoRefresh)}
-                  className="text-xs"
-                >
-                  {autoRefresh ? 'Auto-refresh ON' : 'Auto-refresh OFF'}
-                </Button>
+                <span className="text-xs text-muted-foreground">
+                  Auto-refresh ON
+                </span>
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="" />
-                      <AvatarFallback>U</AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>Settings</DropdownMenuItem>
-                  <DropdownMenuItem>Support</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>Log out</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
           </div>
         </div>
@@ -815,7 +780,7 @@ function Dashboard() {
                     <Table className="table-fixed">
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="w-[100px]">
+                          <TableHead className="w-[80px]">
                             <button
                               className={`table-header-sortable ${sortColumn === 'number' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('number')}
@@ -824,7 +789,7 @@ function Dashboard() {
                               PR
                             </button>
                           </TableHead>
-                          <TableHead className="w-[120px]">
+                          <TableHead className="w-[100px]">
                             <button
                               className={`table-header-sortable ${sortColumn === 'repository' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('repository')}
@@ -833,7 +798,7 @@ function Dashboard() {
                               Repo
                             </button>
                           </TableHead>
-                          <TableHead className="w-[280px]">
+                          <TableHead className="w-[240px]">
                             <button
                               className={`table-header-sortable ${sortColumn === 'title' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('title')}
@@ -842,7 +807,7 @@ function Dashboard() {
                               Title
                             </button>
                           </TableHead>
-                          <TableHead className="w-[140px]">
+                          <TableHead className="w-[120px]">
                             <button
                               className={`table-header-sortable ${sortColumn === 'author' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('author')}
@@ -851,7 +816,7 @@ function Dashboard() {
                               Author
                             </button>
                           </TableHead>
-                          <TableHead className="w-[120px]">
+                          <TableHead className="w-[100px]">
                             <button
                               className={`table-header-sortable ${sortColumn === 'ci_status' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('ci_status')}
@@ -860,7 +825,7 @@ function Dashboard() {
                               CI Status
                             </button>
                           </TableHead>
-                          <TableHead className="w-[180px]">
+                          <TableHead className="w-[140px]">
                             <button
                               className={`table-header-sortable ${sortColumn === 'failures' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('failures')}
@@ -869,7 +834,7 @@ function Dashboard() {
                               CI Failures
                             </button>
                           </TableHead>
-                          <TableHead className="w-[120px]">
+                          <TableHead className="w-[100px]">
                             <button
                               className={`table-header-sortable ${sortColumn === 'approvals' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('approvals')}
@@ -878,7 +843,7 @@ function Dashboard() {
                               Approvals
                             </button>
                           </TableHead>
-                          <TableHead className="w-[140px]">
+                          <TableHead className="w-[120px]">
                             <button
                               className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
                               onClick={() => handleSort('ready_for_backend')}
@@ -891,9 +856,9 @@ function Dashboard() {
                               )}
                             </button>
                           </TableHead>
-                          <TableHead className="w-[120px]">Commented</TableHead>
-                          <TableHead className="w-[200px]">Timeline Updates</TableHead>
-                          <TableHead className="w-[100px]">
+                          <TableHead className="w-[100px]">Commented</TableHead>
+                          <TableHead className="w-[160px]">Timeline Updates</TableHead>
+                          <TableHead className="w-[80px]">
                             <button
                               className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
                               onClick={() => handleSort('created')}
@@ -906,7 +871,7 @@ function Dashboard() {
                               )}
                             </button>
                           </TableHead>
-                          <TableHead className="w-[100px] text-right">
+                          <TableHead className="w-[80px] text-right">
                             <button
                               className="inline-flex items-center gap-1 hover:text-foreground transition-colors ml-auto"
                               onClick={() => handleSort('updated')}

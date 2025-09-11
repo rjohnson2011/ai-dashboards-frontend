@@ -6,8 +6,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: "2.1.7",
+    version: "2.1.8",
     date: new Date().toISOString(),
+    changes: [
+      "Removed auto-refresh toggle - always on now",
+      "Removed user menu and login UI",
+      "Reduced table column widths to prevent horizontal scrolling"
+    ]
+  },
+  {
+    version: "2.1.7",
+    date: "2025-01-09T20:15:00.000Z",
     changes: [
       "Added 'Check Workflow Statuses' to review-related checks",
       "PRs with only workflow status checks now show in Ready for Review",
