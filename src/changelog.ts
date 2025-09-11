@@ -6,8 +6,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: "2.1.5",
+    version: "2.1.6",
     date: new Date().toISOString(),
+    changes: [
+      "Removed repository name from header",
+      "Header now shows only 'Last updated...'",
+      "Cleaner header display"
+    ]
+  },
+  {
+    version: "2.1.5",
+    date: "2025-01-09T19:30:00.000Z",
     changes: [
       "Fixed header showing 'all' to show 'All repositories'",
       "Restored Total Pull Requests card",

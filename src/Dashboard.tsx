@@ -108,7 +108,6 @@ function Dashboard() {
   const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [repository, setRepository] = useState('')
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [, setRateLimit] = useState<ApiResponse['rate_limit'] | null>(null)
   const [sortColumn, setSortColumn] = useState<string | null>('updated')
@@ -164,7 +163,6 @@ function Dashboard() {
         // Combine both regular and approved pull requests
         const allPRs = [...(data.pull_requests || []), ...(data.approved_pull_requests || [])]
         setPullRequests(allPRs)
-        setRepository(data.repository)
         setLastUpdated(data.last_updated)
         setRateLimit(data.rate_limit || null)
       }
@@ -494,13 +492,10 @@ function Dashboard() {
               )} */}
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm text-muted-foreground">
-                    {repository}
-                  </span>
                   {lastUpdated && (
                     <>
                       <span className="text-sm text-muted-foreground">
-                        • Last updated {formatTimeAgo(lastUpdated)} ({new Date(lastUpdated).toLocaleString('en-US', { 
+                        Last updated {formatTimeAgo(lastUpdated)} ({new Date(lastUpdated).toLocaleString('en-US', { 
                           timeZone: 'America/New_York',
                           month: 'short',
                           day: 'numeric',
