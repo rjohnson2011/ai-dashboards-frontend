@@ -522,7 +522,8 @@ function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-semibold tracking-tight">Repositories Dashboard</h2>
-              <p className="text-sm text-muted-foreground mt-1">Pull requests across configured repositories</p>
+              <p className="text-sm text-muted-foreground mt-1">Pull requests across configured repositories:</p>
+              <p className="text-xs text-muted-foreground">vets-api, vets-json-schema, vets-api-mockdata, platform-atlas</p>
             </div>
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
@@ -776,11 +777,11 @@ function Dashboard() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="rounded-md border overflow-hidden">
-                    <Table className="table-fixed">
+                  <div className="rounded-md border overflow-x-auto">
+                    <Table className="w-full">
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="w-[80px]">
+                          <TableHead className="w-[70px]">
                             <button
                               className={`table-header-sortable ${sortColumn === 'number' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('number')}
@@ -789,7 +790,7 @@ function Dashboard() {
                               PR
                             </button>
                           </TableHead>
-                          <TableHead className="w-[100px]">
+                          <TableHead className="w-[90px]">
                             <button
                               className={`table-header-sortable ${sortColumn === 'repository' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('repository')}
@@ -798,7 +799,7 @@ function Dashboard() {
                               Repo
                             </button>
                           </TableHead>
-                          <TableHead className="w-[240px]">
+                          <TableHead className="w-[200px]">
                             <button
                               className={`table-header-sortable ${sortColumn === 'title' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('title')}
@@ -807,7 +808,7 @@ function Dashboard() {
                               Title
                             </button>
                           </TableHead>
-                          <TableHead className="w-[120px]">
+                          <TableHead className="w-[100px]">
                             <button
                               className={`table-header-sortable ${sortColumn === 'author' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('author')}
@@ -816,7 +817,7 @@ function Dashboard() {
                               Author
                             </button>
                           </TableHead>
-                          <TableHead className="w-[100px]">
+                          <TableHead className="w-[90px]">
                             <button
                               className={`table-header-sortable ${sortColumn === 'ci_status' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('ci_status')}
@@ -825,7 +826,7 @@ function Dashboard() {
                               CI Status
                             </button>
                           </TableHead>
-                          <TableHead className="w-[140px]">
+                          <TableHead className="w-[120px]">
                             <button
                               className={`table-header-sortable ${sortColumn === 'failures' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('failures')}
@@ -834,7 +835,7 @@ function Dashboard() {
                               CI Failures
                             </button>
                           </TableHead>
-                          <TableHead className="w-[100px]">
+                          <TableHead className="w-[90px]">
                             <button
                               className={`table-header-sortable ${sortColumn === 'approvals' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('approvals')}
@@ -843,7 +844,7 @@ function Dashboard() {
                               Approvals
                             </button>
                           </TableHead>
-                          <TableHead className="w-[120px]">
+                          <TableHead className="w-[100px]">
                             <button
                               className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
                               onClick={() => handleSort('ready_for_backend')}
@@ -856,9 +857,9 @@ function Dashboard() {
                               )}
                             </button>
                           </TableHead>
-                          <TableHead className="w-[100px]">Commented</TableHead>
-                          <TableHead className="w-[160px]">Timeline Updates</TableHead>
-                          <TableHead className="w-[80px]">
+                          <TableHead className="w-[90px]">Commented</TableHead>
+                          <TableHead className="w-[140px]">Timeline Updates</TableHead>
+                          <TableHead className="w-[70px]">
                             <button
                               className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
                               onClick={() => handleSort('created')}
@@ -1033,7 +1034,7 @@ function Dashboard() {
                               )}
                             </div>
                           </TableCell>
-                          <TableCell className="min-w-[200px]">
+                          <TableCell>
                             <div className="space-y-1">
                               {pr.recent_timeline?.slice(-2).map((event, idx) => (
                                 <div key={idx} className="text-xs text-muted-foreground">

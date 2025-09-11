@@ -6,8 +6,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: "2.1.8",
+    version: "2.1.9",
     date: new Date().toISOString(),
+    changes: [
+      "Fixed remaining horizontal scrollbar on table",
+      "Updated header to list repositories on new line",
+      "Further reduced column widths for better fit"
+    ]
+  },
+  {
+    version: "2.1.8",
+    date: "2025-01-09T20:30:00.000Z",
     changes: [
       "Removed auto-refresh toggle - always on now",
       "Removed user menu and login UI",
