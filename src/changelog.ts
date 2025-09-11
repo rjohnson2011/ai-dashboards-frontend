@@ -6,8 +6,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: "2.1.6",
+    version: "2.1.7",
     date: new Date().toISOString(),
+    changes: [
+      "Added 'Check Workflow Statuses' to review-related checks",
+      "PRs with only workflow status checks now show in Ready for Review",
+      "Fixed PR #24041 categorization"
+    ]
+  },
+  {
+    version: "2.1.6",
+    date: "2025-01-09T19:45:00.000Z",
     changes: [
       "Removed repository name from header",
       "Header now shows only 'Last updated...'",

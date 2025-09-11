@@ -302,7 +302,8 @@ function Dashboard() {
       'Danger',
       'Status Checks',
       'Get PR data',
-      'Get PR Data'
+      'Get PR Data',
+      'Check Workflow Statuses'
     ]
     
     return pr.failing_checks.some(check => {
@@ -317,6 +318,9 @@ function Dashboard() {
       
       // Check if it's the backend approval confirmation check
       if (check.name.includes('Succeed if backend approval')) return false
+      
+      // Check if it contains "Check Workflow Statuses" in any form
+      if (check.name.includes('Check Workflow Statuses')) return false
       
       // This is a non-review failing check
       return true
