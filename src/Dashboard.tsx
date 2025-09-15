@@ -599,7 +599,7 @@ function Dashboard() {
                       ).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Approved or platform-atlas PRs
+                      CI passing, team approved or non-vets-api PRs
                     </p>
                   </CardContent>
                 </Card>

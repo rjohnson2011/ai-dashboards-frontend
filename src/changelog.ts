@@ -6,8 +6,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: "2.1.9",
+    version: "2.2.0",
     date: new Date().toISOString(),
+    changes: [
+      "Updated Ready for Review description",
+      "Now shows: CI passing, team approved or non-vets-api PRs",
+      "More accurate description of filtering logic"
+    ]
+  },
+  {
+    version: "2.1.9",
+    date: "2025-01-09T20:45:00.000Z",
     changes: [
       "Fixed remaining horizontal scrollbar on table",
       "Updated header to list repositories on new line",
