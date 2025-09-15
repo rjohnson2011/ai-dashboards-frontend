@@ -310,6 +310,9 @@ function Dashboard() {
       // Check if it contains "Check Workflow Statuses" in any form
       if (check.name.includes('Check Workflow Statuses')) return false
       
+      // Check if it's Danger in any form
+      if (check.name.toLowerCase().includes('danger')) return false
+      
       // This is a non-review failing check
       return true
     })
