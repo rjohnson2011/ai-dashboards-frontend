@@ -6,8 +6,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: "2.2.1",
+    version: "2.2.2",
     date: new Date().toISOString(),
+    changes: [
+      "Confirmed Get PR Data and Check Workflow Statuses are review-related checks",
+      "PRs with only these checks failing properly appear in Ready for Review",
+      "Fixed PR #24206 categorization with team approvals"
+    ]
+  },
+  {
+    version: "2.2.1",
+    date: "2025-09-19T18:45:00.000Z",
     changes: [
       "Ensured Danger failures don't prevent Ready for Review status",
       "Added case-insensitive check for Danger-related checks",
