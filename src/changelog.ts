@@ -6,8 +6,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: "2.2.3",
+    version: "2.2.4",
     date: new Date().toISOString(),
+    changes: [
+      "Clarified header timestamps: 'Data refreshed' vs 'Version'",
+      "Removed version build timestamp from header",
+      "Tooltip now shows 'Deployed' date instead of just date"
+    ]
+  },
+  {
+    version: "2.2.3",
+    date: "2025-09-22T18:35:00.000Z",
     changes: [
       "Fixed backend ready_for_backend_review calculation",
       "Handles 'Require backend-review-group approval / Get PR Data' check",

@@ -490,7 +490,7 @@ function Dashboard() {
                   {lastUpdated && (
                     <>
                       <span className="text-sm text-muted-foreground">
-                        Last updated {formatTimeAgo(lastUpdated)} ({new Date(lastUpdated).toLocaleString('en-US', { 
+                        Data refreshed {formatTimeAgo(lastUpdated)} ({new Date(lastUpdated).toLocaleString('en-US', { 
                           timeZone: 'America/New_York',
                           month: 'short',
                           day: 'numeric',
@@ -501,15 +501,7 @@ function Dashboard() {
                         })} ET)
                       </span>
                       <span className="text-sm text-muted-foreground">
-                        • Version {APP_VERSION.version} ({new Date(APP_VERSION.timestamp).toLocaleString('en-US', { 
-                          timeZone: 'America/New_York',
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                          hour: 'numeric',
-                          minute: '2-digit',
-                          hour12: true
-                        })} ET)
+                        • Version {APP_VERSION.version}
                       </span>
                     </>
                   )}
@@ -1080,7 +1072,7 @@ function Dashboard() {
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-medium text-sm">v{entry.version}</span>
                         <span className="text-xs text-muted-foreground">
-                          {new Date(entry.date).toLocaleDateString()}
+                          Deployed {new Date(entry.date).toLocaleDateString()}
                         </span>
                       </div>
                       <ul className="text-xs space-y-0.5">
