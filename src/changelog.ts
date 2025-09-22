@@ -6,8 +6,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: "2.2.2",
+    version: "2.2.3",
     date: new Date().toISOString(),
+    changes: [
+      "Fixed backend ready_for_backend_review calculation",
+      "Handles 'Require backend-review-group approval / Get PR Data' check",
+      "PR #24312 now correctly appears in Ready for Review"
+    ]
+  },
+  {
+    version: "2.2.2",
+    date: "2025-09-22T18:50:00.000Z",
     changes: [
       "Confirmed Get PR Data and Check Workflow Statuses are review-related checks",
       "PRs with only these checks failing properly appear in Ready for Review",
