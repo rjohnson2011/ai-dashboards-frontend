@@ -502,4 +502,159 @@
       rgba(251, 191, 36, 0.4) 100%
     );
   }
+
+  /* Dark mode specific styles */
+  .dark {
+    /* Update semantic colors for dark mode */
+    --success: 142.1 76.2% 42%; /* Slightly brighter green */
+    --warning: 45 93.4% 55%; /* Slightly brighter yellow */
+    --destructive: 0 84.2% 65%; /* Slightly brighter red */
+    --info: 217.2 91.2% 65%; /* Slightly brighter blue */
+    
+    /* Text hierarchy for dark mode */
+    --text-primary: 0 0% 98%; /* Nearly white */
+    --text-secondary: 0 0% 70%; /* Light gray */
+    --text-tertiary: 0 0% 50%; /* Medium gray */
+  }
+
+  /* Dark mode gradient cards */
+  .dark .gradient-card {
+    background: rgba(20, 20, 20, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .dark .gradient-card:hover {
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Ready for Review - Dark mode */
+  .dark .gradient-ready-review {
+    background: rgba(20, 20, 20, 0.6);
+    border: 1px solid rgba(134, 239, 172, 0.2);
+    box-shadow: 0 4px 20px -5px rgba(134, 239, 172, 0.2);
+  }
+
+  .dark .gradient-ready-review::before {
+    background: linear-gradient(135deg, 
+      rgba(134, 239, 172, 0.05) 0%, 
+      rgba(134, 239, 172, 0.15) 100%
+    );
+  }
+
+  /* Total PRs - Dark mode */
+  .dark .gradient-total-prs {
+    background: rgba(20, 20, 20, 0.6);
+    border: 1px solid rgba(147, 197, 253, 0.2);
+    box-shadow: 0 4px 20px -5px rgba(147, 197, 253, 0.2);
+  }
+
+  .dark .gradient-total-prs::before {
+    background: linear-gradient(135deg, 
+      rgba(147, 197, 253, 0.05) 0%, 
+      rgba(147, 197, 253, 0.15) 100%
+    );
+  }
+
+  /* PRs Needing Team Review - Dark mode */
+  .dark .gradient-needs-review {
+    background: rgba(20, 20, 20, 0.6);
+    border: 1px solid rgba(196, 181, 253, 0.2);
+    box-shadow: 0 4px 20px -5px rgba(196, 181, 253, 0.2);
+  }
+
+  .dark .gradient-needs-review::before {
+    background: linear-gradient(135deg, 
+      rgba(196, 181, 253, 0.05) 0%, 
+      rgba(196, 181, 253, 0.15) 100%
+    );
+  }
+
+  /* Finished but Unmerged - Dark mode */
+  .dark .gradient-finished {
+    background: rgba(20, 20, 20, 0.6);
+    border: 1px solid rgba(253, 186, 116, 0.2);
+    box-shadow: 0 4px 20px -5px rgba(253, 186, 116, 0.2);
+  }
+
+  .dark .gradient-finished::before {
+    background: linear-gradient(135deg, 
+      rgba(253, 186, 116, 0.05) 0%, 
+      rgba(253, 186, 116, 0.15) 100%
+    );
+  }
+
+  /* Draft PRs - Dark mode */
+  .dark .gradient-drafts {
+    background: rgba(20, 20, 20, 0.6);
+    border: 1px solid rgba(156, 163, 175, 0.2);
+    box-shadow: 0 4px 20px -5px rgba(156, 163, 175, 0.2);
+  }
+
+  .dark .gradient-drafts::before {
+    background: linear-gradient(135deg, 
+      rgba(156, 163, 175, 0.05) 0%, 
+      rgba(156, 163, 175, 0.15) 100%
+    );
+  }
+
+  /* Failing CI - Dark mode */
+  .dark .gradient-ci-failures {
+    background: rgba(20, 20, 20, 0.6);
+    border: 1px solid rgba(252, 165, 165, 0.2);
+    box-shadow: 0 4px 20px -5px rgba(252, 165, 165, 0.2);
+  }
+
+  .dark .gradient-ci-failures::before {
+    background: linear-gradient(135deg, 
+      rgba(252, 165, 165, 0.05) 0%, 
+      rgba(252, 165, 165, 0.15) 100%
+    );
+  }
+
+  /* Exempt BE Review - Dark mode */
+  .dark .gradient-exempt {
+    background: rgba(20, 20, 20, 0.6);
+    border: 1px solid rgba(103, 232, 249, 0.2);
+    box-shadow: 0 4px 20px -5px rgba(103, 232, 249, 0.2);
+  }
+
+  .dark .gradient-exempt::before {
+    background: linear-gradient(135deg, 
+      rgba(103, 232, 249, 0.05) 0%, 
+      rgba(103, 232, 249, 0.15) 100%
+    );
+  }
+
+  /* Dependabot PRs - Dark mode */
+  .dark .gradient-dependabot {
+    background: rgba(20, 20, 20, 0.6);
+    border: 1px solid rgba(251, 191, 36, 0.2);
+    box-shadow: 0 4px 20px -5px rgba(251, 191, 36, 0.2);
+  }
+
+  .dark .gradient-dependabot::before {
+    background: linear-gradient(135deg, 
+      rgba(251, 191, 36, 0.05) 0%, 
+      rgba(251, 191, 36, 0.15) 100%
+    );
+  }
+
+  /* Selected state in dark mode */
+  .dark .gradient-card.selected {
+    background: rgba(30, 30, 30, 0.8);
+  }
+
+  /* Table styles for dark mode */
+  .dark .table-row-hover:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .dark .table-row-stripe:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.02);
+  }
+
+  /* Header border in dark mode */
+  .dark .border-b {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
 }

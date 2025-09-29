@@ -6,8 +6,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: "2.2.5",
+    version: "2.3.0",
     date: new Date().toISOString(),
+    changes: [
+      "Added dark mode toggle with sun/moon icons",
+      "Removed 'Auto-refresh ON' text",
+      "Full dark mode support with custom gradient cards"
+    ]
+  },
+  {
+    version: "2.2.5",
+    date: "2025-09-22T21:10:00.000Z",
     changes: [
       "CRITICAL FIX: Backend now fetches PR labels from GitHub",
       "PRs with exempt-be-review label now correctly show in Exempt section",

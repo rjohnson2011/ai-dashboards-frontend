@@ -27,9 +27,12 @@ import {
   ArrowUp,
   ArrowDown,
   ArrowUpDown,
-  ExternalLink
+  ExternalLink,
+  Sun,
+  Moon
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './components/ui/tooltip'
+import { useTheme } from './contexts/ThemeContext'
 
 interface CheckRun {
   name: string
@@ -96,6 +99,7 @@ interface ApiResponse {
 const BACKEND_REVIEWERS = ['ericboehs', 'LindseySaari', 'rmtolmach', 'stiehlrod', 'RachalCassity', 'rjohnson2011', 'stevenjcumming']
 
 function Dashboard() {
+  const { theme, toggleTheme } = useTheme()
   const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -473,8 +477,8 @@ function Dashboard() {
 
   return (
     <TooltipProvider>
-      <div className="flex-col md:flex min-h-screen">
-        <div className="border-b bg-white">
+      <div className="flex-col md:flex min-h-screen bg-background">
+        <div className="border-b bg-white dark:bg-zinc-900">
           <div className="flex h-16 items-center px-4">
             <GitPullRequest className="mr-2 h-4 w-4 text-muted-foreground" />
             <h2 className="text-lg font-medium">Pull Request Dashboard</h2>
@@ -506,9 +510,18 @@ function Dashboard() {
                     </>
                   )}
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  Auto-refresh ON
-                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleTheme}
+                  className="ml-2"
+                >
+                  {theme === 'light' ? (
+                    <Moon className="h-4 w-4" />
+                  ) : (
+                    <Sun className="h-4 w-4" />
+                  )}
+                </Button>
               </div>
             </div>
           </div>
