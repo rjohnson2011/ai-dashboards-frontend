@@ -6,8 +6,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: "2.2.4",
+    version: "2.2.5",
     date: new Date().toISOString(),
+    changes: [
+      "CRITICAL FIX: Backend now fetches PR labels from GitHub",
+      "PRs with exempt-be-review label now correctly show in Exempt section",
+      "Fixed PR #24350 and similar PRs being miscategorized"
+    ]
+  },
+  {
+    version: "2.2.4",
+    date: "2025-09-22T20:45:00.000Z",
     changes: [
       "Clarified header timestamps: 'Data refreshed' vs 'Version'",
       "Removed version build timestamp from header",
