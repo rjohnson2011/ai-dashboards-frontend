@@ -1,4 +1,4 @@
 export const APP_VERSION = {
-  version: "2.3.0",
+  version: "2.3.1",
   timestamp: new Date().toISOString()
 };

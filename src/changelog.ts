@@ -6,8 +6,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: "2.3.0",
+    version: "2.3.1",
     date: new Date().toISOString(),
+    changes: [
+      "Improved dark mode colors and contrast",
+      "Enhanced gradient cards for better visibility in dark mode",
+      "Updated dark theme to use navy/slate color palette"
+    ]
+  },
+  {
+    version: "2.3.0",
+    date: "2025-09-29T12:00:00.000Z",
     changes: [
       "Added dark mode toggle with sun/moon icons",
       "Removed 'Auto-refresh ON' text",

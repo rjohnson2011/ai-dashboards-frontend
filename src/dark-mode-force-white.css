@@ -1,0 +1,24 @@
+/* FORCE ALL TEXT TO BE WHITE IN DARK MODE */
+
+/* Global white text */
+.dark * {
+  color: rgb(255, 255, 255) !important;
+}
+
+/* Links should be bright blue */
+.dark a {
+  color: rgb(96, 165, 250) !important;
+}
+
+.dark a:hover {
+  color: rgb(147, 197, 253) !important;
+}
+
+/* Dark backgrounds */
+.dark body {
+  background: linear-gradient(to bottom, #0f111a, #1a202c) !important;
+}
+
+.dark header {
+  background-color: rgb(26, 32, 44) !important;
+}

@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
+@import "./dark-mode-override.css";
+@import "./dark-mode-force-white.css";
 
 @layer base {
   :root {
@@ -54,30 +56,52 @@
   }
   
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    /* Base colors - dark theme */
+    --background: 222 47% 11%; /* #171923 */
+    --foreground: 0 0% 95%; /* #f2f2f2 */
+    --card: 222 47% 14%; /* #1a202c */
+    --card-foreground: 0 0% 95%;
+    --popover: 222 47% 14%;
+    --popover-foreground: 0 0% 95%;
+    
+    /* Primary - Light gray for dark mode */
+    --primary: 0 0% 95%;
+    --primary-foreground: 222 47% 11%;
+    
+    /* Secondary colors */
+    --secondary: 222 47% 18%; /* #2d3748 */
+    --secondary-foreground: 0 0% 95%;
+    --muted: 222 47% 22%; /* #374151 */
+    --muted-foreground: 0 0% 65%; /* #a0aec0 */
+    --accent: 222 47% 22%;
+    --accent-foreground: 0 0% 95%;
+    
+    /* Semantic colors - vibrant for dark mode */
+    --success: 142.1 70% 45%; /* Vibrant green */
+    --success-foreground: 0 0% 100%;
+    --warning: 45 90% 50%; /* Vibrant yellow */
+    --warning-foreground: 0 0% 0%;
+    --destructive: 0 80% 55%; /* Vibrant red */
+    --destructive-foreground: 0 0% 100%;
+    --info: 217.2 80% 55%; /* Vibrant blue */
+    --info-foreground: 0 0% 100%;
+    
+    /* Text hierarchy */
+    --text-primary: 0 0% 95%;
+    --text-secondary: 0 0% 75%;
+    --text-tertiary: 0 0% 55%;
+    
+    /* UI elements */
+    --border: 222 47% 25%; /* #4a5568 */
+    --input: 222 47% 25%;
+    --ring: 217.2 80% 60%;
+    
+    /* Charts - Vibrant colors for dark mode */
+    --chart-1: 142.1 60% 45%; /* Green */
+    --chart-2: 217.2 70% 50%; /* Blue */
+    --chart-3: 0 70% 50%; /* Red */
+    --chart-4: 45 80% 45%; /* Yellow */
+    --chart-5: 222 47% 40%; /* Gray */
   }
 }
 
@@ -93,6 +117,21 @@
     background: linear-gradient(to bottom, #fafafa, #f3f4f6);
     min-height: 100vh;
     color: hsl(var(--foreground));
+  }
+  
+  .dark body {
+    background: linear-gradient(to bottom, #0f111a, #1a202c);
+    color: hsl(var(--foreground));
+  }
+  
+  /* Ensure text visibility in dark mode */
+  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6,
+  .dark p, .dark span, .dark div, .dark td, .dark th {
+    color: hsl(var(--foreground));
+  }
+  
+  .dark .text-muted-foreground {
+    color: hsl(var(--muted-foreground)) !important;
   }
 }
 
@@ -519,129 +558,131 @@
 
   /* Dark mode gradient cards */
   .dark .gradient-card {
-    background: rgba(20, 20, 20, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(26, 32, 44, 0.8);
+    border: 1px solid rgba(74, 85, 104, 0.3);
+    backdrop-filter: blur(8px);
   }
 
   .dark .gradient-card:hover {
     box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
   }
 
-  /* Ready for Review - Dark mode */
+  /* Ready for Review - Dark mode - Bright green */
   .dark .gradient-ready-review {
-    background: rgba(20, 20, 20, 0.6);
-    border: 1px solid rgba(134, 239, 172, 0.2);
-    box-shadow: 0 4px 20px -5px rgba(134, 239, 172, 0.2);
+    background: rgba(26, 32, 44, 0.8);
+    border: 2px solid rgba(134, 239, 172, 0.6);
+    box-shadow: 0 4px 20px -5px rgba(134, 239, 172, 0.5);
   }
 
   .dark .gradient-ready-review::before {
     background: linear-gradient(135deg, 
-      rgba(134, 239, 172, 0.05) 0%, 
-      rgba(134, 239, 172, 0.15) 100%
+      rgba(134, 239, 172, 0.1) 0%, 
+      rgba(134, 239, 172, 0.2) 100%
     );
   }
 
-  /* Total PRs - Dark mode */
+  /* Total PRs - Dark mode - Bright blue */
   .dark .gradient-total-prs {
-    background: rgba(20, 20, 20, 0.6);
-    border: 1px solid rgba(147, 197, 253, 0.2);
-    box-shadow: 0 4px 20px -5px rgba(147, 197, 253, 0.2);
+    background: rgba(26, 32, 44, 0.8);
+    border: 2px solid rgba(147, 197, 253, 0.6);
+    box-shadow: 0 4px 20px -5px rgba(147, 197, 253, 0.5);
   }
 
   .dark .gradient-total-prs::before {
     background: linear-gradient(135deg, 
-      rgba(147, 197, 253, 0.05) 0%, 
-      rgba(147, 197, 253, 0.15) 100%
+      rgba(147, 197, 253, 0.1) 0%, 
+      rgba(147, 197, 253, 0.2) 100%
     );
   }
 
-  /* PRs Needing Team Review - Dark mode */
+  /* PRs Needing Team Review - Dark mode - Bright purple */
   .dark .gradient-needs-review {
-    background: rgba(20, 20, 20, 0.6);
-    border: 1px solid rgba(196, 181, 253, 0.2);
-    box-shadow: 0 4px 20px -5px rgba(196, 181, 253, 0.2);
+    background: rgba(26, 32, 44, 0.8);
+    border: 2px solid rgba(196, 181, 253, 0.6);
+    box-shadow: 0 4px 20px -5px rgba(196, 181, 253, 0.5);
   }
 
   .dark .gradient-needs-review::before {
     background: linear-gradient(135deg, 
-      rgba(196, 181, 253, 0.05) 0%, 
-      rgba(196, 181, 253, 0.15) 100%
+      rgba(196, 181, 253, 0.1) 0%, 
+      rgba(196, 181, 253, 0.2) 100%
     );
   }
 
-  /* Finished but Unmerged - Dark mode */
+  /* Finished but Unmerged - Dark mode - Bright orange */
   .dark .gradient-finished {
-    background: rgba(20, 20, 20, 0.6);
-    border: 1px solid rgba(253, 186, 116, 0.2);
-    box-shadow: 0 4px 20px -5px rgba(253, 186, 116, 0.2);
+    background: rgba(26, 32, 44, 0.8);
+    border: 2px solid rgba(253, 186, 116, 0.6);
+    box-shadow: 0 4px 20px -5px rgba(253, 186, 116, 0.5);
   }
 
   .dark .gradient-finished::before {
     background: linear-gradient(135deg, 
-      rgba(253, 186, 116, 0.05) 0%, 
-      rgba(253, 186, 116, 0.15) 100%
+      rgba(253, 186, 116, 0.1) 0%, 
+      rgba(253, 186, 116, 0.2) 100%
     );
   }
 
-  /* Draft PRs - Dark mode */
+  /* Draft PRs - Dark mode - Bright gray */
   .dark .gradient-drafts {
-    background: rgba(20, 20, 20, 0.6);
-    border: 1px solid rgba(156, 163, 175, 0.2);
-    box-shadow: 0 4px 20px -5px rgba(156, 163, 175, 0.2);
+    background: rgba(26, 32, 44, 0.8);
+    border: 2px solid rgba(156, 163, 175, 0.6);
+    box-shadow: 0 4px 20px -5px rgba(156, 163, 175, 0.5);
   }
 
   .dark .gradient-drafts::before {
     background: linear-gradient(135deg, 
-      rgba(156, 163, 175, 0.05) 0%, 
-      rgba(156, 163, 175, 0.15) 100%
+      rgba(156, 163, 175, 0.1) 0%, 
+      rgba(156, 163, 175, 0.2) 100%
     );
   }
 
-  /* Failing CI - Dark mode */
+  /* Failing CI - Dark mode - Bright red */
   .dark .gradient-ci-failures {
-    background: rgba(20, 20, 20, 0.6);
-    border: 1px solid rgba(252, 165, 165, 0.2);
-    box-shadow: 0 4px 20px -5px rgba(252, 165, 165, 0.2);
+    background: rgba(26, 32, 44, 0.8);
+    border: 2px solid rgba(252, 165, 165, 0.6);
+    box-shadow: 0 4px 20px -5px rgba(252, 165, 165, 0.5);
   }
 
   .dark .gradient-ci-failures::before {
     background: linear-gradient(135deg, 
-      rgba(252, 165, 165, 0.05) 0%, 
-      rgba(252, 165, 165, 0.15) 100%
+      rgba(252, 165, 165, 0.1) 0%, 
+      rgba(252, 165, 165, 0.2) 100%
     );
   }
 
-  /* Exempt BE Review - Dark mode */
+  /* Exempt BE Review - Dark mode - Bright cyan */
   .dark .gradient-exempt {
-    background: rgba(20, 20, 20, 0.6);
-    border: 1px solid rgba(103, 232, 249, 0.2);
-    box-shadow: 0 4px 20px -5px rgba(103, 232, 249, 0.2);
+    background: rgba(26, 32, 44, 0.8);
+    border: 2px solid rgba(103, 232, 249, 0.6);
+    box-shadow: 0 4px 20px -5px rgba(103, 232, 249, 0.5);
   }
 
   .dark .gradient-exempt::before {
     background: linear-gradient(135deg, 
-      rgba(103, 232, 249, 0.05) 0%, 
-      rgba(103, 232, 249, 0.15) 100%
+      rgba(103, 232, 249, 0.1) 0%, 
+      rgba(103, 232, 249, 0.2) 100%
     );
   }
 
-  /* Dependabot PRs - Dark mode */
+  /* Dependabot PRs - Dark mode - Bright yellow */
   .dark .gradient-dependabot {
-    background: rgba(20, 20, 20, 0.6);
-    border: 1px solid rgba(251, 191, 36, 0.2);
-    box-shadow: 0 4px 20px -5px rgba(251, 191, 36, 0.2);
+    background: rgba(26, 32, 44, 0.8);
+    border: 2px solid rgba(251, 191, 36, 0.6);
+    box-shadow: 0 4px 20px -5px rgba(251, 191, 36, 0.5);
   }
 
   .dark .gradient-dependabot::before {
     background: linear-gradient(135deg, 
-      rgba(251, 191, 36, 0.05) 0%, 
-      rgba(251, 191, 36, 0.15) 100%
+      rgba(251, 191, 36, 0.1) 0%, 
+      rgba(251, 191, 36, 0.2) 100%
     );
   }
 
   /* Selected state in dark mode */
   .dark .gradient-card.selected {
-    background: rgba(30, 30, 30, 0.8);
+    background: rgba(45, 55, 72, 0.9);
+    border-color: rgba(147, 197, 253, 0.5);
   }
 
   /* Table styles for dark mode */
@@ -656,5 +697,32 @@
   /* Header border in dark mode */
   .dark .border-b {
     border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Badge and button text visibility */
+  .dark [class*="badge"] {
+    color: hsl(var(--foreground));
+  }
+  
+  .dark button {
+    color: hsl(var(--foreground));
+  }
+  
+  /* Table text visibility */
+  .dark table {
+    color: hsl(var(--foreground));
+  }
+  
+  /* Card text visibility */
+  .dark .card-header,
+  .dark .card-content,
+  .dark .card-title,
+  .dark .card-description {
+    color: hsl(var(--foreground));
+  }
+  
+  /* Icon visibility */
+  .dark svg {
+    color: currentColor;
   }
 }
