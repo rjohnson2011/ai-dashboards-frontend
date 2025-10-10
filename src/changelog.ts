@@ -6,8 +6,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: "2.3.1",
+    version: "2.3.2",
     date: new Date().toISOString(),
+    changes: [
+      "Removed Timeline Updates column from PR table",
+      "Simplified table layout for better readability"
+    ]
+  },
+  {
+    version: "2.3.1",
+    date: "2025-09-29T14:00:00.000Z",
     changes: [
       "Improved dark mode colors and contrast",
       "Enhanced gradient cards for better visibility in dark mode",

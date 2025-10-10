@@ -74,7 +74,6 @@ interface PullRequest {
     pending_users: string[]
     pending_teams: string[]
   }
-  recent_timeline?: string[]
   labels?: string[]
   repository_name?: string
   repository_owner?: string
@@ -866,7 +865,6 @@ function Dashboard() {
                             </button>
                           </TableHead>
                           <TableHead className="w-[90px]">Commented</TableHead>
-                          <TableHead className="w-[140px]">Timeline Updates</TableHead>
                           <TableHead className="w-[70px]">
                             <button
                               className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
@@ -1039,18 +1037,6 @@ function Dashboard() {
                               ))}
                               {(!pr.approval_summary?.commented_users || pr.approval_summary.commented_users.length === 0) && (
                                 <span className="text-xs text-muted-foreground">None</span>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="space-y-1">
-                              {pr.recent_timeline?.slice(-2).map((event, idx) => (
-                                <div key={idx} className="text-xs text-muted-foreground">
-                                  {event}
-                                </div>
-                              ))}
-                              {(!pr.recent_timeline || pr.recent_timeline.length === 0) && (
-                                <span className="text-xs text-muted-foreground">Loading...</span>
                               )}
                             </div>
                           </TableCell>
