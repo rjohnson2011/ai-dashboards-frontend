@@ -432,18 +432,15 @@ function Dashboard() {
     // Limit to prevent opening too many tabs at once
     const maxTabs = 20
     const prsToOpen = filteredPullRequests.slice(0, maxTabs)
-    
-    // Open tabs with a small delay to avoid popup blockers
-    prsToOpen.forEach((pr, index) => {
-      setTimeout(() => {
-        window.open(pr.url, '_blank', 'noopener,noreferrer')
-      }, index * 100) // 100ms delay between each tab
+
+    // Open all tabs immediately to avoid popup blockers
+    // Browsers allow multiple popups if they're all triggered in the same user action
+    prsToOpen.forEach((pr) => {
+      window.open(pr.url, '_blank', 'noopener,noreferrer')
     })
-    
+
     if (filteredPullRequests.length > maxTabs) {
-      setTimeout(() => {
-        alert(`Opened first ${maxTabs} PRs. Total PRs: ${filteredPullRequests.length}`)
-      }, maxTabs * 100)
+      alert(`Opened first ${maxTabs} PRs. Total PRs: ${filteredPullRequests.length}`)
     }
   }
 
