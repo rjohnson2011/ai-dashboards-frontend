@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
 import { authService } from './services/auth'
 import { APP_VERSION } from './version'
@@ -16,10 +17,10 @@ import {
   TableHeader,
   TableRow,
 } from './components/ui/table'
-import { 
-  GitPullRequest, 
-  AlertCircle, 
-  CheckCircle2, 
+import {
+  GitPullRequest,
+  AlertCircle,
+  CheckCircle2,
   XCircle,
   Clock,
   RefreshCw,
@@ -29,7 +30,8 @@ import {
   ArrowUpDown,
   ExternalLink,
   Sun,
-  Moon
+  Moon,
+  BarChart3
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './components/ui/tooltip'
 import { useTheme } from './contexts/ThemeContext'
@@ -481,6 +483,12 @@ function Dashboard() {
           <div className="flex h-16 items-center px-4">
             <GitPullRequest className="mr-2 h-4 w-4 text-muted-foreground" />
             <h2 className="text-lg font-medium">Pull Request Dashboard</h2>
+            <Link to="/sprint-metrics" className="ml-6">
+              <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Sprint Metrics
+              </Button>
+            </Link>
             <div className="ml-auto flex items-center space-x-4">
               {/* Authentication UI - Temporarily disabled during OAuth setup */}
               {/* {authService.isAuthenticated() ? (

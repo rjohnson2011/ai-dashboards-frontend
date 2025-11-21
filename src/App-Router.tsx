@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Dashboard from './Dashboard'
+import SprintMetrics from './SprintMetrics'
 import { AuthCallback } from './components/AuthCallback'
 import { ThemeProvider } from './contexts/ThemeContext'
 
@@ -16,7 +17,10 @@ function AppRouter() {
           
           {/* Dashboard route */}
           <Route path="/dashboard" element={<Dashboard />} />
-          
+
+          {/* Sprint Metrics route */}
+          <Route path="/sprint-metrics" element={<SprintMetrics />} />
+
           {/* Catch-all redirect */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
