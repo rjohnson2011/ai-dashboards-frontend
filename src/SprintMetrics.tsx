@@ -84,7 +84,23 @@ const SprintMetrics: React.FC = () => {
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl text-red-500">Error: {error}</div>
+        <Card className="w-[600px]">
+          <CardHeader>
+            <CardTitle className="text-red-500">Error Loading Sprint Metrics</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4">{error}</p>
+            <p className="text-sm text-gray-600 mb-4">
+              This feature requires database migrations to be run. Please wait a few minutes for the deployment to complete, then try again.
+            </p>
+            <button
+              onClick={fetchSprintMetrics}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            >
+              Retry
+            </button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
