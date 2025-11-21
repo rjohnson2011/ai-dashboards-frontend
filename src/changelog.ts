@@ -6,6 +6,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.4.0",
+    date: new Date().toISOString(),
+    changes: [
+      "NEW: Sprint Metrics dashboard page",
+      "Track which engineer is on support each sprint",
+      "View daily PR approvals with line chart",
+      "See per-engineer approval breakdowns",
+      "Display sprint totals and averages",
+      "Fixed 'Open All' button to open all PRs instead of just one"
+    ]
+  },
+  {
     version: "2.3.2",
     date: new Date().toISOString(),
     changes: [
