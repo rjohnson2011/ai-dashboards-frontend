@@ -433,16 +433,19 @@ function Dashboard() {
     const maxTabs = 20
     const prsToOpen = filteredPullRequests.slice(0, maxTabs)
 
-    // Open tabs with a tiny delay to avoid popup blockers
-    // We open them quickly enough that it feels instant but slow enough for the browser
-    prsToOpen.forEach((pr, index) => {
-      setTimeout(() => {
-        window.open(pr.url, '_blank', 'noopener,noreferrer')
-      }, index * 50) // 50ms delay between each tab
+    // Create and click anchor tags - works better with Safari's popup blocker
+    prsToOpen.forEach((pr) => {
+      const link = document.createElement('a')
+      link.href = pr.url
+      link.target = '_blank'
+      link.rel = 'noopener noreferrer'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
     })
 
     if (filteredPullRequests.length > maxTabs) {
-      alert(`Opening first ${maxTabs} PRs. Total PRs: ${filteredPullRequests.length}`)
+      alert(`Opened first ${maxTabs} PRs. Total PRs: ${filteredPullRequests.length}`)
     }
   }
 
