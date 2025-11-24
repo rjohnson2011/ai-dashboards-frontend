@@ -30,11 +30,27 @@ interface EngineerTotal {
   approvals: number;
 }
 
+interface ApprovedPR {
+  number: number;
+  title: string;
+  url: string;
+  author: string;
+  approved_by: string;
+  approved_at: string;
+  state: string;
+}
+
+interface ApprovedPRsByDay {
+  date: string;
+  prs: ApprovedPR[];
+}
+
 interface SprintMetricsData {
   current_sprint: SprintInfo | null;
   daily_approvals: DailyApproval[];
   sprint_totals: SprintTotals;
   engineer_totals: EngineerTotal[];
+  approved_prs_by_day: ApprovedPRsByDay[];
 }
 
 const SprintMetrics: React.FC = () => {
@@ -168,14 +184,14 @@ const SprintMetrics: React.FC = () => {
             <CardTitle>Current Sprint</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="text-sm text-blue-700 font-medium mb-1">Support Engineer on Duty</div>
+              <div className="text-3xl font-bold text-blue-900">{data.current_sprint.engineer_name}</div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <div className="text-sm text-gray-500">Sprint Number</div>
                 <div className="text-2xl font-bold">#{data.current_sprint.sprint_number}</div>
-              </div>
-              <div>
-                <div className="text-sm text-gray-500">Support Engineer</div>
-                <div className="text-2xl font-bold">{data.current_sprint.engineer_name}</div>
               </div>
               <div>
                 <div className="text-sm text-gray-500">Start Date</div>
@@ -308,6 +324,51 @@ const SprintMetrics: React.FC = () => {
                   })}
                 </tbody>
               </table>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Approved & Closed PRs by Day */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Approved & Closed PRs</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {data.approved_prs_by_day.map((day) => (
+                <div key={day.date} className="border-b pb-4 last:border-b-0">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-700">
+                    {formatDate(day.date)} ({day.prs.length} {day.prs.length === 1 ? 'PR' : 'PRs'})
+                  </h3>
+                  <div className="space-y-2">
+                    {day.prs.map((pr) => (
+                      <div key={pr.number} className="flex items-start gap-3 text-sm">
+                        <a
+                          href={pr.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                        >
+                          #{pr.number}
+                        </a>
+                        <div className="flex-1">
+                          <a
+                            href={pr.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-gray-900 hover:text-blue-600 hover:underline"
+                          >
+                            {pr.title}
+                          </a>
+                          <div className="text-xs text-gray-500 mt-1">
+                            by {pr.author} • approved by <span className="font-medium text-gray-700">{pr.approved_by}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
