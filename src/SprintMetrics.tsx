@@ -57,6 +57,7 @@ const SprintMetrics: React.FC = () => {
   const [data, setData] = useState<SprintMetricsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [prSearch, setPrSearch] = useState('');
 
   useEffect(() => {
     fetchSprintMetrics();
@@ -154,6 +155,20 @@ const SprintMetrics: React.FC = () => {
     '#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1',
     '#d084d0', '#a4de6c', '#d0ed57', '#ffa07a', '#20b2aa'
   ];
+
+  // Filter approved PRs by search term
+  const filteredApprovedPRs = data.approved_prs_by_day.map(day => ({
+    ...day,
+    prs: day.prs.filter(pr => {
+      const searchLower = prSearch.toLowerCase();
+      return (
+        pr.number.toString().includes(searchLower) ||
+        pr.title.toLowerCase().includes(searchLower) ||
+        pr.author.toLowerCase().includes(searchLower) ||
+        pr.approved_by.toLowerCase().includes(searchLower)
+      );
+    })
+  })).filter(day => day.prs.length > 0); // Only show days with matching PRs
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -331,11 +346,35 @@ const SprintMetrics: React.FC = () => {
         {/* Approved & Closed PRs by Day */}
         <Card>
           <CardHeader>
-            <CardTitle>Approved & Closed PRs</CardTitle>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <CardTitle>Approved & Closed PRs</CardTitle>
+              <div className="relative w-full md:w-96">
+                <input
+                  type="text"
+                  placeholder="Search by PR #, title, author, or approver..."
+                  value={prSearch}
+                  onChange={(e) => setPrSearch(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                {prSearch && (
+                  <button
+                    onClick={() => setPrSearch('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
-              {data.approved_prs_by_day.map((day) => (
+            {filteredApprovedPRs.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                {prSearch ? `No PRs match "${prSearch}"` : 'No PRs found'}
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {filteredApprovedPRs.map((day) => (
                 <div key={day.date} className="border-b pb-4 last:border-b-0">
                   <h3 className="text-lg font-semibold mb-3 text-gray-700">
                     {formatDate(day.date)} ({day.prs.length} {day.prs.length === 1 ? 'PR' : 'PRs'})
@@ -369,7 +408,8 @@ const SprintMetrics: React.FC = () => {
                   </div>
                 </div>
               ))}
-            </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
