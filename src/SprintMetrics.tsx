@@ -412,10 +412,10 @@ const SprintMetrics: React.FC = () => {
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#1a1a1a',
-                    border: '1px solid #2a2a2a',
+                    backgroundColor: '#0a0a0a',
+                    border: '1px solid #1a1a1a',
                     borderRadius: '8px',
-                    color: '#e5e7eb'
+                    color: '#9ca3af'
                   }}
                 />
                 <Legend
