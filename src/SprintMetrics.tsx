@@ -94,6 +94,23 @@ const SprintMetrics: React.FC = () => {
     });
   };
 
+  const getEngineerDisplayName = (githubHandle: string): string => {
+    const nameMap: Record<string, string> = {
+      'rjohnson2011': 'Ryan Johnson',
+      'RachalCassity': 'Rachal Cassity',
+      'stiehlrod': 'Rod Stiehl',
+      'rmtolmach': 'Rob Tolmach',
+      'ericboehs': 'Eric Boehs',
+      'LindseySaari': 'Lindsey Saari',
+      'stevenjcumming': 'Steven Cumming'
+    };
+    return nameMap[githubHandle] || githubHandle;
+  };
+
+  const getGitHubAvatarUrl = (githubHandle: string): string => {
+    return `https://github.com/${githubHandle}.png?size=80`;
+  };
+
   const calculateBusinessDays = (startDate: string, endDate: string) => {
     const [startYear, startMonth, startDay] = startDate.split('-').map(Number);
     const [endYear, endMonth, endDay] = endDate.split('-').map(Number);
@@ -235,8 +252,22 @@ const SprintMetrics: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="text-sm text-blue-700 font-medium mb-1">Support Engineer on Duty</div>
-              <div className="text-3xl font-bold text-blue-900">{data.current_sprint.engineer_name}</div>
+              <div className="text-sm text-blue-700 font-medium mb-2">Support Engineer on Duty</div>
+              <div className="flex items-center gap-3">
+                <img
+                  src={getGitHubAvatarUrl(data.current_sprint.engineer_name)}
+                  alt={getEngineerDisplayName(data.current_sprint.engineer_name)}
+                  className="w-16 h-16 rounded-full border-2 border-blue-200"
+                />
+                <div>
+                  <div className="text-2xl font-bold text-blue-900">
+                    {getEngineerDisplayName(data.current_sprint.engineer_name)}
+                  </div>
+                  <div className="text-sm text-blue-600">
+                    ({data.current_sprint.engineer_name})
+                  </div>
+                </div>
+              </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
@@ -250,9 +281,6 @@ const SprintMetrics: React.FC = () => {
               <div>
                 <div className="text-sm text-gray-500">End Date</div>
                 <div className="text-lg">{formatDate(data.current_sprint.end_date)}</div>
-                {data.current_sprint.start_date.startsWith('2025-11') && (
-                  <div className="text-xs text-gray-400 mt-1">Thanksgiving: 11/27</div>
-                )}
               </div>
             </div>
           </CardContent>
@@ -280,6 +308,9 @@ const SprintMetrics: React.FC = () => {
                 {calculateBusinessDays(data.current_sprint.start_date, data.current_sprint.end_date)}
               </div>
               <div className="text-xs text-gray-500 mt-1">business days</div>
+              {data.current_sprint.start_date.startsWith('2025-11') && (
+                <div className="text-xs text-gray-400 mt-1">Thanksgiving: 11/27</div>
+              )}
             </CardContent>
           </Card>
 
