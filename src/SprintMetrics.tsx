@@ -45,12 +45,19 @@ interface ApprovedPRsByDay {
   prs: ApprovedPR[];
 }
 
+interface UpcomingRotation {
+  engineer_name: string;
+  start_date: string;
+  end_date: string;
+}
+
 interface SprintMetricsData {
   current_sprint: SprintInfo | null;
   daily_approvals: DailyApproval[];
   sprint_totals: SprintTotals;
   engineer_totals: EngineerTotal[];
   approved_prs_by_day: ApprovedPRsByDay[];
+  upcoming_rotations?: UpcomingRotation[];
 }
 
 const SprintMetrics: React.FC = () => {
@@ -296,6 +303,41 @@ const SprintMetrics: React.FC = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Upcoming Support Rotations */}
+        {data.upcoming_rotations && data.upcoming_rotations.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {data.upcoming_rotations.map((rotation, index) => (
+              <Card key={index} className="bg-gradient-to-r from-gray-50 to-gray-100">
+                <CardHeader>
+                  <CardTitle className="text-lg">
+                    {index === 0 ? 'Upcoming Support' : 'Up Next'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={getGitHubAvatarUrl(rotation.engineer_name)}
+                      alt={getEngineerDisplayName(rotation.engineer_name)}
+                      className="w-20 h-20 rounded-full border-2 border-gray-300 shadow-md"
+                    />
+                    <div className="flex-1">
+                      <div className="text-2xl font-bold text-gray-900">
+                        {getEngineerDisplayName(rotation.engineer_name)}
+                      </div>
+                      <div className="text-sm text-gray-600 mb-2">
+                        ({rotation.engineer_name})
+                      </div>
+                      <div className="text-sm font-medium text-gray-700">
+                        {formatDate(rotation.start_date, true)} - {formatDate(rotation.end_date, true)}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
         {/* Sprint Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
