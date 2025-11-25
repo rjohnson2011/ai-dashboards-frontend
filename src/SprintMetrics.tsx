@@ -200,7 +200,7 @@ const SprintMetrics: React.FC = () => {
               This feature requires database migrations to be run. Please wait a few minutes for the deployment to complete, then try again.
             </p>
             <button
-              onClick={fetchSprintMetrics}
+              onClick={() => fetchSprintMetrics(0)}
               className="px-4 py-2 bg-teal-600 text-white rounded font-light hover:bg-teal-500 transition-colors"
             >
               Retry
@@ -304,6 +304,12 @@ const SprintMetrics: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Link
+              to="/sprint-metrics/detailed"
+              className="px-4 py-2 bg-gray-700 text-white rounded font-light hover:bg-gray-600 transition-colors"
+            >
+              View Detailed Metrics
+            </Link>
             <button
               onClick={() => fetchSprintMetrics(sprintOffset)}
               className="px-4 py-2 bg-teal-600 text-white rounded font-light hover:bg-teal-500 transition-colors"
