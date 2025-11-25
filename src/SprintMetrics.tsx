@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface SprintInfo {
   sprint_number: number;
@@ -65,16 +65,20 @@ const SprintMetrics: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [prSearch, setPrSearch] = useState('');
+  const [sprintOffset, setSprintOffset] = useState(0); // 0 = current, -1 = previous, etc.
 
   useEffect(() => {
-    fetchSprintMetrics();
-  }, []);
+    fetchSprintMetrics(sprintOffset);
+  }, [sprintOffset]);
 
-  const fetchSprintMetrics = async () => {
+  const fetchSprintMetrics = async (offset: number = 0) => {
     try {
       setLoading(true);
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-      const response = await fetch(`${apiUrl}/api/v1/sprint_metrics`);
+      const url = offset === 0
+        ? `${apiUrl}/api/v1/sprint_metrics`
+        : `${apiUrl}/api/v1/sprint_metrics?sprint_offset=${offset}`;
+      const response = await fetch(url);
 
       if (!response.ok) {
         throw new Error('Failed to fetch sprint metrics');
@@ -89,6 +93,21 @@ const SprintMetrics: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const goToPreviousSprint = () => {
+    // Limit to 3 months back (roughly 6 sprints of 2 weeks each)
+    if (sprintOffset > -6) {
+      setSprintOffset(prev => prev - 1);
+    }
+  };
+
+  const goToNextSprint = () => {
+    if (sprintOffset < 0) {
+      setSprintOffset(prev => prev + 1);
+    }
+  };
+
+  const isCurrentSprint = sprintOffset === 0;
 
   const formatDate = (dateString: string, includeDayOfWeek: boolean = false) => {
     // Parse date in UTC to avoid timezone shifts
@@ -207,12 +226,19 @@ const SprintMetrics: React.FC = () => {
     );
   }
 
-  // Prepare chart data
-  const chartData = data.daily_approvals.map(day => ({
-    date: formatDate(day.date, true), // Include day of week
-    total: day.total,
-    ...day.by_engineer
-  }));
+  // Prepare chart data - only show elapsed days for current sprint
+  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+  const chartData = data.daily_approvals
+    .filter(day => {
+      // For current sprint, only show days up to today
+      // For past sprints, show all days
+      return !isCurrentSprint || day.date <= today;
+    })
+    .map(day => ({
+      date: formatDate(day.date, true), // Include day of week
+      total: day.total,
+      ...day.by_engineer
+    }));
 
   // Get unique engineers for chart lines
   const engineers = Array.from(
@@ -255,13 +281,31 @@ const SprintMetrics: React.FC = () => {
               <ArrowLeft className="h-5 w-5" />
               <span className="font-light">Back to Dashboard</span>
             </Link>
-            <h1 className="text-4xl font-extralight tracking-wide text-white">
-              Sprint Metrics
-            </h1>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={goToPreviousSprint}
+                disabled={sprintOffset <= -6}
+                className="p-2 text-gray-400 hover:text-teal-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                title="Previous Sprint"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+              <h1 className="text-4xl font-extralight tracking-wide text-white">
+                {isCurrentSprint ? 'Current Sprint' : `Sprint #${data?.current_sprint?.sprint_number}`}
+              </h1>
+              <button
+                onClick={goToNextSprint}
+                disabled={sprintOffset >= 0}
+                className="p-2 text-gray-400 hover:text-teal-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                title="Next Sprint"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <button
-              onClick={fetchSprintMetrics}
+              onClick={() => fetchSprintMetrics(sprintOffset)}
               className="px-4 py-2 bg-teal-600 text-white rounded font-light hover:bg-teal-500 transition-colors"
             >
               Refresh
@@ -272,7 +316,7 @@ const SprintMetrics: React.FC = () => {
         {/* Current Sprint Card */}
         <Card>
           <CardHeader>
-            <CardTitle>Current Sprint</CardTitle>
+            <CardTitle>{isCurrentSprint ? 'Current Sprint' : `Sprint #${data.current_sprint.sprint_number}`}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="mb-4 p-4 bg-teal-900/30 rounded border border-teal-500/30">
@@ -472,8 +516,22 @@ const SprintMetrics: React.FC = () => {
 
                       return (
                         <tr key={engineer.engineer}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-light text-white">
-                            {engineer.engineer}
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-3">
+                              <img
+                                src={getGitHubAvatarUrl(engineer.engineer)}
+                                alt={getEngineerDisplayName(engineer.engineer)}
+                                className="w-10 h-10 rounded-full border border-teal-500"
+                              />
+                              <div>
+                                <div className="text-sm font-light text-white">
+                                  {getEngineerDisplayName(engineer.engineer)}
+                                </div>
+                                <div className="text-xs text-gray-400">
+                                  {engineer.engineer}
+                                </div>
+                              </div>
+                            </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-light text-teal-400">
                             {engineer.approvals}
@@ -527,7 +585,7 @@ const SprintMetrics: React.FC = () => {
                   <h3 className="text-lg font-light mb-3 text-white">
                     {formatDate(day.date)} ({day.prs.length} {day.prs.length === 1 ? 'PR' : 'PRs'})
                   </h3>
-                  <div className="space-y-2">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-2">
                     {day.prs.map((pr) => (
                       <div key={pr.number} className="flex items-start gap-3 text-sm">
                         <a
