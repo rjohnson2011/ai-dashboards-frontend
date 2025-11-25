@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { ArrowLeft, Moon, Sun } from 'lucide-react';
-import { useTheme } from './contexts/ThemeContext';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { ArrowLeft } from 'lucide-react';
 
 interface SprintInfo {
   sprint_number: number;
@@ -62,7 +61,6 @@ interface SprintMetricsData {
 }
 
 const SprintMetrics: React.FC = () => {
-  const { theme, toggleTheme } = useTheme();
   const [data, setData] = useState<SprintMetricsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -164,27 +162,27 @@ const SprintMetrics: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl">Loading sprint metrics...</div>
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="text-xl font-light text-white">Loading sprint metrics...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-black">
         <Card className="w-[600px]">
           <CardHeader>
-            <CardTitle className="text-red-500">Error Loading Sprint Metrics</CardTitle>
+            <CardTitle className="text-red-400">Error Loading Sprint Metrics</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="mb-4">{error}</p>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="mb-4 font-light text-white">{error}</p>
+            <p className="text-sm text-gray-400 mb-4 font-light">
               This feature requires database migrations to be run. Please wait a few minutes for the deployment to complete, then try again.
             </p>
             <button
               onClick={fetchSprintMetrics}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+              className="px-4 py-2 bg-teal-600 text-white rounded font-light hover:bg-teal-500 transition-colors"
             >
               Retry
             </button>
@@ -196,13 +194,13 @@ const SprintMetrics: React.FC = () => {
 
   if (!data?.current_sprint) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-black">
         <Card className="w-96">
           <CardHeader>
             <CardTitle>No Sprint Data</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>No sprint rotation data has been configured yet.</p>
+            <p className="font-light text-white">No sprint rotation data has been configured yet.</p>
           </CardContent>
         </Card>
       </div>
@@ -224,8 +222,8 @@ const SprintMetrics: React.FC = () => {
   );
 
   const colors = [
-    '#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1',
-    '#d084d0', '#a4de6c', '#d0ed57', '#ffa07a', '#20b2aa'
+    '#14b8a6', '#0d9488', '#0f766e', '#06b6d4', '#0891b2',
+    '#0e7490', '#22d3ee', '#67e8f9', '#5eead4', '#2dd4bf'
   ];
 
   // Filter approved PRs by search term
@@ -243,37 +241,28 @@ const SprintMetrics: React.FC = () => {
   })).filter(day => day.prs.length > 0); // Only show days with matching PRs
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 p-6 transition-colors duration-300">
+    <div className="min-h-screen bg-black p-6"
+
+>
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-4">
             <Link
               to="/dashboard"
-              className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+              className="flex items-center gap-2 text-gray-400 hover:text-teal-400 transition-colors"
             >
               <ArrowLeft className="h-5 w-5" />
-              <span>Back to Dashboard</span>
+              <span className="font-light">Back to Dashboard</span>
             </Link>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-extralight tracking-wide text-white">
               Sprint Metrics
             </h1>
           </div>
           <div className="flex items-center gap-3">
             <button
-              onClick={toggleTheme}
-              className="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
-              aria-label="Toggle theme"
-            >
-              {theme === 'dark' ? (
-                <Sun className="h-5 w-5 text-amber-500" />
-              ) : (
-                <Moon className="h-5 w-5 text-slate-700" />
-              )}
-            </button>
-            <button
               onClick={fetchSprintMetrics}
-              className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-500 dark:to-blue-600 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 dark:hover:from-blue-600 dark:hover:to-blue-700 transition-all duration-200 shadow-sm hover:shadow-md font-medium"
+              className="px-4 py-2 bg-teal-600 text-white rounded font-light hover:bg-teal-500 transition-colors"
             >
               Refresh
             </button>
@@ -286,19 +275,19 @@ const SprintMetrics: React.FC = () => {
             <CardTitle>Current Sprint</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="text-sm text-blue-700 font-medium mb-2">Support Engineer on Duty</div>
+            <div className="mb-4 p-4 bg-teal-900/30 rounded border border-teal-500/30">
+              <div className="text-sm text-teal-400 font-light mb-2">Support Engineer on Duty</div>
               <div className="flex items-center gap-3">
                 <img
                   src={getGitHubAvatarUrl(data.current_sprint.engineer_name)}
                   alt={getEngineerDisplayName(data.current_sprint.engineer_name)}
-                  className="w-16 h-16 rounded-full border-2 border-blue-200"
+                  className="w-16 h-16 rounded-full border-2 border-teal-500"
                 />
                 <div>
-                  <div className="text-2xl font-bold text-blue-900">
+                  <div className="text-2xl font-light text-white">
                     {getEngineerDisplayName(data.current_sprint.engineer_name)}
                   </div>
-                  <div className="text-sm text-blue-600">
+                  <div className="text-sm text-gray-400">
                     ({data.current_sprint.engineer_name})
                   </div>
                 </div>
@@ -306,16 +295,16 @@ const SprintMetrics: React.FC = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <div className="text-sm text-gray-500">Sprint Number</div>
-                <div className="text-2xl font-bold">#{data.current_sprint.sprint_number}</div>
+                <div className="text-sm text-gray-400 font-light">Sprint Number</div>
+                <div className="text-2xl font-light text-white">#{data.current_sprint.sprint_number}</div>
               </div>
               <div>
-                <div className="text-sm text-gray-500">Start Date</div>
-                <div className="text-lg">{formatDate(data.current_sprint.start_date, true)}</div>
+                <div className="text-sm text-gray-400 font-light">Start Date</div>
+                <div className="text-lg font-light text-white">{formatDate(data.current_sprint.start_date, true)}</div>
               </div>
               <div>
-                <div className="text-sm text-gray-500">End Date</div>
-                <div className="text-lg">{formatDate(data.current_sprint.end_date, true)}</div>
+                <div className="text-sm text-gray-400 font-light">End Date</div>
+                <div className="text-lg font-light text-white">{formatDate(data.current_sprint.end_date, true)}</div>
               </div>
             </div>
           </CardContent>
@@ -325,9 +314,9 @@ const SprintMetrics: React.FC = () => {
         {data.upcoming_rotations && data.upcoming_rotations.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {data.upcoming_rotations.map((rotation, index) => (
-              <Card key={index} className="bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50 dark:from-purple-950/20 dark:via-blue-950/20 dark:to-cyan-950/20 border-purple-200/50 dark:border-purple-700/30">
+              <Card key={index}>
                 <CardHeader>
-                  <CardTitle className="text-lg bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-400 dark:to-blue-400 bg-clip-text text-transparent">
+                  <CardTitle>
                     {index === 0 ? 'Upcoming Support' : 'Up Next'}
                   </CardTitle>
                 </CardHeader>
@@ -336,16 +325,16 @@ const SprintMetrics: React.FC = () => {
                     <img
                       src={getGitHubAvatarUrl(rotation.engineer_name)}
                       alt={getEngineerDisplayName(rotation.engineer_name)}
-                      className="w-20 h-20 rounded-full border-3 border-purple-300 dark:border-purple-600 shadow-lg ring-2 ring-purple-100 dark:ring-purple-900/50"
+                      className="w-20 h-20 rounded-full border-2 border-teal-500"
                     />
                     <div className="flex-1">
-                      <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                      <div className="text-2xl font-light text-white">
                         {getEngineerDisplayName(rotation.engineer_name)}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                      <div className="text-sm text-gray-400 mb-2">
                         ({rotation.engineer_name})
                       </div>
-                      <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <div className="text-sm font-light text-gray-300">
                         {formatDate(rotation.start_date, true)} - {formatDate(rotation.end_date, true)}
                       </div>
                     </div>
@@ -358,50 +347,44 @@ const SprintMetrics: React.FC = () => {
 
         {/* Sprint Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-100 dark:from-blue-950/30 dark:via-cyan-950/30 dark:to-blue-900/30 border-blue-200/50 dark:border-blue-700/30">
+          <Card>
             <CardHeader>
-              <CardTitle className="bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent">
-                Total Approvals
-              </CardTitle>
+              <CardTitle>Total Approvals</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-5xl font-bold bg-gradient-to-br from-blue-600 to-cyan-500 dark:from-blue-400 dark:to-cyan-300 bg-clip-text text-transparent">
+              <div className="text-5xl font-extralight text-teal-400">
                 {data.sprint_totals.total}
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-emerald-50 via-green-50 to-teal-100 dark:from-emerald-950/30 dark:via-green-950/30 dark:to-teal-900/30 border-emerald-200/50 dark:border-emerald-700/30">
+          <Card>
             <CardHeader>
-              <CardTitle className="bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">
-                Days in Sprint
-              </CardTitle>
+              <CardTitle>Days in Sprint</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-5xl font-bold bg-gradient-to-br from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent">
+              <div className="text-5xl font-extralight text-teal-400">
                 {calculateBusinessDays(data.current_sprint.start_date, data.current_sprint.end_date)}
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">business days</div>
+              <div className="text-xs text-gray-400 mt-1 font-light">business days</div>
               {data.current_sprint.start_date.startsWith('2025-11') && (
-                <div className="text-xs text-amber-600 dark:text-amber-400 mt-1 font-medium">Thanksgiving: 11/27</div>
+                <div className="text-xs text-amber-400 mt-1 font-light">Thanksgiving: 11/27</div>
               )}
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-50 via-fuchsia-50 to-pink-100 dark:from-purple-950/30 dark:via-fuchsia-950/30 dark:to-pink-900/30 border-purple-200/50 dark:border-purple-700/30">
+          <Card>
             <CardHeader>
-              <CardTitle className="bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
-                Average per Day
-              </CardTitle>
+              <CardTitle>Average per Day</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-5xl font-bold bg-gradient-to-br from-purple-600 to-pink-500 dark:from-purple-400 dark:to-pink-300 bg-clip-text text-transparent">
+              <div className="text-5xl font-extralight text-teal-400">
                 {(() => {
                   const businessDays = calculateBusinessDays(data.current_sprint.start_date, data.current_sprint.end_date);
                   return businessDays > 0 ? (data.sprint_totals.total / businessDays).toFixed(1) : '0.0';
                 })()}
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">per business day</div>
+              <div className="text-xs text-gray-400 mt-1 font-light">per business day</div>
             </CardContent>
           </Card>
         </div>
@@ -413,35 +396,47 @@ const SprintMetrics: React.FC = () => {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={400}>
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
                 <XAxis
                   dataKey="date"
                   angle={-45}
                   textAnchor="end"
                   height={80}
+                  stroke="#9ca3af"
+                  tick={{ fill: '#e5e7eb', fontSize: 12 }}
                 />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line
-                  type="monotone"
+                <YAxis
+                  stroke="#9ca3af"
+                  tick={{ fill: '#e5e7eb', fontSize: 12 }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#1f2937',
+                    border: '1px solid #14b8a6',
+                    borderRadius: '8px',
+                    color: '#fff'
+                  }}
+                />
+                <Legend
+                  wrapperStyle={{ color: '#e5e7eb' }}
+                />
+                <Bar
                   dataKey="total"
-                  stroke="#000000"
-                  strokeWidth={2}
+                  fill="#14b8a6"
                   name="Total"
+                  radius={[4, 4, 0, 0]}
                 />
                 {engineers.map((engineer, index) => (
-                  <Line
+                  <Bar
                     key={engineer}
-                    type="monotone"
                     dataKey={engineer}
-                    stroke={colors[index % colors.length]}
-                    strokeWidth={1.5}
+                    fill={colors[index % colors.length]}
                     name={engineer}
+                    radius={[4, 4, 0, 0]}
                   />
                 ))}
-              </LineChart>
+              </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
@@ -453,21 +448,21 @@ const SprintMetrics: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-teal-500/20">
+                <thead className="bg-gray-800">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-light text-gray-400 uppercase tracking-wider">
                       Engineer
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-light text-gray-400 uppercase tracking-wider">
                       Approvals
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-light text-gray-400 uppercase tracking-wider">
                       Percentage
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="divide-y divide-teal-500/10">
                   {data.engineer_totals.map((engineer) => {
                     const percentage = data.sprint_totals.total > 0
                       ? ((engineer.approvals / data.sprint_totals.total) * 100).toFixed(1)
@@ -475,13 +470,13 @@ const SprintMetrics: React.FC = () => {
 
                     return (
                       <tr key={engineer.engineer}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-light text-white">
                           {engineer.engineer}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-light text-teal-400">
                           {engineer.approvals}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-light text-gray-300">
                           {percentage}%
                         </td>
                       </tr>
@@ -504,12 +499,12 @@ const SprintMetrics: React.FC = () => {
                   placeholder="Search by PR #, title, author, or approver..."
                   value={prSearch}
                   onChange={(e) => setPrSearch(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-teal-500/30 bg-gray-800 text-white rounded font-light focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent placeholder-gray-500"
                 />
                 {prSearch && (
                   <button
                     onClick={() => setPrSearch('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-teal-400"
                   >
                     ✕
                   </button>
@@ -519,14 +514,14 @@ const SprintMetrics: React.FC = () => {
           </CardHeader>
           <CardContent>
             {filteredApprovedPRs.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-gray-400 font-light">
                 {prSearch ? `No PRs match "${prSearch}"` : 'No PRs found'}
               </div>
             ) : (
               <div className="space-y-6">
                 {filteredApprovedPRs.map((day) => (
-                <div key={day.date} className="border-b pb-4 last:border-b-0">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-700">
+                <div key={day.date} className="border-b border-teal-500/20 pb-4 last:border-b-0">
+                  <h3 className="text-lg font-light mb-3 text-white">
                     {formatDate(day.date)} ({day.prs.length} {day.prs.length === 1 ? 'PR' : 'PRs'})
                   </h3>
                   <div className="space-y-2">
@@ -536,7 +531,7 @@ const SprintMetrics: React.FC = () => {
                           href={pr.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                          className="text-teal-400 hover:text-teal-300 hover:underline font-light"
                         >
                           #{pr.number}
                         </a>
@@ -545,12 +540,12 @@ const SprintMetrics: React.FC = () => {
                             href={pr.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-gray-900 hover:text-blue-600 hover:underline"
+                            className="text-white hover:text-teal-400 hover:underline font-light"
                           >
                             {pr.title}
                           </a>
-                          <div className="text-xs text-gray-500 mt-1">
-                            by {pr.author} • approved by <span className="font-medium text-gray-700">{pr.approved_by}</span>
+                          <div className="text-xs text-gray-400 mt-1 font-light">
+                            by {pr.author} • approved by <span className="font-light text-teal-400">{pr.approved_by}</span>
                           </div>
                         </div>
                       </div>
