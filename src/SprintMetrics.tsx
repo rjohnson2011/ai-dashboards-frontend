@@ -83,15 +83,26 @@ const SprintMetrics: React.FC = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string, includeDayOfWeek: boolean = false) => {
     // Parse date in UTC to avoid timezone shifts
     const [year, month, day] = dateString.split('-').map(Number);
     const date = new Date(Date.UTC(year, month - 1, day));
-    return date.toLocaleDateString('en-US', {
+
+    const monthDay = date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       timeZone: 'UTC'
     });
+
+    if (includeDayOfWeek) {
+      const dayOfWeek = date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        timeZone: 'UTC'
+      });
+      return `${monthDay} (${dayOfWeek})`;
+    }
+
+    return monthDay;
   };
 
   const getEngineerDisplayName = (githubHandle: string): string => {
@@ -276,11 +287,11 @@ const SprintMetrics: React.FC = () => {
               </div>
               <div>
                 <div className="text-sm text-gray-500">Start Date</div>
-                <div className="text-lg">{formatDate(data.current_sprint.start_date)}</div>
+                <div className="text-lg">{formatDate(data.current_sprint.start_date, true)}</div>
               </div>
               <div>
                 <div className="text-sm text-gray-500">End Date</div>
-                <div className="text-lg">{formatDate(data.current_sprint.end_date)}</div>
+                <div className="text-lg">{formatDate(data.current_sprint.end_date, true)}</div>
               </div>
             </div>
           </CardContent>
