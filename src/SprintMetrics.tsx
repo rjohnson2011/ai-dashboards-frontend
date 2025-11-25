@@ -222,8 +222,8 @@ const SprintMetrics: React.FC = () => {
   );
 
   const colors = [
-    '#14b8a6', '#0d9488', '#0f766e', '#06b6d4', '#0891b2',
-    '#0e7490', '#22d3ee', '#67e8f9', '#5eead4', '#2dd4bf'
+    '#5eead4', '#2dd4bf', '#14b8a6', '#22d3ee', '#67e8f9',
+    '#06b6d4', '#99f6e4', '#5eead4', '#2dd4bf', '#14b8a6'
   ];
 
   // Filter approved PRs by search term
