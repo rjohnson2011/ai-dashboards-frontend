@@ -209,7 +209,7 @@ const SprintMetrics: React.FC = () => {
 
   // Prepare chart data
   const chartData = data.daily_approvals.map(day => ({
-    date: formatDate(day.date),
+    date: formatDate(day.date, true), // Include day of week
     total: day.total,
     ...day.by_engineer
   }));
@@ -389,104 +389,107 @@ const SprintMetrics: React.FC = () => {
           </Card>
         </div>
 
-        {/* Daily Approvals Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Daily Approvals</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                <XAxis
-                  dataKey="date"
-                  angle={-45}
-                  textAnchor="end"
-                  height={80}
-                  stroke="#9ca3af"
-                  tick={{ fill: '#e5e7eb', fontSize: 12 }}
-                />
-                <YAxis
-                  stroke="#9ca3af"
-                  tick={{ fill: '#e5e7eb', fontSize: 12 }}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#0a0a0a',
-                    border: '1px solid #1a1a1a',
-                    borderRadius: '8px',
-                    color: '#9ca3af'
-                  }}
-                />
-                <Legend
-                  wrapperStyle={{ color: '#e5e7eb' }}
-                />
-                <Bar
-                  dataKey="total"
-                  fill="#14b8a6"
-                  name="Total"
-                  radius={[4, 4, 0, 0]}
-                />
-                {engineers.map((engineer, index) => (
+        {/* Charts Grid - 2 columns on wide screens */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          {/* Daily Approvals Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Daily Approvals</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                  <XAxis
+                    dataKey="date"
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                    stroke="#9ca3af"
+                    tick={{ fill: '#e5e7eb', fontSize: 12 }}
+                  />
+                  <YAxis
+                    stroke="#9ca3af"
+                    tick={{ fill: '#e5e7eb', fontSize: 12 }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#0a0a0a',
+                      border: '1px solid #1a1a1a',
+                      borderRadius: '8px',
+                      color: '#9ca3af'
+                    }}
+                  />
+                  <Legend
+                    wrapperStyle={{ color: '#e5e7eb' }}
+                  />
                   <Bar
-                    key={engineer}
-                    dataKey={engineer}
-                    fill={colors[index % colors.length]}
-                    name={engineer}
+                    dataKey="total"
+                    fill="#14b8a6"
+                    name="Total"
                     radius={[4, 4, 0, 0]}
                   />
-                ))}
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+                  {engineers.map((engineer, index) => (
+                    <Bar
+                      key={engineer}
+                      dataKey={engineer}
+                      fill={colors[index % colors.length]}
+                      name={engineer}
+                      radius={[4, 4, 0, 0]}
+                    />
+                  ))}
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
 
-        {/* Engineer Totals Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Approvals by Engineer</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-teal-500/20">
-                <thead className="bg-gray-800">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-light text-gray-400 uppercase tracking-wider">
-                      Engineer
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-light text-gray-400 uppercase tracking-wider">
-                      Approvals
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-light text-gray-400 uppercase tracking-wider">
-                      Percentage
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-teal-500/10">
-                  {data.engineer_totals.map((engineer) => {
-                    const percentage = data.sprint_totals.total > 0
-                      ? ((engineer.approvals / data.sprint_totals.total) * 100).toFixed(1)
-                      : '0.0';
+          {/* Engineer Totals Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Approvals by Engineer</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-teal-500/20">
+                  <thead className="bg-gray-800">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-light text-gray-400 uppercase tracking-wider">
+                        Engineer
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-light text-gray-400 uppercase tracking-wider">
+                        Approvals
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-light text-gray-400 uppercase tracking-wider">
+                        Percentage
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-teal-500/10">
+                    {data.engineer_totals.map((engineer) => {
+                      const percentage = data.sprint_totals.total > 0
+                        ? ((engineer.approvals / data.sprint_totals.total) * 100).toFixed(1)
+                        : '0.0';
 
-                    return (
-                      <tr key={engineer.engineer}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-light text-white">
-                          {engineer.engineer}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-light text-teal-400">
-                          {engineer.approvals}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-light text-gray-300">
-                          {percentage}%
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+                      return (
+                        <tr key={engineer.engineer}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-light text-white">
+                            {engineer.engineer}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-light text-teal-400">
+                            {engineer.approvals}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-light text-gray-300">
+                            {percentage}%
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Approved & Closed PRs by Day */}
         <Card>
