@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Moon, Sun } from 'lucide-react';
+import { useTheme } from './contexts/ThemeContext';
 
 interface SprintInfo {
   sprint_number: number;
@@ -61,6 +62,7 @@ interface SprintMetricsData {
 }
 
 const SprintMetrics: React.FC = () => {
+  const { theme, toggleTheme } = useTheme();
   const [data, setData] = useState<SprintMetricsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -241,26 +243,41 @@ const SprintMetrics: React.FC = () => {
   })).filter(day => day.prs.length > 0); // Only show days with matching PRs
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 p-6 transition-colors duration-300">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-4">
             <Link
               to="/dashboard"
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+              className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
             >
               <ArrowLeft className="h-5 w-5" />
               <span>Back to Dashboard</span>
             </Link>
-            <h1 className="text-3xl font-bold">Sprint Metrics</h1>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+              Sprint Metrics
+            </h1>
           </div>
-          <button
-            onClick={fetchSprintMetrics}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          >
-            Refresh
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleTheme}
+              className="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? (
+                <Sun className="h-5 w-5 text-amber-500" />
+              ) : (
+                <Moon className="h-5 w-5 text-slate-700" />
+              )}
+            </button>
+            <button
+              onClick={fetchSprintMetrics}
+              className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-500 dark:to-blue-600 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 dark:hover:from-blue-600 dark:hover:to-blue-700 transition-all duration-200 shadow-sm hover:shadow-md font-medium"
+            >
+              Refresh
+            </button>
+          </div>
         </div>
 
         {/* Current Sprint Card */}
@@ -308,9 +325,9 @@ const SprintMetrics: React.FC = () => {
         {data.upcoming_rotations && data.upcoming_rotations.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {data.upcoming_rotations.map((rotation, index) => (
-              <Card key={index} className="bg-gradient-to-r from-gray-50 to-gray-100">
+              <Card key={index} className="bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50 dark:from-purple-950/20 dark:via-blue-950/20 dark:to-cyan-950/20 border-purple-200/50 dark:border-purple-700/30">
                 <CardHeader>
-                  <CardTitle className="text-lg">
+                  <CardTitle className="text-lg bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-400 dark:to-blue-400 bg-clip-text text-transparent">
                     {index === 0 ? 'Upcoming Support' : 'Up Next'}
                   </CardTitle>
                 </CardHeader>
@@ -319,16 +336,16 @@ const SprintMetrics: React.FC = () => {
                     <img
                       src={getGitHubAvatarUrl(rotation.engineer_name)}
                       alt={getEngineerDisplayName(rotation.engineer_name)}
-                      className="w-20 h-20 rounded-full border-2 border-gray-300 shadow-md"
+                      className="w-20 h-20 rounded-full border-3 border-purple-300 dark:border-purple-600 shadow-lg ring-2 ring-purple-100 dark:ring-purple-900/50"
                     />
                     <div className="flex-1">
-                      <div className="text-2xl font-bold text-gray-900">
+                      <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                         {getEngineerDisplayName(rotation.engineer_name)}
                       </div>
-                      <div className="text-sm text-gray-600 mb-2">
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                         ({rotation.engineer_name})
                       </div>
-                      <div className="text-sm font-medium text-gray-700">
+                      <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
                         {formatDate(rotation.start_date, true)} - {formatDate(rotation.end_date, true)}
                       </div>
                     </div>
@@ -341,44 +358,50 @@ const SprintMetrics: React.FC = () => {
 
         {/* Sprint Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
+          <Card className="bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-100 dark:from-blue-950/30 dark:via-cyan-950/30 dark:to-blue-900/30 border-blue-200/50 dark:border-blue-700/30">
             <CardHeader>
-              <CardTitle>Total Approvals</CardTitle>
+              <CardTitle className="bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent">
+                Total Approvals
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-blue-600">
+              <div className="text-5xl font-bold bg-gradient-to-br from-blue-600 to-cyan-500 dark:from-blue-400 dark:to-cyan-300 bg-clip-text text-transparent">
                 {data.sprint_totals.total}
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-gradient-to-br from-emerald-50 via-green-50 to-teal-100 dark:from-emerald-950/30 dark:via-green-950/30 dark:to-teal-900/30 border-emerald-200/50 dark:border-emerald-700/30">
             <CardHeader>
-              <CardTitle>Days in Sprint</CardTitle>
+              <CardTitle className="bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">
+                Days in Sprint
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-green-600">
+              <div className="text-5xl font-bold bg-gradient-to-br from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent">
                 {calculateBusinessDays(data.current_sprint.start_date, data.current_sprint.end_date)}
               </div>
-              <div className="text-xs text-gray-500 mt-1">business days</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">business days</div>
               {data.current_sprint.start_date.startsWith('2025-11') && (
-                <div className="text-xs text-gray-400 mt-1">Thanksgiving: 11/27</div>
+                <div className="text-xs text-amber-600 dark:text-amber-400 mt-1 font-medium">Thanksgiving: 11/27</div>
               )}
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-gradient-to-br from-purple-50 via-fuchsia-50 to-pink-100 dark:from-purple-950/30 dark:via-fuchsia-950/30 dark:to-pink-900/30 border-purple-200/50 dark:border-purple-700/30">
             <CardHeader>
-              <CardTitle>Average per Day</CardTitle>
+              <CardTitle className="bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
+                Average per Day
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-purple-600">
+              <div className="text-5xl font-bold bg-gradient-to-br from-purple-600 to-pink-500 dark:from-purple-400 dark:to-pink-300 bg-clip-text text-transparent">
                 {(() => {
                   const businessDays = calculateBusinessDays(data.current_sprint.start_date, data.current_sprint.end_date);
                   return businessDays > 0 ? (data.sprint_totals.total / businessDays).toFixed(1) : '0.0';
                 })()}
               </div>
-              <div className="text-xs text-gray-500 mt-1">per business day</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">per business day</div>
             </CardContent>
           </Card>
         </div>
