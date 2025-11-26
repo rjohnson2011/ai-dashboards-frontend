@@ -111,18 +111,17 @@
   }
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    font-weight: 300;
     font-feature-settings: "rlig" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background: #000000;
+    background: linear-gradient(to bottom, #fafafa, #f3f4f6);
     min-height: 100vh;
-    color: #ffffff;
+    color: hsl(var(--foreground));
   }
 
   .dark body {
-    background: #000000;
-    color: #ffffff;
+    background: linear-gradient(to bottom, #0f111a, #1a202c);
+    color: hsl(var(--foreground));
   }
   
   /* Ensure text visibility in dark mode */
