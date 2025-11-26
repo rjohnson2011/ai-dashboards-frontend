@@ -51,12 +51,28 @@ interface UpcomingRotation {
   end_date: string;
 }
 
+interface DependabotPR {
+  number: number;
+  title: string;
+  url: string;
+  repository: string;
+}
+
+interface DependabotMetrics {
+  merged_count: number;
+  closed_count: number;
+  merged_prs: DependabotPR[];
+  closed_prs: DependabotPR[];
+}
+
 interface SprintMetricsData {
   current_sprint: SprintInfo | null;
   daily_approvals: DailyApproval[];
   sprint_totals: SprintTotals;
   engineer_totals: EngineerTotal[];
   approved_prs_by_day: ApprovedPRsByDay[];
+  dependabot_metrics?: DependabotMetrics;
+  approved_unmerged_count?: number;
   upcoming_rotations?: UpcomingRotation[];
 }
 
@@ -405,6 +421,11 @@ const SprintMetrics: React.FC = () => {
               <div className="text-5xl font-extralight text-teal-400">
                 {data.sprint_totals.total}
               </div>
+              {data.approved_unmerged_count !== undefined && data.approved_unmerged_count > 0 && (
+                <div className="text-xs text-amber-400 mt-2 font-light">
+                  {data.approved_unmerged_count} approved, not yet merged
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -438,6 +459,67 @@ const SprintMetrics: React.FC = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Dependabot Metrics */}
+        {data.dependabot_metrics && (data.dependabot_metrics.merged_count > 0 || data.dependabot_metrics.closed_count > 0) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Dependabot PRs Merged</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-5xl font-extralight text-green-400">
+                  {data.dependabot_metrics.merged_count}
+                </div>
+                {data.dependabot_metrics.merged_prs.length > 0 && (
+                  <div className="mt-4 space-y-2 max-h-64 overflow-y-auto">
+                    {data.dependabot_metrics.merged_prs.map(pr => (
+                      <a
+                        key={pr.number}
+                        href={pr.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block text-sm p-2 bg-gray-800/50 rounded hover:bg-gray-700/50 transition-colors"
+                      >
+                        <div className="text-teal-400 font-light">#{pr.number}</div>
+                        <div className="text-white font-light text-xs truncate">{pr.title}</div>
+                        <div className="text-gray-500 text-xs">{pr.repository}</div>
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Dependabot PRs Closed</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-5xl font-extralight text-gray-400">
+                  {data.dependabot_metrics.closed_count}
+                </div>
+                {data.dependabot_metrics.closed_prs.length > 0 && (
+                  <div className="mt-4 space-y-2 max-h-64 overflow-y-auto">
+                    {data.dependabot_metrics.closed_prs.map(pr => (
+                      <a
+                        key={pr.number}
+                        href={pr.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block text-sm p-2 bg-gray-800/50 rounded hover:bg-gray-700/50 transition-colors"
+                      >
+                        <div className="text-teal-400 font-light">#{pr.number}</div>
+                        <div className="text-white font-light text-xs truncate">{pr.title}</div>
+                        <div className="text-gray-500 text-xs">{pr.repository}</div>
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Charts Grid - 2 columns on wide screens */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
