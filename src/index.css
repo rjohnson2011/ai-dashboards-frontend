@@ -213,17 +213,39 @@
   .text-success {
     color: hsl(var(--success));
   }
-  
+
   .text-warning {
     color: hsl(var(--warning));
   }
-  
+
   .text-danger {
     color: hsl(var(--destructive));
   }
-  
+
+  .text-destructive {
+    color: hsl(var(--destructive));
+  }
+
   .text-info {
     color: hsl(var(--info));
+  }
+
+  /* Dark mode - brighter status colors for visibility */
+  .dark .text-success {
+    color: #22c55e;
+  }
+
+  .dark .text-warning {
+    color: #fbbf24;
+  }
+
+  .dark .text-danger,
+  .dark .text-destructive {
+    color: #ef4444;
+  }
+
+  .dark .text-info {
+    color: #60a5fa;
   }
   
   /* Table row hover - minimal */
