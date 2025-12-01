@@ -151,8 +151,8 @@ const SprintMetrics: React.FC = () => {
     const nameMap: Record<string, string> = {
       'rjohnson2011': 'Ryan Johnson',
       'RachalCassity': 'Rachal Cassity',
-      'stiehlrod': 'Rod Stiehl',
-      'rmtolmach': 'Rob Tolmach',
+      'stiehlrod': 'Jennica Stiehl',
+      'rmtolmach': 'Rebecca Tolmach',
       'ericboehs': 'Eric Boehs',
       'LindseySaari': 'Lindsey Saari',
       'stevenjcumming': 'Steven Cumming'
