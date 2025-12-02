@@ -79,6 +79,13 @@ interface PullRequest {
   labels?: string[]
   repository_name?: string
   repository_owner?: string
+  changes_requested_info?: {
+    status: string
+    message: string
+    backend_commenter: string
+    backend_comment_at: string
+    author_comment_at?: string
+  } | null
 }
 
 interface ApiResponse {
@@ -874,6 +881,7 @@ function Dashboard() {
                               )}
                             </button>
                           </TableHead>
+                          <TableHead className="w-[140px]">Changes Requested</TableHead>
                           <TableHead className="w-[90px]">Commented</TableHead>
                           <TableHead className="w-[70px]">
                             <button
@@ -1028,13 +1036,30 @@ function Dashboard() {
                           <TableCell>
                             <div className="flex items-center justify-center">
                               {(!pr.draft &&
-                                pr.approval_summary && 
+                                pr.approval_summary &&
                                 pr.approval_summary.approved_count > 0 &&
                                 pr.backend_approval_status !== 'approved' &&
                                 !(pr.approval_summary.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))) ? (
                                 <CheckCircle2 className="h-5 w-5 text-success" />
                               ) : (
                                 <XCircle className="h-5 w-5 text-muted-foreground" />
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              {pr.changes_requested_info ? (
+                                pr.changes_requested_info.status === 'new_comment_from_author' ? (
+                                  <span className="text-xs font-medium text-blue-500">
+                                    New comment from author
+                                  </span>
+                                ) : (
+                                  <span className="text-xs text-warning">
+                                    {pr.changes_requested_info.message}
+                                  </span>
+                                )
+                              ) : (
+                                <span className="text-xs text-muted-foreground">-</span>
                               )}
                             </div>
                           </TableCell>
