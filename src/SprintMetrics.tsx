@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceArea, Label } from 'recharts';
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface SprintInfo {
@@ -269,19 +269,67 @@ const SprintMetrics: React.FC = () => {
     );
   }
 
-  // Prepare chart data - only show elapsed days for current sprint
+  // Prepare chart data - fill in missing days with zeros
   const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-  const chartData = data.daily_approvals
-    .filter(day => {
-      // For current sprint, only show days up to today
-      // For past sprints, show all days
-      return !isCurrentSprint || day.date <= today;
-    })
-    .map(day => ({
-      date: formatDate(day.date, true), // Include day of week
-      total: day.total,
-      ...day.by_engineer
-    }));
+
+  // Get all engineers
+  const allEngineers = Array.from(
+    new Set(
+      data.daily_approvals.flatMap(day => Object.keys(day.by_engineer))
+    )
+  );
+
+  // Create a map of existing data
+  const dataMap = new Map(
+    data.daily_approvals.map(day => [day.date, day])
+  );
+
+  // Generate all dates in the sprint range
+  const startDate = new Date(data.current_sprint.start_date + 'T00:00:00Z');
+  const endDate = isCurrentSprint
+    ? new Date(today + 'T00:00:00Z')
+    : new Date(data.current_sprint.end_date + 'T00:00:00Z');
+
+  const allDates: string[] = [];
+  const currentDate = new Date(startDate);
+  while (currentDate <= endDate) {
+    allDates.push(currentDate.toISOString().split('T')[0]);
+    currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+  }
+
+  // Fill in all days, setting missing days to zero
+  const chartData = allDates.map(dateStr => {
+    const dayData = dataMap.get(dateStr);
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day));
+    const dayOfWeek = date.getUTCDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    const isThanksgiving = dateStr === '2025-11-27';
+
+    if (dayData) {
+      return {
+        date: formatDate(dateStr, true),
+        rawDate: dateStr,
+        total: dayData.total,
+        isWeekend,
+        isThanksgiving,
+        ...dayData.by_engineer
+      };
+    } else {
+      // Fill with zeros for missing days
+      const emptyDay: any = {
+        date: formatDate(dateStr, true),
+        rawDate: dateStr,
+        total: 0,
+        isWeekend,
+        isThanksgiving
+      };
+      allEngineers.forEach(engineer => {
+        emptyDay[engineer] = 0;
+      });
+      return emptyDay;
+    }
+  });
 
   // Get unique engineers for chart lines
   const engineers = Array.from(
@@ -574,6 +622,87 @@ const SprintMetrics: React.FC = () => {
                       </linearGradient>
                     ))}
                   </defs>
+                  {/* Reference areas for weekends and holidays */}
+                  {(() => {
+                    const areas: JSX.Element[] = [];
+                    let weekendStart: number | null = null;
+
+                    chartData.forEach((day, index) => {
+                      if (day.isThanksgiving) {
+                        // Add Thanksgiving reference area
+                        areas.push(
+                          <ReferenceArea
+                            key={`thanksgiving-${index}`}
+                            x1={index - 0.5}
+                            x2={index + 0.5}
+                            fill="#fbbf24"
+                            fillOpacity={0.15}
+                            ifOverflow="extendDomain"
+                          >
+                            <Label
+                              value="THANKSGIVING"
+                              position="insideTop"
+                              fill="#fbbf24"
+                              fontSize={10}
+                              fontWeight="bold"
+                              offset={10}
+                            />
+                          </ReferenceArea>
+                        );
+                      } else if (day.isWeekend) {
+                        if (weekendStart === null) {
+                          weekendStart = index;
+                        }
+                      } else if (weekendStart !== null) {
+                        // End of weekend, add reference area
+                        areas.push(
+                          <ReferenceArea
+                            key={`weekend-${weekendStart}`}
+                            x1={weekendStart - 0.5}
+                            x2={index - 0.5}
+                            fill="#6b7280"
+                            fillOpacity={0.1}
+                            ifOverflow="extendDomain"
+                          >
+                            <Label
+                              value="WEEKEND"
+                              position="insideTop"
+                              fill="#6b7280"
+                              fontSize={10}
+                              fontWeight="bold"
+                              offset={10}
+                            />
+                          </ReferenceArea>
+                        );
+                        weekendStart = null;
+                      }
+                    });
+
+                    // Handle case where sprint ends on a weekend
+                    if (weekendStart !== null) {
+                      areas.push(
+                        <ReferenceArea
+                          key={`weekend-${weekendStart}`}
+                          x1={weekendStart - 0.5}
+                          x2={chartData.length - 0.5}
+                          fill="#6b7280"
+                          fillOpacity={0.1}
+                          ifOverflow="extendDomain"
+                        >
+                          <Label
+                            value="WEEKEND"
+                            position="insideTop"
+                            fill="#6b7280"
+                            fontSize={10}
+                            fontWeight="bold"
+                            offset={10}
+                          />
+                        </ReferenceArea>
+                      );
+                    }
+
+                    return areas;
+                  })()}
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} vertical={false} />
                   <XAxis
                     dataKey="date"
