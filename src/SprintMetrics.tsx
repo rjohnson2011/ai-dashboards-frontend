@@ -65,6 +65,32 @@ interface DependabotMetrics {
   closed_prs: DependabotPR[];
 }
 
+interface BackendApprovedClosedPR {
+  number: number;
+  title: string;
+  url: string;
+  state: string;
+  author: string;
+  closed_at: string;
+  approved_by: string[];
+}
+
+interface MonthlyBreakdown {
+  month: string;
+  month_date: string;
+  total: number;
+  merged: number;
+  closed: number;
+  prs: BackendApprovedClosedPR[];
+}
+
+interface BackendApprovedClosed {
+  total: number;
+  merged: number;
+  closed: number;
+  monthly_breakdown: MonthlyBreakdown[];
+}
+
 interface SprintMetricsData {
   current_sprint: SprintInfo | null;
   daily_approvals: DailyApproval[];
@@ -74,6 +100,7 @@ interface SprintMetricsData {
   dependabot_metrics?: DependabotMetrics;
   approved_unmerged_count?: number;
   upcoming_rotations?: UpcomingRotation[];
+  backend_approved_closed?: BackendApprovedClosed;
 }
 
 const SprintMetrics: React.FC = () => {
@@ -706,6 +733,70 @@ const SprintMetrics: React.FC = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Backend Approved & Closed PRs (Past 6 Months) */}
+        {data.backend_approved_closed && data.backend_approved_closed.total > 0 && (
+          <Card className="bg-slate-800 border-amber-500/30">
+            <CardHeader>
+              <CardTitle className="text-xl font-light text-white flex items-center justify-between">
+                <span>Backend-Approved & Closed PRs</span>
+                <span className="text-sm text-amber-400">Past 6 Months</span>
+              </CardTitle>
+              <div className="grid grid-cols-3 gap-4 mt-4">
+                <div className="text-center">
+                  <div className="text-3xl font-extralight text-white">{data.backend_approved_closed.total}</div>
+                  <div className="text-xs text-gray-400 mt-1">Total</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-extralight text-green-400">{data.backend_approved_closed.merged}</div>
+                  <div className="text-xs text-gray-400 mt-1">Merged</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-extralight text-gray-400">{data.backend_approved_closed.closed}</div>
+                  <div className="text-xs text-gray-400 mt-1">Closed</div>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {data.backend_approved_closed.monthly_breakdown.map((month) => (
+                  <div key={month.month_date} className="border-b border-amber-500/20 pb-4 last:border-b-0">
+                    <h3 className="text-lg font-light mb-3 text-white">
+                      {month.month} ({month.total} {month.total === 1 ? 'PR' : 'PRs'}: {month.merged} merged, {month.closed} closed)
+                    </h3>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-2">
+                      {month.prs.map((pr) => (
+                        <div key={pr.number} className="flex items-start gap-3 text-sm">
+                          <a
+                            href={pr.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-amber-400 hover:text-amber-300 hover:underline font-light"
+                          >
+                            #{pr.number}
+                          </a>
+                          <div className="flex-1">
+                            <a
+                              href={pr.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-white hover:text-amber-400 hover:underline font-light"
+                            >
+                              {pr.title}
+                            </a>
+                            <div className="text-xs text-gray-400 mt-1 font-light">
+                              by {pr.author} • {pr.state === 'merged' ? '✓ merged' : '✕ closed'} • approved by <span className="font-light text-amber-400">{pr.approved_by.join(', ')}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
