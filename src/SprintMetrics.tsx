@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface SprintInfo {
@@ -553,12 +553,28 @@ const SprintMetrics: React.FC = () => {
           {/* Daily Approvals Chart */}
           <Card>
             <CardHeader>
-              <CardTitle>Daily Approvals</CardTitle>
+              <CardTitle>Daily Approvals by Engineer</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                <AreaChart data={chartData}>
+                  <defs>
+                    {engineers.map((engineer, index) => (
+                      <linearGradient key={`gradient-${engineer}`} id={`fill${engineer}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop
+                          offset="5%"
+                          stopColor={colors[index % colors.length]}
+                          stopOpacity={0.8}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor={colors[index % colors.length]}
+                          stopOpacity={0.1}
+                        />
+                      </linearGradient>
+                    ))}
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} vertical={false} />
                   <XAxis
                     dataKey="date"
                     angle={-45}
@@ -566,10 +582,14 @@ const SprintMetrics: React.FC = () => {
                     height={80}
                     stroke="#9ca3af"
                     tick={{ fill: '#e5e7eb', fontSize: 12 }}
+                    tickLine={false}
+                    axisLine={false}
                   />
                   <YAxis
                     stroke="#9ca3af"
                     tick={{ fill: '#e5e7eb', fontSize: 12 }}
+                    tickLine={false}
+                    axisLine={false}
                   />
                   <Tooltip
                     contentStyle={{
@@ -578,26 +598,23 @@ const SprintMetrics: React.FC = () => {
                       borderRadius: '8px',
                       color: '#9ca3af'
                     }}
+                    cursor={false}
                   />
                   <Legend
                     wrapperStyle={{ color: '#e5e7eb' }}
                   />
-                  <Bar
-                    dataKey="total"
-                    fill="#14b8a6"
-                    name="Total"
-                    radius={[4, 4, 0, 0]}
-                  />
                   {engineers.map((engineer, index) => (
-                    <Bar
+                    <Area
                       key={engineer}
+                      type="natural"
                       dataKey={engineer}
-                      fill={colors[index % colors.length]}
+                      stackId="a"
+                      stroke={colors[index % colors.length]}
+                      fill={`url(#fill${engineer})`}
                       name={engineer}
-                      radius={[4, 4, 0, 0]}
                     />
                   ))}
-                </BarChart>
+                </AreaChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
