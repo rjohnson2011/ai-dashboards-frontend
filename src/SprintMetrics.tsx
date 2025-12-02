@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceArea, Label } from 'recharts';
-import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface SprintInfo {
   sprint_number: number;
@@ -109,6 +109,7 @@ const SprintMetrics: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [prSearch, setPrSearch] = useState('');
   const [sprintOffset, setSprintOffset] = useState(0); // 0 = current, -1 = previous, etc.
+  const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchSprintMetrics(sprintOffset);
@@ -151,6 +152,18 @@ const SprintMetrics: React.FC = () => {
   };
 
   const isCurrentSprint = sprintOffset === 0;
+
+  const toggleMonth = (monthDate: string) => {
+    setExpandedMonths(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(monthDate)) {
+        newSet.delete(monthDate);
+      } else {
+        newSet.add(monthDate);
+      }
+      return newSet;
+    });
+  };
 
   const formatDate = (dateString: string, includeDayOfWeek: boolean = false) => {
     // Parse date in UTC to avoid timezone shifts
@@ -905,40 +918,55 @@ const SprintMetrics: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {data.backend_approved_closed.monthly_breakdown.map((month) => (
-                  <div key={month.month_date} className="border-b border-amber-500/20 pb-4 last:border-b-0">
-                    <h3 className="text-lg font-light mb-3 text-white">
-                      {month.month} ({month.total} {month.total === 1 ? 'PR' : 'PRs'}: {month.merged} merged, {month.closed} closed)
-                    </h3>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-2">
-                      {month.prs.map((pr) => (
-                        <div key={pr.number} className="flex items-start gap-3 text-sm">
-                          <a
-                            href={pr.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-amber-400 hover:text-amber-300 hover:underline font-light"
-                          >
-                            #{pr.number}
-                          </a>
-                          <div className="flex-1">
-                            <a
-                              href={pr.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-white hover:text-amber-400 hover:underline font-light"
-                            >
-                              {pr.title}
-                            </a>
-                            <div className="text-xs text-gray-400 mt-1 font-light">
-                              by {pr.author} • {pr.state === 'merged' ? '✓ merged' : '✕ closed'} • approved by <span className="font-light text-amber-400">{pr.approved_by.join(', ')}</span>
+                {data.backend_approved_closed.monthly_breakdown.map((month) => {
+                  const isExpanded = expandedMonths.has(month.month_date);
+                  return (
+                    <div key={month.month_date} className="border-b border-amber-500/20 pb-4 last:border-b-0">
+                      <button
+                        onClick={() => toggleMonth(month.month_date)}
+                        className="w-full flex items-center justify-between text-lg font-light mb-3 text-white hover:text-amber-400 transition-colors"
+                      >
+                        <span>
+                          {month.month} ({month.total} {month.total === 1 ? 'PR' : 'PRs'}: {month.merged} merged, {month.closed} closed)
+                        </span>
+                        {isExpanded ? (
+                          <ChevronUp className="h-5 w-5 text-amber-400" />
+                        ) : (
+                          <ChevronDown className="h-5 w-5 text-gray-400" />
+                        )}
+                      </button>
+                      {isExpanded && (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-2">
+                          {month.prs.map((pr) => (
+                            <div key={pr.number} className="flex items-start gap-3 text-sm">
+                              <a
+                                href={pr.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-amber-400 hover:text-amber-300 hover:underline font-light"
+                              >
+                                #{pr.number}
+                              </a>
+                              <div className="flex-1">
+                                <a
+                                  href={pr.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-white hover:text-amber-400 hover:underline font-light"
+                                >
+                                  {pr.title}
+                                </a>
+                                <div className="text-xs text-gray-400 mt-1 font-light">
+                                  by {pr.author} • {pr.state === 'merged' ? '✓ merged' : '✕ closed'} • approved by <span className="font-light text-amber-400">{pr.approved_by.join(', ')}</span>
+                                </div>
+                              </div>
                             </div>
-                          </div>
+                          ))}
                         </div>
-                      ))}
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
