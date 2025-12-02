@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceArea, Label } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceArea, Label } from 'recharts';
 import { ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface SprintInfo {
@@ -618,23 +618,7 @@ const SprintMetrics: React.FC = () => {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={400}>
-                <AreaChart data={chartData}>
-                  <defs>
-                    {engineers.map((engineer, index) => (
-                      <linearGradient key={`gradient-${engineer}`} id={`fill${engineer}`} x1="0" y1="0" x2="0" y2="1">
-                        <stop
-                          offset="5%"
-                          stopColor={colors[index % colors.length]}
-                          stopOpacity={0.8}
-                        />
-                        <stop
-                          offset="95%"
-                          stopColor={colors[index % colors.length]}
-                          stopOpacity={0.1}
-                        />
-                      </linearGradient>
-                    ))}
-                  </defs>
+                <BarChart data={chartData}>
                   {/* Reference areas for weekends and holidays */}
                   {(() => {
                     const areas: JSX.Element[] = [];
@@ -746,17 +730,15 @@ const SprintMetrics: React.FC = () => {
                     wrapperStyle={{ color: '#e5e7eb' }}
                   />
                   {engineers.map((engineer, index) => (
-                    <Area
+                    <Bar
                       key={engineer}
-                      type="natural"
                       dataKey={engineer}
                       stackId="a"
-                      stroke={colors[index % colors.length]}
-                      fill={`url(#fill${engineer})`}
+                      fill={colors[index % colors.length]}
                       name={engineer}
                     />
                   ))}
-                </AreaChart>
+                </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
