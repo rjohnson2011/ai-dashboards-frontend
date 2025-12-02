@@ -272,7 +272,7 @@ const SprintMetrics: React.FC = () => {
       <div className="flex items-center justify-center min-h-screen bg-black">
         <Card className="w-96">
           <CardHeader>
-            <CardTitle>No Sprint Data</CardTitle>
+            <CardTitle className="text-white">No Sprint Data</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="font-light text-white">No sprint rotation data has been configured yet.</p>
@@ -426,7 +426,7 @@ const SprintMetrics: React.FC = () => {
         {/* Current Sprint Card */}
         <Card>
           <CardHeader>
-            <CardTitle>{isCurrentSprint ? 'Current Sprint' : `Sprint #${data.current_sprint.sprint_number}`}</CardTitle>
+            <CardTitle className="text-white">{isCurrentSprint ? 'Current Sprint' : `Sprint #${data.current_sprint.sprint_number}`}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="mb-4 p-4 bg-teal-900/30 rounded border border-teal-500/30">
@@ -470,7 +470,7 @@ const SprintMetrics: React.FC = () => {
             {data.upcoming_rotations.map((rotation, index) => (
               <Card key={index}>
                 <CardHeader>
-                  <CardTitle>
+                  <CardTitle className="text-white">
                     {index === 0 ? 'Upcoming Support' : 'Up Next'}
                   </CardTitle>
                 </CardHeader>
@@ -503,7 +503,7 @@ const SprintMetrics: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardHeader>
-              <CardTitle>Total Approvals</CardTitle>
+              <CardTitle className="text-white">Total Approvals</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-5xl font-extralight text-teal-400">
@@ -519,7 +519,7 @@ const SprintMetrics: React.FC = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle>Days in Sprint</CardTitle>
+              <CardTitle className="text-white">Days in Sprint</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-5xl font-extralight text-teal-400">
@@ -534,7 +534,7 @@ const SprintMetrics: React.FC = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle>Average per Day</CardTitle>
+              <CardTitle className="text-white">Average per Day</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-5xl font-extralight text-teal-400">
@@ -553,7 +553,7 @@ const SprintMetrics: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card>
               <CardHeader>
-                <CardTitle>Dependabot PRs Merged</CardTitle>
+                <CardTitle className="text-white">Dependabot PRs Merged</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-5xl font-extralight text-green-400">
@@ -581,7 +581,7 @@ const SprintMetrics: React.FC = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>Dependabot PRs Closed</CardTitle>
+                <CardTitle className="text-white">Dependabot PRs Closed</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-5xl font-extralight text-gray-400">
@@ -614,7 +614,7 @@ const SprintMetrics: React.FC = () => {
           {/* Daily Approvals Chart */}
           <Card>
             <CardHeader>
-              <CardTitle>Daily Approvals by Engineer</CardTitle>
+              <CardTitle className="text-white">Daily Approvals by Engineer</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={400}>
@@ -748,7 +748,7 @@ const SprintMetrics: React.FC = () => {
           {/* Engineer Totals Table */}
           <Card>
             <CardHeader>
-              <CardTitle>Approvals by Engineer</CardTitle>
+              <CardTitle className="text-white">Approvals by Engineer</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
@@ -811,7 +811,7 @@ const SprintMetrics: React.FC = () => {
         <Card>
           <CardHeader>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <CardTitle>Approved & Closed PRs</CardTitle>
+              <CardTitle className="text-white">Approved & Closed PRs</CardTitle>
               <div className="relative w-full md:w-96">
                 <input
                   type="text"
