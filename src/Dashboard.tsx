@@ -106,6 +106,27 @@ interface ApiResponse {
 
 const BACKEND_REVIEWERS = ['ericboehs', 'LindseySaari', 'rmtolmach', 'stiehlrod', 'RachalCassity', 'rjohnson2011', 'stevenjcumming']
 
+// Lighthouse teams (lighthouse-dash, lighthouse-pivot, lighthouse-banana-peels)
+// were removed from the exemption list on Dec 1, 2025 per PR #25353
+// However, existing PRs still have the exempt-be-review label
+// This function provides the correct exemption status, ignoring the label for Lighthouse PRs
+const LIGHTHOUSE_LABELS = ['claimsApi']
+
+function isTrulyExemptFromBackendReview(pr: PullRequest): boolean {
+  // If no exempt label, definitely not exempt
+  if (!pr.labels || !pr.labels.includes('exempt-be-review')) {
+    return false
+  }
+
+  // If PR has Lighthouse team indicators, it's NOT exempt (policy changed Dec 1, 2025)
+  if (pr.labels.some(label => LIGHTHOUSE_LABELS.includes(label))) {
+    return false
+  }
+
+  // Otherwise, respect the exempt label
+  return true
+}
+
 function Dashboard() {
   const { theme, toggleTheme } = useTheme()
   const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
@@ -336,13 +357,13 @@ function Dashboard() {
     // Apply card filter
     switch (activeFilter) {
       case 'ready':
-        filtered = filtered.filter(pr => 
+        filtered = filtered.filter(pr =>
           !pr.draft &&
           pr.backend_approval_status !== 'approved' &&
           // Exclude dependabot PRs (they have their own section)
           pr.author !== 'dependabot[bot]' &&
           // Exclude PRs with exempt-be-review label (they should be in "Exempt BE Review" section)
-          !(pr.labels && pr.labels.includes('exempt-be-review')) &&
+          !isTrulyExemptFromBackendReview(pr) &&
           // Exclude PRs with failing CI checks (they should be in "Failing CI" section)
           !(pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) &&
           (
@@ -370,20 +391,20 @@ function Dashboard() {
         }
         break
       case 'failing':
-        filtered = filtered.filter(pr => 
-          !pr.draft && 
-          pr.ci_status === 'failure' && 
+        filtered = filtered.filter(pr =>
+          !pr.draft &&
+          pr.ci_status === 'failure' &&
           hasNonReviewFailingChecks(pr) &&
           // Exclude PRs with exempt-be-review label (they should be in "Exempt BE Review" section)
-          !(pr.labels && pr.labels.includes('exempt-be-review'))
+          !isTrulyExemptFromBackendReview(pr)
         )
         break
       case 'draft':
         filtered = filtered.filter(pr => pr.draft)
         break
       case 'reviewed-today':
-        filtered = filtered.filter(pr => 
-          pr.backend_approval_status !== 'approved' && 
+        filtered = filtered.filter(pr =>
+          pr.backend_approval_status !== 'approved' &&
           !(pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))) &&
           !pr.draft &&
           // Exclude dependabot PRs (they have their own section)
@@ -391,23 +412,23 @@ function Dashboard() {
           // Exclude platform-atlas PRs (they go straight to Ready for Review)
           pr.repository_name !== 'platform-atlas' &&
           // Exclude PRs with exempt-be-review label
-          !(pr.labels && pr.labels.includes('exempt-be-review')) &&
+          !isTrulyExemptFromBackendReview(pr) &&
           // Exclude PRs that already have approvals (they should be in "Ready for Review")
           !(pr.approval_summary && pr.approval_summary.approved_count > 0)
         )
         break
       case 'exempt':
-        filtered = filtered.filter(pr => 
-          !pr.draft && pr.labels && pr.labels.includes('exempt-be-review')
+        filtered = filtered.filter(pr =>
+          !pr.draft && isTrulyExemptFromBackendReview(pr)
         )
         break
       case 'finished':
-        filtered = filtered.filter(pr => 
-          !pr.draft && 
+        filtered = filtered.filter(pr =>
+          !pr.draft &&
           // Exclude PRs with exempt-be-review label (they should be in "Exempt BE Review" section)
-          !(pr.labels && pr.labels.includes('exempt-be-review')) &&
+          !isTrulyExemptFromBackendReview(pr) &&
           (
-            pr.backend_approval_status === 'approved' || 
+            pr.backend_approval_status === 'approved' ||
             (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
           )
         )
@@ -597,13 +618,13 @@ function Dashboard() {
                   </CardHeader>
                   <CardContent className="h-[85px]">
                     <div className="text-2xl font-semibold">
-                      {pullRequests.filter(pr => 
+                      {pullRequests.filter(pr =>
                         !pr.draft &&
                         pr.backend_approval_status !== 'approved' &&
                         // Exclude dependabot PRs (they have their own section)
                         pr.author !== 'dependabot[bot]' &&
                         // Exclude PRs with exempt-be-review label
-                        !(pr.labels && pr.labels.includes('exempt-be-review')) &&
+                        !isTrulyExemptFromBackendReview(pr) &&
                         // Exclude PRs with failing CI checks
                         !(pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) &&
                         (
@@ -710,8 +731,8 @@ function Dashboard() {
                   </CardHeader>
                   <CardContent className="h-[85px]">
                     <div className="text-2xl font-semibold">
-                      {pullRequests.filter(pr => 
-                        pr.backend_approval_status !== 'approved' && 
+                      {pullRequests.filter(pr =>
+                        pr.backend_approval_status !== 'approved' &&
                         !(pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))) &&
                         !pr.draft &&
                         // Exclude dependabot PRs (they have their own section)
@@ -719,7 +740,7 @@ function Dashboard() {
                         // Exclude platform-atlas PRs (they go straight to Ready for Review)
                         pr.repository_name !== 'platform-atlas' &&
                         // Exclude PRs with exempt-be-review label
-                        !(pr.labels && pr.labels.includes('exempt-be-review')) &&
+                        !isTrulyExemptFromBackendReview(pr) &&
                         // Exclude PRs that already have approvals (they should be in "Ready for Review")
                         !(pr.approval_summary && pr.approval_summary.approved_count > 0)
                       ).length}
@@ -740,8 +761,8 @@ function Dashboard() {
                   </CardHeader>
                   <CardContent className="h-[85px]">
                     <div className="text-2xl font-semibold">
-                      {pullRequests.filter(pr => 
-                        !pr.draft && pr.labels && pr.labels.includes('exempt-be-review')
+                      {pullRequests.filter(pr =>
+                        !pr.draft && isTrulyExemptFromBackendReview(pr)
                       ).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
