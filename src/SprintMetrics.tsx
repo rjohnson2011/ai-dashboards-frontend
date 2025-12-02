@@ -622,7 +622,7 @@ const SprintMetrics: React.FC = () => {
                   {/* Reference areas for weekends and holidays */}
                   {(() => {
                     const areas: JSX.Element[] = [];
-                    let weekendStart: number | null = null;
+                    let weekendStartDate: string | null = null;
 
                     chartData.forEach((day, index) => {
                       if (day.isThanksgiving) {
@@ -630,69 +630,71 @@ const SprintMetrics: React.FC = () => {
                         areas.push(
                           <ReferenceArea
                             key={`thanksgiving-${index}`}
-                            x1={index - 0.5}
-                            x2={index + 0.5}
+                            x1={day.date}
+                            x2={day.date}
                             fill="#fbbf24"
-                            fillOpacity={0.15}
+                            fillOpacity={0.2}
                             ifOverflow="extendDomain"
                           >
                             <Label
-                              value="THANKSGIVING"
+                              value="HOLIDAY"
                               position="insideTop"
                               fill="#fbbf24"
-                              fontSize={10}
+                              fontSize={11}
                               fontWeight="bold"
-                              offset={10}
+                              offset={15}
                             />
                           </ReferenceArea>
                         );
                       } else if (day.isWeekend) {
-                        if (weekendStart === null) {
-                          weekendStart = index;
+                        if (weekendStartDate === null) {
+                          weekendStartDate = day.date;
                         }
-                      } else if (weekendStart !== null) {
+                      } else if (weekendStartDate !== null) {
                         // End of weekend, add reference area
+                        const prevDay = chartData[index - 1];
                         areas.push(
                           <ReferenceArea
-                            key={`weekend-${weekendStart}`}
-                            x1={weekendStart - 0.5}
-                            x2={index - 0.5}
+                            key={`weekend-${weekendStartDate}`}
+                            x1={weekendStartDate}
+                            x2={prevDay.date}
                             fill="#6b7280"
-                            fillOpacity={0.1}
+                            fillOpacity={0.15}
                             ifOverflow="extendDomain"
                           >
                             <Label
                               value="WEEKEND"
                               position="insideTop"
-                              fill="#6b7280"
-                              fontSize={10}
+                              fill="#9ca3af"
+                              fontSize={11}
                               fontWeight="bold"
-                              offset={10}
+                              offset={15}
                             />
                           </ReferenceArea>
                         );
-                        weekendStart = null;
+                        weekendStartDate = null;
                       }
                     });
 
                     // Handle case where sprint ends on a weekend
-                    if (weekendStart !== null) {
+                    if (weekendStartDate !== null) {
+                      const lastDay = chartData[chartData.length - 1];
                       areas.push(
                         <ReferenceArea
-                          key={`weekend-${weekendStart}`}
-                          x1={weekendStart - 0.5}
-                          x2={chartData.length - 0.5}
+                          key={`weekend-${weekendStartDate}`}
+                          x1={weekendStartDate}
+                          x2={lastDay.date}
                           fill="#6b7280"
-                          fillOpacity={0.1}
+                          fillOpacity={0.15}
                           ifOverflow="extendDomain"
                         >
                           <Label
                             value="WEEKEND"
                             position="insideTop"
-                            fill="#6b7280"
-                            fontSize={10}
+                            fill="#9ca3af"
+                            fontSize={11}
                             fontWeight="bold"
-                            offset={10}
+                            offset={15}
                           />
                         </ReferenceArea>
                       );
