@@ -82,9 +82,11 @@ interface PullRequest {
   changes_requested_info?: {
     status: string
     message: string
-    backend_commenter: string
-    backend_comment_at: string
+    backend_commenter?: string
+    backend_comment_at?: string
     author_comment_at?: string
+    backend_reviewer?: string
+    dismissed_at?: string
   } | null
 }
 
@@ -1070,7 +1072,11 @@ function Dashboard() {
                           <TableCell>
                             <div className="space-y-1">
                               {pr.changes_requested_info ? (
-                                pr.changes_requested_info.status === 'new_comment_from_author' ? (
+                                pr.changes_requested_info.status === 'new_commit_from_author' ? (
+                                  <span className="text-xs font-medium text-purple-500">
+                                    New Commit From Author
+                                  </span>
+                                ) : pr.changes_requested_info.status === 'new_comment_from_author' ? (
                                   <span className="text-xs font-medium text-blue-500">
                                     New comment from author
                                   </span>
