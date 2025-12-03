@@ -533,7 +533,7 @@ function Dashboard() {
                   {lastUpdated && (
                     <>
                       <span className="text-sm text-muted-foreground">
-                        Data refreshed ({new Date(lastUpdated).toLocaleString('en-US', {
+                        Data refreshed at {new Date(lastUpdated).toLocaleString('en-US', {
                           timeZone: 'America/New_York',
                           month: 'short',
                           day: 'numeric',
@@ -541,7 +541,7 @@ function Dashboard() {
                           hour: 'numeric',
                           minute: '2-digit',
                           hour12: true
-                        })} ET)
+                        })} ET
                       </span>
                       <span className="text-sm text-muted-foreground">
                         • Version {APP_VERSION.version}
