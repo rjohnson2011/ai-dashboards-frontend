@@ -533,7 +533,7 @@ function Dashboard() {
                   {lastUpdated && (
                     <>
                       <span className="text-sm text-muted-foreground">
-                        Data refreshed {formatTimeAgo(lastUpdated)} ({new Date(lastUpdated).toLocaleString('en-US', { 
+                        Data refreshed ({new Date(lastUpdated).toLocaleString('en-US', {
                           timeZone: 'America/New_York',
                           month: 'short',
                           day: 'numeric',
