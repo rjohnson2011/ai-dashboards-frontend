@@ -768,8 +768,17 @@ const SprintMetrics: React.FC = () => {
                   </thead>
                   <tbody className="divide-y divide-teal-500/10">
                     {data.engineer_totals.map((engineer) => {
-                      const avgPerDay = data.sprint_totals.days > 0
-                        ? (engineer.approvals / data.sprint_totals.days).toFixed(1)
+                      // Calculate days elapsed in sprint (from start to today)
+                      let daysElapsed = data.sprint_totals.days; // fallback to total days
+                      if (data.current_sprint) {
+                        const startDate = new Date(data.current_sprint.start_date);
+                        const today = new Date();
+                        const msPerDay = 1000 * 60 * 60 * 24;
+                        daysElapsed = Math.max(1, Math.ceil((today.getTime() - startDate.getTime()) / msPerDay));
+                      }
+
+                      const avgPerDay = daysElapsed > 0
+                        ? (engineer.approvals / daysElapsed).toFixed(1)
                         : '0.0';
 
                       return (
