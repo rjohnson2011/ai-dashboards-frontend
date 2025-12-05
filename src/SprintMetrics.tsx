@@ -902,7 +902,7 @@ const SprintMetrics: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {data.backend_approved_closed.monthly_breakdown.map((month) => {
+                {[...data.backend_approved_closed.monthly_breakdown].reverse().map((month) => {
                   const isExpanded = expandedMonths.has(month.month_date);
                   return (
                     <div key={month.month_date} className="border-b border-amber-500/20 pb-4 last:border-b-0">
