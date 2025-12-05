@@ -762,14 +762,14 @@ const SprintMetrics: React.FC = () => {
                         Approvals
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-light text-gray-400 uppercase tracking-wider">
-                        Percentage
+                        Avg per Day
                       </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-teal-500/10">
                     {data.engineer_totals.map((engineer) => {
-                      const percentage = data.sprint_totals.total > 0
-                        ? ((engineer.approvals / data.sprint_totals.total) * 100).toFixed(1)
+                      const avgPerDay = data.sprint_totals.days > 0
+                        ? (engineer.approvals / data.sprint_totals.days).toFixed(1)
                         : '0.0';
 
                       return (
@@ -795,7 +795,7 @@ const SprintMetrics: React.FC = () => {
                             {engineer.approvals}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-light text-gray-300">
-                            {percentage}%
+                            {avgPerDay}
                           </td>
                         </tr>
                       );
