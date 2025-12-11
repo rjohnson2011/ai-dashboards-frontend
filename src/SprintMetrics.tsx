@@ -205,37 +205,6 @@ const SprintMetrics: React.FC = () => {
     return `https://github.com/${githubHandle}.png?size=80`;
   };
 
-  const calculateBusinessDays = (startDate: string, endDate: string) => {
-    const [startYear, startMonth, startDay] = startDate.split('-').map(Number);
-    const [endYear, endMonth, endDay] = endDate.split('-').map(Number);
-
-    const start = new Date(Date.UTC(startYear, startMonth - 1, startDay));
-    const end = new Date(Date.UTC(endYear, endMonth - 1, endDay));
-
-    let businessDays = 0;
-    let current = new Date(start);
-
-    while (current <= end) {
-      const dayOfWeek = current.getUTCDay();
-      // Count weekdays (Mon-Fri = 1-5)
-      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-        businessDays++;
-      }
-      current.setUTCDate(current.getUTCDate() + 1);
-    }
-
-    // Check for Thanksgiving (4th Thursday of November)
-    if (startYear === 2025 && startMonth === 11) {
-      // Thanksgiving 2025 is Nov 27
-      const thanksgiving = new Date(Date.UTC(2025, 10, 27));
-      if (thanksgiving >= start && thanksgiving <= end) {
-        businessDays--;
-      }
-    }
-
-    return businessDays;
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-black">
@@ -539,10 +508,7 @@ const SprintMetrics: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="text-5xl font-extralight text-teal-400">
-                {(() => {
-                  const businessDays = calculateBusinessDays(data.current_sprint.start_date, data.current_sprint.end_date);
-                  return businessDays > 0 ? (data.sprint_totals.total / businessDays).toFixed(1) : '0.0';
-                })()}
+                {data.sprint_totals.average_per_day.toFixed(1)}
               </div>
               <div className="text-xs text-gray-400 mt-1 font-light">per business day</div>
             </CardContent>
