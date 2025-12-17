@@ -328,29 +328,39 @@ function Dashboard() {
       'Get PR Data',
       'Check Workflow Statuses'
     ]
-    
+
     return pr.failing_checks.some(check => {
       // Check if it's a backend-related check (including "Succeed if backend approval")
       if (check.name.toLowerCase().includes('backend')) return false
-      
+
       // Check if it's in our review-related list
       if (reviewRelatedChecks.some(reviewCheck => check.name === reviewCheck)) return false
-      
+
       // Check if it contains "Get PR Data" in any form
       if (check.name.includes('Get PR Data')) return false
-      
+
       // Check if it's the backend approval confirmation check
       if (check.name.includes('Succeed if backend approval')) return false
-      
+
       // Check if it contains "Check Workflow Statuses" in any form
       if (check.name.includes('Check Workflow Statuses')) return false
-      
+
       // Check if it's Danger in any form
       if (check.name.toLowerCase().includes('danger')) return false
-      
+
       // This is a non-review failing check
       return true
     })
+  }
+
+  // Check if a PR has a failing Backend Approval CI check
+  // This indicates that a backend approval is needed or has been invalidated by new commits
+  const hasFailingBackendApprovalCheck = (pr: PullRequest) => {
+    return pr.failing_checks.some(check =>
+      check.name.toLowerCase().includes('backend approval') ||
+      check.name.includes('Backend Approval on:') ||
+      check.name.includes('Succeed if backend approval')
+    )
   }
 
   const filterPullRequests = (prs: PullRequest[]) => {
@@ -361,7 +371,9 @@ function Dashboard() {
       case 'ready':
         filtered = filtered.filter(pr =>
           !pr.draft &&
-          pr.backend_approval_status !== 'approved' &&
+          // Include PRs with failing backend approval checks OR PRs without backend approval
+          // This handles the case where a PR was approved but then the author made more commits
+          (hasFailingBackendApprovalCheck(pr) || pr.backend_approval_status !== 'approved') &&
           // Exclude dependabot PRs (they have their own section)
           pr.author !== 'dependabot[bot]' &&
           // Exclude PRs with exempt-be-review label (they should be in "Exempt BE Review" section)
@@ -369,13 +381,15 @@ function Dashboard() {
           // Exclude PRs with failing CI checks (they should be in "Failing CI" section)
           !(pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) &&
           (
+            // Special case: PRs with failing backend approval checks are always ready for review
+            hasFailingBackendApprovalCheck(pr) ||
             // Special case: platform-atlas PRs don't need approval to be ready for review
             pr.repository_name === 'platform-atlas' ||
             // Must be ready for backend review
             (pr.ready_for_backend_review &&
              (
                // Regular PRs with approvals (not from backend reviewers)
-               (pr.approval_summary && 
+               (pr.approval_summary &&
                 pr.approval_summary.approved_count > 0 &&
                 !(pr.approval_summary.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))) ||
                // PRs from backend team members (auto-ready for review)
@@ -429,6 +443,10 @@ function Dashboard() {
           !pr.draft &&
           // Exclude PRs with exempt-be-review label (they should be in "Exempt BE Review" section)
           !isTrulyExemptFromBackendReview(pr) &&
+          // IMPORTANT: Exclude PRs with failing backend approval checks
+          // If the backend approval CI check is failing (e.g., due to new commits after approval),
+          // the PR should be in "Ready for Review", not "Finished but Unmerged"
+          !hasFailingBackendApprovalCheck(pr) &&
           (
             pr.backend_approval_status === 'approved' ||
             (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
