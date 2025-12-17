@@ -1032,7 +1032,9 @@ function Dashboard() {
                           </TableCell>
                           <TableCell>
                             <div className="space-y-1">
-                              {pr.ci_status === 'pending' && pr.total_checks - pr.successful_checks === 1 && pr.failed_checks === 0 ? (
+                              {pr.ci_status === 'success' ? (
+                                <span className="text-xs text-muted-foreground">None</span>
+                              ) : pr.ci_status === 'pending' && pr.total_checks - pr.successful_checks === 1 && pr.failed_checks === 0 ? (
                                 <span className="text-xs font-medium text-warning">Succeed if backend approval is confirmed</span>
                               ) : pr.failing_checks.length > 0 ? (
                                 pr.failing_checks.map((check, idx) => (
