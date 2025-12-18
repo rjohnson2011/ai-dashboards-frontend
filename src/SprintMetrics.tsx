@@ -102,6 +102,8 @@ interface SprintMetricsData {
   approved_unmerged_count?: number;
   upcoming_rotations?: UpcomingRotation[];
   backend_approved_closed?: BackendApprovedClosed;
+  has_previous_sprint?: boolean;
+  has_next_sprint?: boolean;
 }
 
 const SprintMetrics: React.FC = () => {
@@ -111,6 +113,7 @@ const SprintMetrics: React.FC = () => {
   const [prSearch, setPrSearch] = useState('');
   const [sprintOffset, setSprintOffset] = useState(0); // 0 = current, -1 = previous, etc.
   const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
+  const [sprintCache, setSprintCache] = useState<Record<number, SprintMetricsData>>({});
 
   useEffect(() => {
     fetchSprintMetrics(sprintOffset);
@@ -118,6 +121,15 @@ const SprintMetrics: React.FC = () => {
 
   const fetchSprintMetrics = async (offset: number = 0) => {
     try {
+      // Check cache first - use cached data for historical sprints (offset < 0)
+      // Always fetch fresh data for current sprint (offset === 0)
+      if (offset < 0 && sprintCache[offset]) {
+        setData(sprintCache[offset]);
+        setLoading(false);
+        setError(null);
+        return;
+      }
+
       setLoading(true);
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
       const url = offset === 0
@@ -132,6 +144,11 @@ const SprintMetrics: React.FC = () => {
       const jsonData = await response.json();
       setData(jsonData);
       setError(null);
+
+      // Cache historical sprint data (offset < 0)
+      if (offset < 0) {
+        setSprintCache(prev => ({ ...prev, [offset]: jsonData }));
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -140,14 +157,15 @@ const SprintMetrics: React.FC = () => {
   };
 
   const goToPreviousSprint = () => {
-    // Limit to 3 months back (roughly 6 sprints of 2 weeks each)
-    if (sprintOffset > -6) {
+    // Only navigate if there's a previous sprint available
+    if (data?.has_previous_sprint) {
       setSprintOffset(prev => prev - 1);
     }
   };
 
   const goToNextSprint = () => {
-    if (sprintOffset < 0) {
+    // Only navigate if there's a next sprint available
+    if (data?.has_next_sprint) {
       setSprintOffset(prev => prev + 1);
     }
   };
@@ -357,7 +375,7 @@ const SprintMetrics: React.FC = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={goToPreviousSprint}
-              disabled={sprintOffset <= -6}
+              disabled={!data?.has_previous_sprint}
               className="p-2 text-gray-400 hover:text-teal-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               title="Previous Sprint"
             >
@@ -368,7 +386,7 @@ const SprintMetrics: React.FC = () => {
             </h1>
             <button
               onClick={goToNextSprint}
-              disabled={sprintOffset >= 0}
+              disabled={!data?.has_next_sprint}
               className="p-2 text-gray-400 hover:text-teal-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               title="Next Sprint"
             >
