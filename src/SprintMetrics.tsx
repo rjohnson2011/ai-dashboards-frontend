@@ -347,56 +347,46 @@ const SprintMetrics: React.FC = () => {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <div className="flex items-center gap-4">
-            <Link
-              to="/dashboard"
-              className="flex items-center gap-2 text-gray-400 hover:text-teal-400 transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5" />
-              <span className="font-light">Back to Dashboard</span>
-            </Link>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={goToPreviousSprint}
-                disabled={sprintOffset <= -6}
-                className="p-2 text-gray-400 hover:text-teal-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                title="Previous Sprint"
-              >
-                <ChevronLeft className="h-6 w-6" />
-              </button>
-              <h1 className="text-4xl font-extralight tracking-wide text-white">
-                {isCurrentSprint ? 'Current Sprint' : `Sprint #${data?.current_sprint?.sprint_number}`}
-              </h1>
-              <button
-                onClick={goToNextSprint}
-                disabled={sprintOffset >= 0}
-                className="p-2 text-gray-400 hover:text-teal-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                title="Next Sprint"
-              >
-                <ChevronRight className="h-6 w-6" />
-              </button>
-            </div>
-          </div>
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-2 text-gray-400 hover:text-teal-400 transition-colors"
+          >
+            <ArrowLeft className="h-5 w-5" />
+            <span className="font-light">Back to Dashboard</span>
+          </Link>
           <div className="flex items-center gap-3">
-            <Link
-              to="/sprint-metrics/detailed"
-              className="px-4 py-2 bg-gray-700 text-white rounded font-light hover:bg-gray-600 transition-colors"
-            >
-              View Detailed Metrics
-            </Link>
             <button
-              onClick={() => fetchSprintMetrics(sprintOffset)}
-              className="px-4 py-2 bg-teal-600 text-white rounded font-light hover:bg-teal-500 transition-colors"
+              onClick={goToPreviousSprint}
+              disabled={sprintOffset <= -6}
+              className="p-2 text-gray-400 hover:text-teal-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              title="Previous Sprint"
             >
-              Refresh
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+            <h1 className="text-4xl font-extralight tracking-wide text-white">
+              Sprint #{data?.current_sprint?.sprint_number}
+            </h1>
+            <button
+              onClick={goToNextSprint}
+              disabled={sprintOffset >= 0}
+              className="p-2 text-gray-400 hover:text-teal-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              title="Next Sprint"
+            >
+              <ChevronRight className="h-6 w-6" />
             </button>
           </div>
+          <Link
+            to="/sprint-metrics/detailed"
+            className="px-4 py-2 bg-gray-700 text-white rounded font-light hover:bg-gray-600 transition-colors"
+          >
+            Detailed Metrics (Beta)
+          </Link>
         </div>
 
         {/* Current Sprint Card */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-white">{isCurrentSprint ? 'Current Sprint' : `Sprint #${data.current_sprint.sprint_number}`}</CardTitle>
+            <CardTitle className="text-white">Sprint #{data.current_sprint.sprint_number}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="mb-4 p-4 bg-teal-900/30 rounded border border-teal-500/30">
