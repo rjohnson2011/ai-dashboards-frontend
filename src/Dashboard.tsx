@@ -371,9 +371,11 @@ function Dashboard() {
       case 'ready':
         filtered = filtered.filter(pr =>
           !pr.draft &&
-          // Include PRs with failing backend approval checks OR PRs without backend approval
+          // Include PRs with failing backend approval checks OR PRs without backend approval OR PRs with new commits after approval
           // This handles the case where a PR was approved but then the author made more commits
-          (hasFailingBackendApprovalCheck(pr) || pr.backend_approval_status !== 'approved') &&
+          (hasFailingBackendApprovalCheck(pr) ||
+           pr.backend_approval_status !== 'approved' ||
+           pr.changes_requested_info?.status === 'new_commits_after_approval') &&
           // Exclude dependabot PRs (they have their own section)
           pr.author !== 'dependabot[bot]' &&
           // Exclude PRs with exempt-be-review label (they should be in "Exempt BE Review" section)
@@ -383,6 +385,8 @@ function Dashboard() {
           (
             // Special case: PRs with failing backend approval checks are always ready for review
             hasFailingBackendApprovalCheck(pr) ||
+            // Special case: PRs with new commits after backend approval need re-review
+            pr.changes_requested_info?.status === 'new_commits_after_approval' ||
             // Special case: platform-atlas PRs don't need approval to be ready for review
             pr.repository_name === 'platform-atlas' ||
             // Must be ready for backend review
@@ -450,6 +454,9 @@ function Dashboard() {
           // If the backend approval CI check is failing (e.g., due to new commits after approval),
           // the PR should be in "Ready for Review", not "Finished but Unmerged"
           !hasFailingBackendApprovalCheck(pr) &&
+          // IMPORTANT: Exclude PRs with new commits after backend approval
+          // These PRs need re-review and should go to "Ready for Review", not here
+          pr.changes_requested_info?.status !== 'new_commits_after_approval' &&
           (
             pr.backend_approval_status === 'approved' ||
             (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
