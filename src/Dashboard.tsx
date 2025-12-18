@@ -583,7 +583,7 @@ function Dashboard() {
             </div>
           </div>
         </div>
-        <div className="flex-1 space-y-8 px-4 py-6">
+        <div className="flex-1 space-y-8 px-2 py-6">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-semibold tracking-tight">Repositories Dashboard</h2>
