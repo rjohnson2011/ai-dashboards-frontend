@@ -443,6 +443,9 @@ function Dashboard() {
           !pr.draft &&
           // Exclude PRs with exempt-be-review label (they should be in "Exempt BE Review" section)
           !isTrulyExemptFromBackendReview(pr) &&
+          // IMPORTANT: Exclude PRs with failing CI
+          // PRs with backend approval but failing CI should go to "Failing CI", not here
+          pr.ci_status !== 'failure' &&
           // IMPORTANT: Exclude PRs with failing backend approval checks
           // If the backend approval CI check is failing (e.g., due to new commits after approval),
           // the PR should be in "Ready for Review", not "Finished but Unmerged"
