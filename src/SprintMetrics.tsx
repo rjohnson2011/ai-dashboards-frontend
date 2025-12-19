@@ -164,8 +164,9 @@ const SprintMetrics: React.FC = () => {
   };
 
   const goToNextSprint = () => {
-    // Only navigate if there's a next sprint available
-    if (data?.has_next_sprint) {
+    // Only navigate if there's a next sprint available AND we're not on the current sprint
+    // (Don't allow navigation to future sprints that haven't happened yet)
+    if (data?.has_next_sprint && sprintOffset < 0) {
       setSprintOffset(prev => prev + 1);
     }
   };
@@ -386,7 +387,7 @@ const SprintMetrics: React.FC = () => {
             </h1>
             <button
               onClick={goToNextSprint}
-              disabled={!data?.has_next_sprint}
+              disabled={sprintOffset >= 0 || !data?.has_next_sprint}
               className="p-2 text-gray-400 hover:text-teal-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               title="Next Sprint"
             >
