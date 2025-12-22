@@ -193,8 +193,6 @@ const SprintMetrics: React.FC = () => {
     }
   };
 
-  const isCurrentSprint = sprintOffset === 0;
-
   const toggleMonth = (monthDate: string) => {
     setExpandedMonths(prev => {
       const newSet = new Set(prev);
@@ -308,11 +306,9 @@ const SprintMetrics: React.FC = () => {
     data.daily_approvals.map(day => [day.date, day])
   );
 
-  // Generate all dates in the sprint range
+  // Generate all dates in the sprint range (including future days)
   const startDate = new Date(data.current_sprint.start_date + 'T00:00:00Z');
-  const endDate = isCurrentSprint
-    ? new Date(today + 'T00:00:00Z')
-    : new Date(data.current_sprint.end_date + 'T00:00:00Z');
+  const endDate = new Date(data.current_sprint.end_date + 'T00:00:00Z');
 
   const allDates: string[] = [];
   const currentDate = new Date(startDate);
@@ -329,6 +325,8 @@ const SprintMetrics: React.FC = () => {
     const dayOfWeek = date.getUTCDay();
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
     const isThanksgiving = dateStr === '2025-11-27';
+    const isHoliday = dateStr === '2024-12-25' || dateStr === '2025-01-01' ||
+                     dateStr === '2025-12-25' || dateStr === '2026-01-01';
 
     if (dayData) {
       return {
@@ -337,6 +335,7 @@ const SprintMetrics: React.FC = () => {
         total: dayData.total,
         isWeekend,
         isThanksgiving,
+        isHoliday,
         ...dayData.by_engineer
       };
     } else {
@@ -346,7 +345,8 @@ const SprintMetrics: React.FC = () => {
         rawDate: dateStr,
         total: 0,
         isWeekend,
-        isThanksgiving
+        isThanksgiving,
+        isHoliday
       };
       allEngineers.forEach(engineer => {
         emptyDay[engineer] = 0;
@@ -420,14 +420,19 @@ const SprintMetrics: React.FC = () => {
 
   // Generate all sprint days with PR data merged in
   const allSprintDays = getAllSprintDays();
+
   const filteredApprovedPRs = allSprintDays.map(date => ({
     date,
     prs: prsByDate.get(date)?.prs || [],
     isWeekend: isWeekend(date),
     isHoliday: isHoliday(date)
   })).filter(day => {
+    // Only show elapsed days (not future), exclude weekends
+    if (day.date > today) return false;
+    if (day.isWeekend) return false;
+
     // If searching, only show days with matching PRs
-    // If not searching, show all days
+    // If not searching, show all elapsed non-weekend days
     return prSearch ? day.prs.length > 0 : true;
   });
 
