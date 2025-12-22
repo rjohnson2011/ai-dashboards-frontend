@@ -367,8 +367,40 @@ const SprintMetrics: React.FC = () => {
     '#06b6d4', '#99f6e4', '#5eead4', '#2dd4bf', '#14b8a6'
   ];
 
+  // Helper functions for date handling
+  const isWeekend = (dateStr: string): boolean => {
+    const date = new Date(dateStr + 'T00:00:00Z');
+    const day = date.getUTCDay();
+    return day === 0 || day === 6; // Sunday = 0, Saturday = 6
+  };
+
+  const isHoliday = (dateStr: string): boolean => {
+    // Holidays: Dec 25 and Jan 1
+    return dateStr === '2024-12-25' || dateStr === '2025-01-01' ||
+           dateStr === '2025-12-25' || dateStr === '2026-01-01';
+  };
+
+  const getAllSprintDays = (): string[] => {
+    if (!data.current_sprint) return [];
+
+    const start = new Date(data.current_sprint.start_date + 'T00:00:00Z');
+    const end = new Date(data.current_sprint.end_date + 'T00:00:00Z');
+    const days: string[] = [];
+
+    const current = new Date(start);
+    while (current <= end) {
+      const year = current.getUTCFullYear();
+      const month = String(current.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(current.getUTCDate()).padStart(2, '0');
+      days.push(`${year}-${month}-${day}`);
+      current.setUTCDate(current.getUTCDate() + 1);
+    }
+
+    return days.reverse(); // Descending order (newest first)
+  };
+
   // Filter approved PRs by search term
-  const filteredApprovedPRs = data.approved_prs_by_day.map(day => ({
+  const filteredApprovedPRsBySearch = data.approved_prs_by_day.map(day => ({
     ...day,
     prs: day.prs.filter(pr => {
       const searchLower = prSearch.toLowerCase();
@@ -379,7 +411,25 @@ const SprintMetrics: React.FC = () => {
         pr.approved_by.toLowerCase().includes(searchLower)
       );
     })
-  })).filter(day => day.prs.length > 0); // Only show days with matching PRs
+  }));
+
+  // Create a map of dates to PR data
+  const prsByDate = new Map(
+    filteredApprovedPRsBySearch.map(day => [day.date, day])
+  );
+
+  // Generate all sprint days with PR data merged in
+  const allSprintDays = getAllSprintDays();
+  const filteredApprovedPRs = allSprintDays.map(date => ({
+    date,
+    prs: prsByDate.get(date)?.prs || [],
+    isWeekend: isWeekend(date),
+    isHoliday: isHoliday(date)
+  })).filter(day => {
+    // If searching, only show days with matching PRs
+    // If not searching, show all days
+    return prSearch ? day.prs.length > 0 : true;
+  });
 
   return (
     <div className="min-h-screen bg-black p-6"
@@ -838,10 +888,23 @@ const SprintMetrics: React.FC = () => {
               <div className="space-y-6">
                 {filteredApprovedPRs.map((day) => (
                 <div key={day.date} className="border-b border-teal-500/20 pb-4 last:border-b-0">
-                  <h3 className="text-lg font-light mb-3 text-white">
-                    {formatDate(day.date)} ({day.prs.length} {day.prs.length === 1 ? 'PR' : 'PRs'})
+                  <h3 className="text-lg font-light mb-3 text-white flex items-center gap-2">
+                    <span>{formatDate(day.date)} ({day.prs.length} {day.prs.length === 1 ? 'PR' : 'PRs'})</span>
+                    {day.isHoliday && (
+                      <span className="px-2 py-0.5 text-xs bg-red-500/20 text-red-400 border border-red-500/30 rounded">
+                        Holiday
+                      </span>
+                    )}
+                    {day.isWeekend && !day.isHoliday && (
+                      <span className="px-2 py-0.5 text-xs bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded">
+                        Weekend
+                      </span>
+                    )}
                   </h3>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-2">
+                  {day.prs.length === 0 ? (
+                    <div className="text-sm text-gray-500 italic font-light">No PRs approved on this day</div>
+                  ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-2">
                     {day.prs.map((pr) => (
                       <div key={pr.number} className="flex items-start gap-3 text-sm">
                         <a
@@ -867,7 +930,8 @@ const SprintMetrics: React.FC = () => {
                         </div>
                       </div>
                     ))}
-                  </div>
+                    </div>
+                  )}
                 </div>
               ))}
               </div>
@@ -883,22 +947,10 @@ const SprintMetrics: React.FC = () => {
                 <span>Backend Team Reviews</span>
                 <span className="text-sm text-amber-400">Past 6 Months</span>
               </CardTitle>
-              <div className="grid grid-cols-4 gap-4 mt-4">
+              <div className="flex justify-center mt-4">
                 <div className="text-center">
-                  <div className="text-3xl font-extralight text-white">{data.backend_approved_closed.total}</div>
-                  <div className="text-xs text-gray-400 mt-1">Total</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-extralight text-green-400">{data.backend_approved_closed.merged}</div>
-                  <div className="text-xs text-gray-400 mt-1">Merged</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-extralight text-gray-400">{data.backend_approved_closed.closed}</div>
-                  <div className="text-xs text-gray-400 mt-1">Closed</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-extralight text-blue-400">{data.backend_approved_closed.open || 0}</div>
-                  <div className="text-xs text-gray-400 mt-1">Open</div>
+                  <div className="text-4xl font-extralight text-amber-400">{data.backend_approved_closed.total}</div>
+                  <div className="text-sm text-gray-400 mt-1">Total Approvals</div>
                 </div>
               </div>
             </CardHeader>
@@ -913,7 +965,7 @@ const SprintMetrics: React.FC = () => {
                         className="w-full flex items-center justify-between text-lg font-light mb-3 text-white hover:text-amber-400 transition-colors"
                       >
                         <span>
-                          {month.month} ({month.total} {month.total === 1 ? 'PR' : 'PRs'}: {month.merged} merged, {month.closed} closed, {month.open || 0} open)
+                          {month.month} ({month.total} {month.total === 1 ? 'approval' : 'approvals'})
                         </span>
                         {isExpanded ? (
                           <ChevronUp className="h-5 w-5 text-amber-400" />
