@@ -82,6 +82,7 @@ interface MonthlyBreakdown {
   total: number;
   merged: number;
   closed: number;
+  open: number;
   prs: BackendApprovedClosedPR[];
 }
 
@@ -89,6 +90,7 @@ interface BackendApprovedClosed {
   total: number;
   merged: number;
   closed: number;
+  open: number;
   monthly_breakdown: MonthlyBreakdown[];
 }
 
@@ -873,15 +875,15 @@ const SprintMetrics: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Backend Approved & Closed PRs (Past 6 Months) */}
+        {/* Backend Team Reviews (Past 6 Months) - All repositories */}
         {data.backend_approved_closed && data.backend_approved_closed.total > 0 && (
           <Card className="bg-slate-800 border-amber-500/30">
             <CardHeader>
               <CardTitle className="text-xl font-light text-white flex items-center justify-between">
-                <span>Backend-Approved & Closed PRs</span>
+                <span>Backend Team Reviews</span>
                 <span className="text-sm text-amber-400">Past 6 Months</span>
               </CardTitle>
-              <div className="grid grid-cols-3 gap-4 mt-4">
+              <div className="grid grid-cols-4 gap-4 mt-4">
                 <div className="text-center">
                   <div className="text-3xl font-extralight text-white">{data.backend_approved_closed.total}</div>
                   <div className="text-xs text-gray-400 mt-1">Total</div>
@@ -893,6 +895,10 @@ const SprintMetrics: React.FC = () => {
                 <div className="text-center">
                   <div className="text-3xl font-extralight text-gray-400">{data.backend_approved_closed.closed}</div>
                   <div className="text-xs text-gray-400 mt-1">Closed</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-extralight text-blue-400">{data.backend_approved_closed.open || 0}</div>
+                  <div className="text-xs text-gray-400 mt-1">Open</div>
                 </div>
               </div>
             </CardHeader>
@@ -907,7 +913,7 @@ const SprintMetrics: React.FC = () => {
                         className="w-full flex items-center justify-between text-lg font-light mb-3 text-white hover:text-amber-400 transition-colors"
                       >
                         <span>
-                          {month.month} ({month.total} {month.total === 1 ? 'PR' : 'PRs'}: {month.merged} merged, {month.closed} closed)
+                          {month.month} ({month.total} {month.total === 1 ? 'PR' : 'PRs'}: {month.merged} merged, {month.closed} closed, {month.open || 0} open)
                         </span>
                         {isExpanded ? (
                           <ChevronUp className="h-5 w-5 text-amber-400" />
