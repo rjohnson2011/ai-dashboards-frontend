@@ -952,8 +952,8 @@ const SprintMetrics: React.FC = () => {
                 <span>Backend Team Reviews</span>
                 <span className="text-sm text-amber-400">Past 6 Months</span>
               </CardTitle>
-              <div className="flex justify-center mt-4">
-                <div className="text-center">
+              <div className="flex justify-start mt-4">
+                <div className="text-left">
                   <div className="text-4xl font-extralight text-amber-400">{data.backend_approved_closed.total}</div>
                   <div className="text-sm text-gray-400 mt-1">Total Approvals</div>
                 </div>
