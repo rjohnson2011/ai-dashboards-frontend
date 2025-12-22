@@ -135,22 +135,42 @@ const SprintMetrics: React.FC = () => {
       const url = offset === 0
         ? `${apiUrl}/api/v1/sprint_metrics`
         : `${apiUrl}/api/v1/sprint_metrics?sprint_offset=${offset}`;
-      const response = await fetch(url);
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch sprint metrics');
-      }
+      // Add 30-second timeout to handle slow API responses
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-      const jsonData = await response.json();
-      setData(jsonData);
-      setError(null);
+      try {
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
 
-      // Cache historical sprint data (offset < 0)
-      if (offset < 0) {
-        setSprintCache(prev => ({ ...prev, [offset]: jsonData }));
+        if (!response.ok) {
+          throw new Error(`Failed to fetch sprint metrics (HTTP ${response.status})`);
+        }
+
+        const jsonData = await response.json();
+        setData(jsonData);
+        setError(null);
+
+        // Cache historical sprint data (offset < 0)
+        if (offset < 0) {
+          setSprintCache(prev => ({ ...prev, [offset]: jsonData }));
+        }
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        throw fetchError;
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      // Provide more helpful error messages
+      if (err instanceof Error) {
+        if (err.name === 'AbortError') {
+          setError('Request timed out after 30 seconds. The API server may be slow or down. Please try again.');
+        } else {
+          setError(err.message);
+        }
+      } else {
+        setError('An unexpected error occurred');
+      }
     } finally {
       setLoading(false);
     }
