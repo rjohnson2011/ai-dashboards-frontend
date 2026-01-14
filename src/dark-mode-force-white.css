@@ -1,16 +1,34 @@
 /* FORCE ALL TEXT TO BE WHITE IN DARK MODE */
 
-/* Global white text */
-.dark * {
+/* Global white text - but exclude status colors */
+.dark *:not(.text-success):not(.text-warning):not(.text-danger):not(.text-destructive):not(.text-info) {
   color: rgb(255, 255, 255) !important;
 }
 
+/* Status colors - override the global white */
+.dark .text-success {
+  color: #22c55e !important;
+}
+
+.dark .text-warning {
+  color: #fbbf24 !important;
+}
+
+.dark .text-danger,
+.dark .text-destructive {
+  color: #ef4444 !important;
+}
+
+.dark .text-info {
+  color: #60a5fa !important;
+}
+
 /* Links should be bright blue */
-.dark a {
+.dark a:not(.text-destructive) {
   color: rgb(96, 165, 250) !important;
 }
 
-.dark a:hover {
+.dark a:hover:not(.text-destructive) {
   color: rgb(147, 197, 253) !important;
 }
 

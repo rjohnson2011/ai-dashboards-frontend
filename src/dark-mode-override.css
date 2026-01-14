@@ -1,10 +1,30 @@
 /* Dark mode override styles to ensure text visibility */
 
-/* Force ALL text to be WHITE in dark mode */
-.dark,
-.dark * {
+/* Force ALL text to be WHITE in dark mode - except status colors */
+.dark {
   color-scheme: dark;
+}
+
+.dark *:not(.text-success):not(.text-warning):not(.text-danger):not(.text-destructive):not(.text-info) {
   color: rgb(255, 255, 255) !important;
+}
+
+/* Status colors - preserve these */
+.dark .text-success {
+  color: #22c55e !important;
+}
+
+.dark .text-warning {
+  color: #fbbf24 !important;
+}
+
+.dark .text-danger,
+.dark .text-destructive {
+  color: #ef4444 !important;
+}
+
+.dark .text-info {
+  color: #60a5fa !important;
 }
 
 /* NAVBAR/HEADER - Dark background with light text */
@@ -59,7 +79,7 @@
   color: rgb(255, 255, 255) !important;
 }
 
-.dark td * {
+.dark td *:not(.text-success):not(.text-warning):not(.text-danger):not(.text-destructive):not(.text-info) {
   color: rgb(255, 255, 255) !important;
 }
 
@@ -153,11 +173,11 @@
   color: rgb(229, 231, 235) !important;
 }
 
-/* Make sure ALL table text is white */
-.dark tbody td,
-.dark tbody td *:not(a),
-.dark tbody span,
-.dark tbody div {
+/* Make sure ALL table text is white - except status colors */
+.dark tbody td:not(.text-success):not(.text-warning):not(.text-danger):not(.text-destructive):not(.text-info),
+.dark tbody td *:not(a):not(.text-success):not(.text-warning):not(.text-danger):not(.text-destructive):not(.text-info),
+.dark tbody span:not(.text-success):not(.text-warning):not(.text-danger):not(.text-destructive):not(.text-info),
+.dark tbody div:not(.text-success):not(.text-warning):not(.text-danger):not(.text-destructive):not(.text-info) {
   color: rgb(255, 255, 255) !important;
 }
 
