@@ -6,21 +6,32 @@
 }
 
 /* Status colors - override the global white */
-.dark .text-success {
+.dark .text-success,
+.dark .text-success * {
   color: #22c55e !important;
 }
 
-.dark .text-warning {
+.dark .text-warning,
+.dark .text-warning * {
   color: #fbbf24 !important;
 }
 
 .dark .text-danger,
-.dark .text-destructive {
+.dark .text-destructive,
+.dark .text-danger *,
+.dark .text-destructive * {
   color: #ef4444 !important;
 }
 
-.dark .text-info {
+.dark .text-info,
+.dark .text-info * {
   color: #60a5fa !important;
+}
+
+/* Muted foreground for X icons that indicate "not ready" */
+.dark .text-muted-foreground,
+.dark .text-muted-foreground * {
+  color: rgb(156, 163, 175) !important;
 }
 
 /* Links should be bright blue */

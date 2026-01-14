@@ -9,22 +9,33 @@
   color: rgb(255, 255, 255) !important;
 }
 
-/* Status colors - preserve these */
-.dark .text-success {
+/* Status colors - preserve these (including child SVGs) */
+.dark .text-success,
+.dark .text-success * {
   color: #22c55e !important;
 }
 
-.dark .text-warning {
+.dark .text-warning,
+.dark .text-warning * {
   color: #fbbf24 !important;
 }
 
 .dark .text-danger,
-.dark .text-destructive {
+.dark .text-destructive,
+.dark .text-danger *,
+.dark .text-destructive * {
   color: #ef4444 !important;
 }
 
-.dark .text-info {
+.dark .text-info,
+.dark .text-info * {
   color: #60a5fa !important;
+}
+
+/* Muted foreground for X icons that indicate "not ready" */
+.dark .text-muted-foreground,
+.dark .text-muted-foreground * {
+  color: rgb(156, 163, 175) !important;
 }
 
 /* NAVBAR/HEADER - Dark background with light text */
