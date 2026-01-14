@@ -9,33 +9,44 @@
   color: rgb(255, 255, 255) !important;
 }
 
-/* Status colors - preserve these (including child SVGs) */
+/* Status colors - preserve these (including child SVGs with stroke) */
 .dark .text-success,
-.dark .text-success * {
+.dark .text-success *,
+.dark .text-success svg {
   color: #22c55e !important;
+  stroke: #22c55e !important;
 }
 
 .dark .text-warning,
-.dark .text-warning * {
+.dark .text-warning *,
+.dark .text-warning svg {
   color: #fbbf24 !important;
+  stroke: #fbbf24 !important;
 }
 
 .dark .text-danger,
 .dark .text-destructive,
 .dark .text-danger *,
-.dark .text-destructive * {
+.dark .text-destructive *,
+.dark .text-danger svg,
+.dark .text-destructive svg {
   color: #ef4444 !important;
+  stroke: #ef4444 !important;
 }
 
 .dark .text-info,
-.dark .text-info * {
+.dark .text-info *,
+.dark .text-info svg {
   color: #60a5fa !important;
+  stroke: #60a5fa !important;
 }
 
 /* Muted foreground for X icons that indicate "not ready" */
 .dark .text-muted-foreground,
-.dark .text-muted-foreground * {
+.dark .text-muted-foreground *,
+.dark .text-muted-foreground svg {
   color: rgb(156, 163, 175) !important;
+  stroke: rgb(156, 163, 175) !important;
 }
 
 /* NAVBAR/HEADER - Dark background with light text */
