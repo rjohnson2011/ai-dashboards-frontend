@@ -160,26 +160,35 @@ function Dashboard() {
   }, [isUpdating, lastUpdated])
 
   
-  const fetchPullRequests = async (isPolling = false) => {
+  const fetchPullRequests = async (isPolling = false, retryCount = 0) => {
+    const maxRetries = 3
+
     if (!isPolling) {
       setLoading(true)
     }
-    
+
     try {
+      // Add timeout to detect slow/cold server
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+
       // Fetch all repositories - no params needed
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/reviews`, {
         headers: {
           ...authService.getAuthHeaders()
-        }
+        },
+        signal: controller.signal
       })
+      clearTimeout(timeoutId)
+
       if (!response.ok) {
         throw new Error('Failed to fetch pull requests')
       }
       const data: ApiResponse = await response.json()
-      
+
       // Update the updating status
       setIsUpdating(data.updating || false)
-      
+
       // Only update data if it has changed
       if (!isPolling || data.last_updated !== lastUpdated) {
         // Combine both regular and approved pull requests
@@ -188,13 +197,24 @@ function Dashboard() {
         setLastUpdated(data.last_updated)
         setRateLimit(data.rate_limit || null)
       }
-      
+
       setLoading(false)
       setError(null)
     } catch (err) {
       console.error('Error fetching PRs:', err)
+
+      // Auto-retry on timeout (server might be waking up)
+      if (!isPolling && retryCount < maxRetries) {
+        console.log(`Retrying... (attempt ${retryCount + 1}/${maxRetries})`)
+        setTimeout(() => fetchPullRequests(false, retryCount + 1), 2000)
+        return
+      }
+
       if (!isPolling) {
-        setError(err instanceof Error ? err.message : 'An error occurred')
+        const isTimeout = err instanceof Error && err.name === 'AbortError'
+        setError(isTimeout
+          ? 'Server is waking up. Please wait a moment and try again.'
+          : (err instanceof Error ? err.message : 'An error occurred'))
       }
       setLoading(false)
     }

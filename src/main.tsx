@@ -3,8 +3,12 @@ import { createRoot } from 'react-dom/client'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { startKeepAlive } from './services/keepAlive'
 import './index.css'
 import App from './App.tsx'
+
+// Start keep-alive service to prevent Render cold starts
+startKeepAlive()
 
 // VA Design System imports (commented out but preserved)
 // import { initializeVAComponents } from './va-web-components'

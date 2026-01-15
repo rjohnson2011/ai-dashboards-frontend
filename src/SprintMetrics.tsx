@@ -121,7 +121,9 @@ const SprintMetrics: React.FC = () => {
     fetchSprintMetrics(sprintOffset);
   }, [sprintOffset]);
 
-  const fetchSprintMetrics = async (offset: number = 0) => {
+  const fetchSprintMetrics = async (offset: number = 0, retryCount: number = 0) => {
+    const maxRetries = 3;
+
     try {
       // Check cache first - use cached data for historical sprints (offset < 0)
       // Always fetch fresh data for current sprint (offset === 0)
@@ -163,10 +165,17 @@ const SprintMetrics: React.FC = () => {
         throw fetchError;
       }
     } catch (err) {
+      // Auto-retry on timeout (server might be waking up)
+      if (retryCount < maxRetries) {
+        console.log(`Retrying sprint metrics... (attempt ${retryCount + 1}/${maxRetries})`);
+        setTimeout(() => fetchSprintMetrics(offset, retryCount + 1), 2000);
+        return;
+      }
+
       // Provide more helpful error messages
       if (err instanceof Error) {
         if (err.name === 'AbortError') {
-          setError('Request timed out after 30 seconds. The API server may be slow or down. Please try again.');
+          setError('Server is waking up. Please wait a moment and click Retry.');
         } else {
           setError(err.message);
         }
@@ -174,7 +183,9 @@ const SprintMetrics: React.FC = () => {
         setError('An unexpected error occurred');
       }
     } finally {
-      setLoading(false);
+      if (retryCount >= maxRetries || !error) {
+        setLoading(false);
+      }
     }
   };
 
