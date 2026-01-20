@@ -1008,8 +1008,8 @@ function Dashboard() {
                                   <span className="text-sm">
                                     {pr.failed_checks > 0 ? (
                                       <span className="text-destructive">{pr.failed_checks} failing</span>
-                                    ) : pr.total_checks - pr.successful_checks > 0 ? (
-                                      <span className="text-warning">{pr.total_checks - pr.successful_checks} pending</span>
+                                    ) : pr.total_checks - pr.successful_checks - pr.failed_checks > 0 ? (
+                                      <span className="text-warning">{pr.total_checks - pr.successful_checks - pr.failed_checks} pending</span>
                                     ) : (
                                       <span className="text-success">All passing</span>
                                     )}
