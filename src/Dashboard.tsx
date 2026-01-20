@@ -1006,12 +1006,14 @@ function Dashboard() {
                                 >
                                   {getCIStatusIcon(pr.ci_status)}
                                   <span className="text-sm">
-                                    {pr.failed_checks > 0 ? (
-                                      <span className="text-destructive">{pr.failed_checks} failing</span>
-                                    ) : pr.total_checks - pr.successful_checks - pr.failed_checks > 0 ? (
-                                      <span className="text-warning">{pr.total_checks - pr.successful_checks - pr.failed_checks} pending</span>
-                                    ) : (
+                                    {(pr.failing_checks?.length || 0) > 0 ? (
+                                      <span className="text-destructive">{pr.failing_checks.length} failing</span>
+                                    ) : pr.ci_status === 'pending' ? (
+                                      <span className="text-warning">{(pr.total_checks - pr.successful_checks - pr.failed_checks) || 1} pending</span>
+                                    ) : pr.ci_status === 'success' ? (
                                       <span className="text-success">All passing</span>
+                                    ) : (
+                                      <span className="text-muted-foreground">{pr.ci_status}</span>
                                     )}
                                   </span>
                                 </a>
