@@ -1010,9 +1010,13 @@ function Dashboard() {
                                       // Filter out the backend-review-group check - it's a required review, not CI
                                       const ciFailures = pr.failing_checks?.filter(c => !c.name.includes('backend-review-group')) || [];
                                       if (ciFailures.length > 0) {
-                                        return <span className="text-destructive">{ciFailures.length} failing</span>;
+                                        return <span className="text-destructive">{ciFailures.length} {ciFailures.length === 1 ? 'failure' : 'failing'}</span>;
+                                      } else if (pr.ci_status === 'failure' && pr.failed_checks > 0) {
+                                        // Has failures but they're all backend-review-group (filtered out)
+                                        return <span className="text-warning">{pr.failed_checks} {pr.failed_checks === 1 ? 'failure' : 'failures'} (review)</span>;
                                       } else if (pr.ci_status === 'pending') {
-                                        return <span className="text-warning">{(pr.total_checks - pr.successful_checks - pr.failed_checks) || 1} pending</span>;
+                                        const pendingCount = (pr.total_checks - pr.successful_checks - pr.failed_checks) || 1;
+                                        return <span className="text-warning">{pendingCount} pending</span>;
                                       } else if (pr.ci_status === 'success') {
                                         return <span className="text-success">All passing</span>;
                                       } else {
