@@ -1006,15 +1006,19 @@ function Dashboard() {
                                 >
                                   {getCIStatusIcon(pr.ci_status)}
                                   <span className="text-sm">
-                                    {(pr.failing_checks?.length || 0) > 0 ? (
-                                      <span className="text-destructive">{pr.failing_checks.length} failing</span>
-                                    ) : pr.ci_status === 'pending' ? (
-                                      <span className="text-warning">{(pr.total_checks - pr.successful_checks - pr.failed_checks) || 1} pending</span>
-                                    ) : pr.ci_status === 'success' ? (
-                                      <span className="text-success">All passing</span>
-                                    ) : (
-                                      <span className="text-muted-foreground">{pr.ci_status}</span>
-                                    )}
+                                    {(() => {
+                                      // Filter out the backend-review-group check - it's a required review, not CI
+                                      const ciFailures = pr.failing_checks?.filter(c => !c.name.includes('backend-review-group')) || [];
+                                      if (ciFailures.length > 0) {
+                                        return <span className="text-destructive">{ciFailures.length} failing</span>;
+                                      } else if (pr.ci_status === 'pending') {
+                                        return <span className="text-warning">{(pr.total_checks - pr.successful_checks - pr.failed_checks) || 1} pending</span>;
+                                      } else if (pr.ci_status === 'success') {
+                                        return <span className="text-success">All passing</span>;
+                                      } else {
+                                        return <span className="text-muted-foreground">{pr.ci_status}</span>;
+                                      }
+                                    })()}
                                   </span>
                                 </a>
                               </TooltipTrigger>
