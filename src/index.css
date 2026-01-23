@@ -366,7 +366,25 @@
   .gradient-needs-review:hover {
     border-color: rgba(107, 114, 128, 0.5);
   }
-  
+
+  /* Awaiting Author Changes - Amber/yellow gradient */
+  .gradient-awaiting-changes {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    box-shadow: 0 4px 20px -5px rgba(251, 191, 36, 0.15);
+  }
+
+  .gradient-awaiting-changes::before {
+    background: linear-gradient(135deg,
+      rgba(243, 244, 246, 0.8) 0%,
+      rgba(251, 191, 36, 0.1) 100%
+    );
+  }
+
+  .gradient-awaiting-changes:hover {
+    border-color: rgba(251, 191, 36, 0.5);
+  }
+
   /* Finished but Unmerged - Gray-orange gradient */
   .gradient-finished {
     background: rgba(255, 255, 255, 0.7);
@@ -460,14 +478,26 @@
     background: rgba(196, 181, 253, 0.15);
     border-color: rgba(196, 181, 253, 0.4);
   }
-  
+
   .gradient-needs-review.selected::before {
-    background: linear-gradient(135deg, 
-      rgba(196, 181, 253, 0.2) 0%, 
+    background: linear-gradient(135deg,
+      rgba(196, 181, 253, 0.2) 0%,
       rgba(196, 181, 253, 0.4) 100%
     );
   }
-  
+
+  .gradient-awaiting-changes.selected {
+    background: rgba(251, 191, 36, 0.15);
+    border-color: rgba(251, 191, 36, 0.4);
+  }
+
+  .gradient-awaiting-changes.selected::before {
+    background: linear-gradient(135deg,
+      rgba(251, 191, 36, 0.2) 0%,
+      rgba(251, 191, 36, 0.4) 100%
+    );
+  }
+
   .gradient-finished.selected {
     background: rgba(253, 186, 116, 0.15);
     border-color: rgba(253, 186, 116, 0.4);
@@ -625,9 +655,23 @@
   }
 
   .dark .gradient-needs-review::before {
-    background: linear-gradient(135deg, 
-      rgba(196, 181, 253, 0.1) 0%, 
+    background: linear-gradient(135deg,
+      rgba(196, 181, 253, 0.1) 0%,
       rgba(196, 181, 253, 0.2) 100%
+    );
+  }
+
+  /* Awaiting Author Changes - Dark mode - Bright amber */
+  .dark .gradient-awaiting-changes {
+    background: rgba(26, 32, 44, 0.8);
+    border: 2px solid rgba(251, 191, 36, 0.6);
+    box-shadow: 0 4px 20px -5px rgba(251, 191, 36, 0.5);
+  }
+
+  .dark .gradient-awaiting-changes::before {
+    background: linear-gradient(135deg,
+      rgba(251, 191, 36, 0.1) 0%,
+      rgba(251, 191, 36, 0.2) 100%
     );
   }
 

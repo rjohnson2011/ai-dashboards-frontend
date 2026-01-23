@@ -78,6 +78,7 @@ interface PullRequest {
   labels?: string[]
   repository_name?: string
   repository_owner?: string
+  awaiting_author_changes?: boolean
   changes_requested_info?: {
     status: string
     message: string
@@ -453,7 +454,22 @@ function Dashboard() {
           // Exclude PRs with exempt-be-review label
           !isTrulyExemptFromBackendReview(pr) &&
           // Exclude PRs that already have approvals (they should be in "Ready for Review")
-          !(pr.approval_summary && pr.approval_summary.approved_count > 0)
+          !(pr.approval_summary && pr.approval_summary.approved_count > 0) &&
+          // Exclude PRs awaiting author changes (they have their own section)
+          !pr.awaiting_author_changes &&
+          !(pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0)
+        )
+        break
+      case 'awaiting-changes':
+        filtered = filtered.filter(pr =>
+          !pr.draft &&
+          // Exclude dependabot PRs
+          pr.author !== 'dependabot[bot]' &&
+          // Exclude PRs with exempt-be-review label
+          !isTrulyExemptFromBackendReview(pr) &&
+          // Include PRs where changes were requested
+          (pr.awaiting_author_changes ||
+           (pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0))
         )
         break
       case 'exempt':
@@ -748,7 +764,7 @@ function Dashboard() {
                     </p>
                   </CardContent>
                 </Card>
-                <Card 
+                <Card
                   className={`gradient-card gradient-needs-review cursor-pointer ${activeFilter === 'reviewed-today' ? 'selected' : ''}`}
                   onClick={() => setActiveFilter('reviewed-today')}
                 >
@@ -770,11 +786,38 @@ function Dashboard() {
                         // Exclude PRs with exempt-be-review label
                         !isTrulyExemptFromBackendReview(pr) &&
                         // Exclude PRs that already have approvals (they should be in "Ready for Review")
-                        !(pr.approval_summary && pr.approval_summary.approved_count > 0)
+                        !(pr.approval_summary && pr.approval_summary.approved_count > 0) &&
+                        // Exclude PRs awaiting author changes (they have their own section)
+                        !pr.awaiting_author_changes &&
+                        !(pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0)
                       ).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Awaiting team review
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card
+                  className={`gradient-card gradient-awaiting-changes cursor-pointer ${activeFilter === 'awaiting-changes' ? 'selected' : ''}`}
+                  onClick={() => setActiveFilter('awaiting-changes')}
+                >
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      Awaiting Author Changes
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="h-[85px]">
+                    <div className="text-2xl font-semibold">
+                      {pullRequests.filter(pr =>
+                        !pr.draft &&
+                        pr.author !== 'dependabot[bot]' &&
+                        !isTrulyExemptFromBackendReview(pr) &&
+                        (pr.awaiting_author_changes ||
+                         (pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0))
+                      ).length}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Changes requested by reviewers
                     </p>
                   </CardContent>
                 </Card>
@@ -832,6 +875,7 @@ function Dashboard() {
                       {activeFilter === 'failing' && 'Failing CI - PRs with failing CI checks that need attention'}
                       {activeFilter === 'draft' && 'Draft PRs - Work in progress pull requests'}
                       {activeFilter === 'reviewed-today' && 'PRs Needing Team Review - Awaiting initial team review'}
+                      {activeFilter === 'awaiting-changes' && 'Awaiting Author Changes - Reviewers requested changes that need to be addressed'}
                       {activeFilter === 'exempt' && 'Exempt BE Review - PRs that do not require backend review'}
                       {activeFilter === 'finished' && 'Finished but Unmerged - Backend approved PRs ready to merge'}
                       {activeFilter === 'dependabot' && 'Dependabot PRs - Automated dependency updates'}
