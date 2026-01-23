@@ -456,8 +456,10 @@ function Dashboard() {
           // Exclude PRs that already have approvals (they should be in "Ready for Review")
           !(pr.approval_summary && pr.approval_summary.approved_count > 0) &&
           // Exclude PRs awaiting author changes (they have their own section)
-          !pr.awaiting_author_changes &&
-          !(pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0)
+          // BUT include PRs where author has responded to change requests
+          !(pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0 &&
+            pr.changes_requested_info?.status !== 'new_commit_from_author' &&
+            pr.changes_requested_info?.status !== 'new_comment_from_author')
         )
         break
       case 'awaiting-changes':
@@ -468,8 +470,12 @@ function Dashboard() {
           // Exclude PRs with exempt-be-review label
           !isTrulyExemptFromBackendReview(pr) &&
           // Include PRs where changes were requested
-          (pr.awaiting_author_changes ||
-           (pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0))
+          (pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0) &&
+          // BUT exclude PRs where author has already responded with new commits/comments
+          // These should go back to the review queue
+          pr.changes_requested_info?.status !== 'new_commit_from_author' &&
+          pr.changes_requested_info?.status !== 'new_comment_from_author' &&
+          pr.changes_requested_info?.status !== 'new_commits_after_approval'
         )
         break
       case 'exempt':
@@ -788,8 +794,10 @@ function Dashboard() {
                         // Exclude PRs that already have approvals (they should be in "Ready for Review")
                         !(pr.approval_summary && pr.approval_summary.approved_count > 0) &&
                         // Exclude PRs awaiting author changes (they have their own section)
-                        !pr.awaiting_author_changes &&
-                        !(pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0)
+                        // BUT include PRs where author has responded to change requests
+                        !(pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0 &&
+                          pr.changes_requested_info?.status !== 'new_commit_from_author' &&
+                          pr.changes_requested_info?.status !== 'new_comment_from_author')
                       ).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -812,8 +820,11 @@ function Dashboard() {
                         !pr.draft &&
                         pr.author !== 'dependabot[bot]' &&
                         !isTrulyExemptFromBackendReview(pr) &&
-                        (pr.awaiting_author_changes ||
-                         (pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0))
+                        (pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0) &&
+                        // Exclude PRs where author has responded
+                        pr.changes_requested_info?.status !== 'new_commit_from_author' &&
+                        pr.changes_requested_info?.status !== 'new_comment_from_author' &&
+                        pr.changes_requested_info?.status !== 'new_commits_after_approval'
                       ).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
