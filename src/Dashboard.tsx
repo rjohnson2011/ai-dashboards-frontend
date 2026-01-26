@@ -656,7 +656,7 @@ function Dashboard() {
             </div>
           </div>
           <div className="space-y-8">
-              <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-8">
+              <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-9">
                 <Card 
                   className={`gradient-card gradient-ready-review cursor-pointer ${activeFilter === 'ready' ? 'selected' : ''}`}
                   onClick={() => setActiveFilter('ready')}
@@ -698,7 +698,33 @@ function Dashboard() {
                     </p>
                   </CardContent>
                 </Card>
-                <Card 
+                <Card
+                  className={`gradient-card gradient-awaiting-changes cursor-pointer ${activeFilter === 'awaiting-changes' ? 'selected' : ''}`}
+                  onClick={() => setActiveFilter('awaiting-changes')}
+                >
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      Awaiting Changes
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="h-[85px]">
+                    <div className="text-2xl font-semibold">
+                      {pullRequests.filter(pr =>
+                        !pr.draft &&
+                        pr.author !== 'dependabot[bot]' &&
+                        !isTrulyExemptFromBackendReview(pr) &&
+                        (pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0) &&
+                        pr.changes_requested_info?.status !== 'new_commit_from_author' &&
+                        pr.changes_requested_info?.status !== 'new_comment_from_author' &&
+                        pr.changes_requested_info?.status !== 'new_commits_after_approval'
+                      ).length}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Reviewer requested changes
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card
                   className={`gradient-card gradient-dependabot cursor-pointer ${activeFilter === 'dependabot' ? 'selected' : ''}`}
                   onClick={() => setActiveFilter('dependabot')}
                 >
@@ -709,7 +735,7 @@ function Dashboard() {
                   </CardHeader>
                   <CardContent className="h-[85px]">
                     <div className="text-2xl font-semibold">
-                      {pullRequests.filter(pr => 
+                      {pullRequests.filter(pr =>
                         !pr.draft && pr.author === 'dependabot[bot]'
                       ).length}
                     </div>
@@ -718,7 +744,7 @@ function Dashboard() {
                     </p>
                   </CardContent>
                 </Card>
-                <Card 
+                <Card
                   className={`gradient-card gradient-total-prs cursor-pointer ${activeFilter === 'all' ? 'selected' : ''}`}
                   onClick={() => setActiveFilter('all')}
                 >
@@ -806,33 +832,6 @@ function Dashboard() {
                   </CardContent>
                 </Card>
                 <Card
-                  className={`gradient-card gradient-awaiting-changes cursor-pointer ${activeFilter === 'awaiting-changes' ? 'selected' : ''}`}
-                  onClick={() => setActiveFilter('awaiting-changes')}
-                >
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Awaiting Author Changes
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="h-[85px]">
-                    <div className="text-2xl font-semibold">
-                      {pullRequests.filter(pr =>
-                        !pr.draft &&
-                        pr.author !== 'dependabot[bot]' &&
-                        !isTrulyExemptFromBackendReview(pr) &&
-                        (pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0) &&
-                        // Exclude PRs where author has responded
-                        pr.changes_requested_info?.status !== 'new_commit_from_author' &&
-                        pr.changes_requested_info?.status !== 'new_comment_from_author' &&
-                        pr.changes_requested_info?.status !== 'new_commits_after_approval'
-                      ).length}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Changes requested by reviewers
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card 
                   className={`gradient-card gradient-exempt cursor-pointer ${activeFilter === 'exempt' ? 'selected' : ''}`}
                   onClick={() => setActiveFilter('exempt')}
                 >
