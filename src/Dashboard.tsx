@@ -915,7 +915,7 @@ function Dashboard() {
                               Repo
                             </button>
                           </TableHead>
-                          <TableHead className="w-[200px]">
+                          <TableHead className="w-[180px]">
                             <button
                               className={`table-header-sortable ${sortColumn === 'title' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('title')}
@@ -942,7 +942,7 @@ function Dashboard() {
                               CI Status
                             </button>
                           </TableHead>
-                          <TableHead className="w-[120px]">
+                          <TableHead className="w-[100px]">
                             <button
                               className={`table-header-sortable ${sortColumn === 'failures' ? 'table-header-sorted' : ''}`}
                               onClick={() => handleSort('failures')}
@@ -973,7 +973,7 @@ function Dashboard() {
                               )}
                             </button>
                           </TableHead>
-                          <TableHead className="w-[140px]">Changes Requested</TableHead>
+                          <TableHead className="w-[100px]">Changes Requested</TableHead>
                           <TableHead className="w-[90px]">Commented</TableHead>
                           <TableHead className="w-[70px]">
                             <button
@@ -1104,7 +1104,7 @@ function Dashboard() {
                                     href={`${pr.url}#pullrequestreview-new_review_form`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="block text-xs text-destructive hover:underline truncate max-w-[200px]"
+                                    className="block text-xs text-destructive hover:underline truncate max-w-[120px]"
                                     title={check.name === 'Status Checks' ? 'Danger' : check.name}
                                     onClick={(e) => e.stopPropagation()}
                                   >
