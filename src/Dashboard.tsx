@@ -670,7 +670,10 @@ function Dashboard() {
                     <div className="text-2xl font-semibold">
                       {pullRequests.filter(pr =>
                         !pr.draft &&
-                        pr.backend_approval_status !== 'approved' &&
+                        // Include PRs with failing backend approval checks OR PRs without backend approval OR PRs with new commits after approval
+                        (hasFailingBackendApprovalCheck(pr) ||
+                         pr.backend_approval_status !== 'approved' ||
+                         pr.changes_requested_info?.status === 'new_commits_after_approval') &&
                         // Exclude dependabot PRs (they have their own section)
                         pr.author !== 'dependabot[bot]' &&
                         // Exclude PRs with exempt-be-review label
@@ -678,13 +681,17 @@ function Dashboard() {
                         // Exclude PRs with failing CI checks
                         !(pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) &&
                         (
+                          // Special case: PRs with failing backend approval checks are always ready for review
+                          hasFailingBackendApprovalCheck(pr) ||
+                          // Special case: PRs with new commits after backend approval need re-review
+                          pr.changes_requested_info?.status === 'new_commits_after_approval' ||
                           // Special case: platform-atlas PRs don't need approval to be ready for review
                           pr.repository_name === 'platform-atlas' ||
                           // Must be ready for backend review
                           (pr.ready_for_backend_review &&
                            (
                              // Regular PRs with approvals (not from backend reviewers)
-                             (pr.approval_summary && 
+                             (pr.approval_summary &&
                               pr.approval_summary.approved_count > 0 &&
                               !(pr.approval_summary.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))) ||
                              // PRs from backend team members (auto-ready for review)
