@@ -115,7 +115,7 @@ interface ApiResponse {
 }
 
 
-const BACKEND_REVIEWERS = ['ericboehs', 'LindseySaari', 'rmtolmach', 'stiehlrod', 'RachalCassity', 'rjohnson2011', 'stevenjcumming', 'voidspooks', 'Crankums']
+const BACKEND_REVIEWERS = ['ericboehs', 'LindseySaari', 'rmtolmach', 'stiehlrod', 'RachalCassity', 'rjohnson2011', 'stevenjcumming', 'Crankums', 'kreek']
 
 // Lighthouse teams (lighthouse-dash, lighthouse-pivot, lighthouse-banana-peels)
 // were removed from the exemption list on Dec 1, 2025 per PR #25353
@@ -453,8 +453,6 @@ function Dashboard() {
         break
       case 'reviewed-today':
         filtered = filtered.filter(pr =>
-          pr.backend_approval_status !== 'approved' &&
-          !(pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))) &&
           !pr.draft &&
           // Exclude dependabot PRs (they have their own section)
           pr.author !== 'dependabot[bot]' &&
@@ -462,13 +460,22 @@ function Dashboard() {
           pr.repository_name !== 'platform-atlas' &&
           // Exclude PRs with exempt-be-review label
           !isTrulyExemptFromBackendReview(pr) &&
-          // Exclude PRs that already have approvals (they should be in "Ready for Review")
-          !(pr.approval_summary && pr.approval_summary.approved_count > 0) &&
-          // Exclude PRs awaiting author changes (they have their own section)
-          // BUT include PRs where author has responded to change requests
-          !(pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0 &&
-            pr.changes_requested_info?.status !== 'new_commit_from_author' &&
-            pr.changes_requested_info?.status !== 'new_comment_from_author')
+          (
+            // Include PRs with waiting-for-team-approval label (explicitly needs team review)
+            pr.labels?.includes('waiting-for-team-approval') ||
+            // OR include PRs without backend approval and without team approvals
+            (
+              pr.backend_approval_status !== 'approved' &&
+              !(pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))) &&
+              // Exclude PRs that already have approvals (they should be in "Ready for Review")
+              !(pr.approval_summary && pr.approval_summary.approved_count > 0) &&
+              // Exclude PRs awaiting author changes (they have their own section)
+              // BUT include PRs where author has responded to change requests
+              !(pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0 &&
+                pr.changes_requested_info?.status !== 'new_commit_from_author' &&
+                pr.changes_requested_info?.status !== 'new_comment_from_author')
+            )
+          )
         )
         break
       case 'awaiting-changes':
@@ -497,6 +504,8 @@ function Dashboard() {
           !pr.draft &&
           // Exclude PRs with exempt-be-review label (they should be in "Exempt BE Review" section)
           !isTrulyExemptFromBackendReview(pr) &&
+          // Exclude PRs with waiting-for-team-approval label (still need team review)
+          !pr.labels?.includes('waiting-for-team-approval') &&
           // IMPORTANT: Exclude PRs with failing CI
           // PRs with backend approval but failing CI should go to "Failing CI", not here
           pr.ci_status !== 'failure' &&
@@ -824,8 +833,6 @@ function Dashboard() {
                   <CardContent className="h-[85px]">
                     <div className="text-2xl font-semibold">
                       {pullRequests.filter(pr =>
-                        pr.backend_approval_status !== 'approved' &&
-                        !(pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))) &&
                         !pr.draft &&
                         // Exclude dependabot PRs (they have their own section)
                         pr.author !== 'dependabot[bot]' &&
@@ -833,13 +840,19 @@ function Dashboard() {
                         pr.repository_name !== 'platform-atlas' &&
                         // Exclude PRs with exempt-be-review label
                         !isTrulyExemptFromBackendReview(pr) &&
-                        // Exclude PRs that already have approvals (they should be in "Ready for Review")
-                        !(pr.approval_summary && pr.approval_summary.approved_count > 0) &&
-                        // Exclude PRs awaiting author changes (they have their own section)
-                        // BUT include PRs where author has responded to change requests
-                        !(pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0 &&
-                          pr.changes_requested_info?.status !== 'new_commit_from_author' &&
-                          pr.changes_requested_info?.status !== 'new_comment_from_author')
+                        (
+                          // Include PRs with waiting-for-team-approval label
+                          pr.labels?.includes('waiting-for-team-approval') ||
+                          // OR PRs without backend approval and without team approvals
+                          (
+                            pr.backend_approval_status !== 'approved' &&
+                            !(pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))) &&
+                            !(pr.approval_summary && pr.approval_summary.approved_count > 0) &&
+                            !(pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0 &&
+                              pr.changes_requested_info?.status !== 'new_commit_from_author' &&
+                              pr.changes_requested_info?.status !== 'new_comment_from_author')
+                          )
+                        )
                       ).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -878,9 +891,12 @@ function Dashboard() {
                   </CardHeader>
                   <CardContent className="h-[85px]">
                     <div className="text-2xl font-semibold">
-                      {pullRequests.filter(pr => 
-                        !pr.draft && (
-                          pr.backend_approval_status === 'approved' || 
+                      {pullRequests.filter(pr =>
+                        !pr.draft &&
+                        // Exclude PRs still waiting for team approval
+                        !pr.labels?.includes('waiting-for-team-approval') &&
+                        (
+                          pr.backend_approval_status === 'approved' ||
                           (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
                         )
                       ).length}
