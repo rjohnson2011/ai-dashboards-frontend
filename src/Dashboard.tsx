@@ -392,16 +392,6 @@ function Dashboard() {
     return !hasNonBackendApproval
   }
 
-  // Check if a PR has a failing Backend Approval CI check
-  // This indicates that a backend approval is needed or has been invalidated by new commits
-  const hasFailingBackendApprovalCheck = (pr: PullRequest) => {
-    return pr.failing_checks.some(check =>
-      check.name.toLowerCase().includes('backend approval') ||
-      check.name.includes('Backend Approval on:') ||
-      check.name.includes('Succeed if backend approval')
-    )
-  }
-
   const filterPullRequests = (prs: PullRequest[]) => {
     let filtered = prs
     
@@ -515,16 +505,9 @@ function Dashboard() {
           !isTrulyExemptFromBackendReview(pr) &&
           // Exclude PRs that still need team approval
           !needsTeamApproval(pr) &&
-          // IMPORTANT: Exclude PRs with failing CI
-          // PRs with backend approval but failing CI should go to "Failing CI", not here
+          // Exclude PRs with failing CI
           pr.ci_status !== 'failure' &&
-          // IMPORTANT: Exclude PRs with failing backend approval checks
-          // If the backend approval CI check is failing (e.g., due to new commits after approval),
-          // the PR should be in "Ready for Review", not "Finished but Unmerged"
-          !hasFailingBackendApprovalCheck(pr) &&
-          // IMPORTANT: Exclude PRs with new commits after backend approval
-          // These PRs need re-review and should go to "Ready for Review", not here
-          pr.changes_requested_info?.status !== 'new_commits_after_approval' &&
+          // PR has backend approval (from API or frontend reviewer list)
           (
             pr.backend_approval_status === 'approved' ||
             (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
@@ -902,8 +885,9 @@ function Dashboard() {
                     <div className="text-2xl font-semibold">
                       {pullRequests.filter(pr =>
                         !pr.draft &&
-                        // Exclude PRs that still need team approval
+                        !isTrulyExemptFromBackendReview(pr) &&
                         !needsTeamApproval(pr) &&
+                        pr.ci_status !== 'failure' &&
                         (
                           pr.backend_approval_status === 'approved' ||
                           (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
