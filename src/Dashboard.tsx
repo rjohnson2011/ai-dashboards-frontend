@@ -403,8 +403,7 @@ function Dashboard() {
           // Include PRs with failing backend approval checks OR PRs without backend approval OR PRs with new commits after approval
           // This handles the case where a PR was approved but then the author made more commits
           (hasFailingBackendApprovalCheck(pr) ||
-           pr.backend_approval_status !== 'approved' ||
-           pr.changes_requested_info?.status === 'new_commits_after_approval') &&
+           pr.backend_approval_status !== 'approved') &&
           // Exclude dependabot PRs (they have their own section)
           pr.author !== 'dependabot[bot]' &&
           // Exclude PRs with exempt-be-review label (they should be in "Exempt BE Review" section)
@@ -416,8 +415,6 @@ function Dashboard() {
           (
             // Special case: PRs with failing backend approval checks are always ready for review
             hasFailingBackendApprovalCheck(pr) ||
-            // Special case: PRs with new commits after backend approval need re-review
-            pr.changes_requested_info?.status === 'new_commits_after_approval' ||
             // Special case: platform-atlas PRs don't need approval to be ready for review
             pr.repository_name === 'platform-atlas' ||
             // Must be ready for backend review
@@ -690,10 +687,9 @@ function Dashboard() {
                     <div className="text-2xl font-semibold">
                       {pullRequests.filter(pr =>
                         !pr.draft &&
-                        // Include PRs with failing backend approval checks OR PRs without backend approval OR PRs with new commits after approval
+                        // Include PRs with failing backend approval checks OR PRs without backend approval
                         (hasFailingBackendApprovalCheck(pr) ||
-                         pr.backend_approval_status !== 'approved' ||
-                         pr.changes_requested_info?.status === 'new_commits_after_approval') &&
+                         pr.backend_approval_status !== 'approved') &&
                         // Exclude dependabot PRs (they have their own section)
                         pr.author !== 'dependabot[bot]' &&
                         // Exclude PRs with exempt-be-review label
@@ -705,8 +701,6 @@ function Dashboard() {
                         (
                           // Special case: PRs with failing backend approval checks are always ready for review
                           hasFailingBackendApprovalCheck(pr) ||
-                          // Special case: PRs with new commits after backend approval need re-review
-                          pr.changes_requested_info?.status === 'new_commits_after_approval' ||
                           // Special case: platform-atlas PRs don't need approval to be ready for review
                           pr.repository_name === 'platform-atlas' ||
                           // Must be ready for backend review
