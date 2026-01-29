@@ -382,6 +382,16 @@ function Dashboard() {
     })
   }
 
+  // Check if PR still needs team approval (has waiting-for-team-approval label and no non-backend approvals)
+  const needsTeamApproval = (pr: PullRequest) => {
+    if (!pr.labels?.includes('waiting-for-team-approval')) return false
+    // If there are non-backend approvals, team approval is satisfied
+    const hasNonBackendApproval = pr.approval_summary &&
+      pr.approval_summary.approved_count > 0 &&
+      pr.approval_summary.approved_users?.some(user => !BACKEND_REVIEWERS.includes(user))
+    return !hasNonBackendApproval
+  }
+
   // Check if a PR has a failing Backend Approval CI check
   // This indicates that a backend approval is needed or has been invalidated by new commits
   const hasFailingBackendApprovalCheck = (pr: PullRequest) => {
@@ -408,8 +418,8 @@ function Dashboard() {
           pr.author !== 'dependabot[bot]' &&
           // Exclude PRs with exempt-be-review label (they should be in "Exempt BE Review" section)
           !isTrulyExemptFromBackendReview(pr) &&
-          // Exclude PRs with waiting-for-team-approval label (they need team review first)
-          !pr.labels?.includes('waiting-for-team-approval') &&
+          // Exclude PRs that still need team approval
+          !needsTeamApproval(pr) &&
           // Exclude PRs with failing CI checks (they should be in "Failing CI" section)
           !(pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) &&
           (
@@ -460,8 +470,8 @@ function Dashboard() {
           // Exclude PRs with exempt-be-review label
           !isTrulyExemptFromBackendReview(pr) &&
           (
-            // Include PRs with waiting-for-team-approval label (explicitly needs team review)
-            pr.labels?.includes('waiting-for-team-approval') ||
+            // Include PRs that still need team approval (label + no non-backend approvals)
+            needsTeamApproval(pr) ||
             // OR include PRs without backend approval and without team approvals
             (
               pr.backend_approval_status !== 'approved' &&
@@ -503,8 +513,8 @@ function Dashboard() {
           !pr.draft &&
           // Exclude PRs with exempt-be-review label (they should be in "Exempt BE Review" section)
           !isTrulyExemptFromBackendReview(pr) &&
-          // Exclude PRs with waiting-for-team-approval label (still need team review)
-          !pr.labels?.includes('waiting-for-team-approval') &&
+          // Exclude PRs that still need team approval
+          !needsTeamApproval(pr) &&
           // IMPORTANT: Exclude PRs with failing CI
           // PRs with backend approval but failing CI should go to "Failing CI", not here
           pr.ci_status !== 'failure' &&
@@ -694,8 +704,8 @@ function Dashboard() {
                         pr.author !== 'dependabot[bot]' &&
                         // Exclude PRs with exempt-be-review label
                         !isTrulyExemptFromBackendReview(pr) &&
-                        // Exclude PRs with waiting-for-team-approval label
-                        !pr.labels?.includes('waiting-for-team-approval') &&
+                        // Exclude PRs that still need team approval
+                        !needsTeamApproval(pr) &&
                         // Exclude PRs with failing CI checks
                         !(pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) &&
                         (
@@ -839,8 +849,8 @@ function Dashboard() {
                         // Exclude PRs with exempt-be-review label
                         !isTrulyExemptFromBackendReview(pr) &&
                         (
-                          // Include PRs with waiting-for-team-approval label
-                          pr.labels?.includes('waiting-for-team-approval') ||
+                          // Include PRs that still need team approval
+                          needsTeamApproval(pr) ||
                           // OR PRs without backend approval and without team approvals
                           (
                             pr.backend_approval_status !== 'approved' &&
@@ -891,8 +901,8 @@ function Dashboard() {
                     <div className="text-2xl font-semibold">
                       {pullRequests.filter(pr =>
                         !pr.draft &&
-                        // Exclude PRs still waiting for team approval
-                        !pr.labels?.includes('waiting-for-team-approval') &&
+                        // Exclude PRs that still need team approval
+                        !needsTeamApproval(pr) &&
                         (
                           pr.backend_approval_status === 'approved' ||
                           (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
