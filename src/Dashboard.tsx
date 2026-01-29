@@ -88,6 +88,15 @@ interface PullRequest {
     backend_reviewer?: string
     dismissed_at?: string
   } | null
+  latest_reviewer_activity?: {
+    message: string
+    user: string
+    type: string
+    reviewer_type: string
+    timestamp: string
+    preview?: string
+    url?: string
+  } | null
 }
 
 interface ApiResponse {
@@ -1162,17 +1171,45 @@ function Dashboard() {
                               {pr.changes_requested_info ? (
                                 pr.changes_requested_info.status === 'new_commit_from_author' ? (
                                   <span className="text-xs font-medium text-purple-500">
-                                    New Commit From Author
+                                    New commits by author
                                   </span>
                                 ) : pr.changes_requested_info.status === 'new_comment_from_author' ? (
                                   <span className="text-xs font-medium text-blue-500">
                                     New comment from author
+                                  </span>
+                                ) : pr.changes_requested_info.status === 'new_commits_after_approval' ? (
+                                  <span className="text-xs font-medium text-orange-500">
+                                    New commits after approval
                                   </span>
                                 ) : (
                                   <span className="text-xs text-warning">
                                     {pr.changes_requested_info.message}
                                   </span>
                                 )
+                              ) : pr.latest_reviewer_activity ? (
+                                <a
+                                  href={pr.latest_reviewer_activity.url || pr.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={`text-xs hover:underline ${
+                                    pr.latest_reviewer_activity.reviewer_type === 'backend'
+                                      ? 'text-teal-500'
+                                      : 'text-blue-400'
+                                  }`}
+                                  title={pr.latest_reviewer_activity.preview || pr.latest_reviewer_activity.message}
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {pr.latest_reviewer_activity.user} {pr.latest_reviewer_activity.type === 'comment' ? 'commented' : pr.latest_reviewer_activity.type}
+                                  <br />
+                                  <span className="text-muted-foreground">
+                                    {new Date(pr.latest_reviewer_activity.timestamp).toLocaleTimeString('en-US', {
+                                      hour: 'numeric',
+                                      minute: '2-digit',
+                                      hour12: true,
+                                      timeZone: 'America/New_York'
+                                    })}
+                                  </span>
+                                </a>
                               ) : (
                                 <span className="text-xs text-muted-foreground">-</span>
                               )}
