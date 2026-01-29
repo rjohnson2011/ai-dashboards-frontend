@@ -427,16 +427,15 @@ function Dashboard() {
             hasFailingBackendApprovalCheck(pr) ||
             // Special case: platform-atlas PRs don't need approval to be ready for review
             pr.repository_name === 'platform-atlas' ||
-            // Must be ready for backend review
+            // PRs with non-backend team approvals are ready for backend review
+            (pr.approval_summary &&
+             pr.approval_summary.approved_count > 0 &&
+             pr.approval_summary.approved_users?.some(user => !BACKEND_REVIEWERS.includes(user))) ||
+            // PRs from backend team members (auto-ready for review)
+            BACKEND_REVIEWERS.includes(pr.author) ||
+            // Backend has flagged as ready for review
             (pr.ready_for_backend_review &&
-             (
-               // Regular PRs with approvals (not from backend reviewers)
-               (pr.approval_summary &&
-                pr.approval_summary.approved_count > 0 &&
-                !(pr.approval_summary.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))) ||
-               // PRs from backend team members (auto-ready for review)
-               BACKEND_REVIEWERS.includes(pr.author)
-             ))
+             (pr.approval_summary && pr.approval_summary.approved_count > 0))
           )
         )
         // Default to showing newest updated PRs first for ready for review
@@ -713,16 +712,15 @@ function Dashboard() {
                           hasFailingBackendApprovalCheck(pr) ||
                           // Special case: platform-atlas PRs don't need approval to be ready for review
                           pr.repository_name === 'platform-atlas' ||
-                          // Must be ready for backend review
+                          // PRs with non-backend team approvals are ready for backend review
+                          (pr.approval_summary &&
+                           pr.approval_summary.approved_count > 0 &&
+                           pr.approval_summary.approved_users?.some(user => !BACKEND_REVIEWERS.includes(user))) ||
+                          // PRs from backend team members (auto-ready for review)
+                          BACKEND_REVIEWERS.includes(pr.author) ||
+                          // Backend has flagged as ready for review
                           (pr.ready_for_backend_review &&
-                           (
-                             // Regular PRs with approvals (not from backend reviewers)
-                             (pr.approval_summary &&
-                              pr.approval_summary.approved_count > 0 &&
-                              !(pr.approval_summary.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))) ||
-                             // PRs from backend team members (auto-ready for review)
-                             BACKEND_REVIEWERS.includes(pr.author)
-                           ))
+                           (pr.approval_summary && pr.approval_summary.approved_count > 0))
                         )
                       ).length}
                     </div>
