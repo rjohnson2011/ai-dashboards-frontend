@@ -1093,18 +1093,22 @@ function Dashboard() {
                                   {getCIStatusIcon(pr.ci_status)}
                                   <span className="text-sm">
                                     {(() => {
-                                      // Filter out the backend-review-group check - it's a required review, not CI
-                                      const ciFailures = pr.failing_checks?.filter(c => !c.name.includes('backend-review-group')) || [];
-                                      if (ciFailures.length > 0) {
-                                        return <span className="text-destructive">{ciFailures.length} {ciFailures.length === 1 ? 'failure' : 'failing'}</span>;
-                                      } else if (pr.ci_status === 'failure' && pr.failed_checks > 0) {
-                                        // Has failures but they're all backend-review-group (filtered out)
-                                        return <span className="text-warning">{pr.failed_checks} {pr.failed_checks === 1 ? 'failure' : 'failures'} (review)</span>;
+                                      // Trust ci_status as the source of truth
+                                      if (pr.ci_status === 'success') {
+                                        return <span className="text-success">All passing</span>;
                                       } else if (pr.ci_status === 'pending') {
                                         const pendingCount = (pr.total_checks - pr.successful_checks - pr.failed_checks) || 1;
                                         return <span className="text-warning">{pendingCount} pending</span>;
-                                      } else if (pr.ci_status === 'success') {
-                                        return <span className="text-success">All passing</span>;
+                                      } else if (pr.ci_status === 'failure') {
+                                        // Filter out the backend-review-group check - it's a required review, not CI
+                                        const ciFailures = pr.failing_checks?.filter(c => !c.name.includes('backend-review-group')) || [];
+                                        if (ciFailures.length > 0) {
+                                          return <span className="text-destructive">{ciFailures.length} {ciFailures.length === 1 ? 'failure' : 'failing'}</span>;
+                                        } else if (pr.failed_checks > 0) {
+                                          // Has failures but they're all backend-review-group (filtered out)
+                                          return <span className="text-warning">{pr.failed_checks} {pr.failed_checks === 1 ? 'failure' : 'failures'} (review)</span>;
+                                        }
+                                        return <span className="text-destructive">Failing</span>;
                                       } else {
                                         return <span className="text-muted-foreground">{pr.ci_status}</span>;
                                       }
