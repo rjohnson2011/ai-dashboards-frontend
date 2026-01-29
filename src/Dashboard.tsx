@@ -421,6 +421,10 @@ function Dashboard() {
           !needsTeamApproval(pr) &&
           // Exclude PRs with failing CI checks (they should be in "Failing CI" section)
           !(pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) &&
+          // Exclude PRs with unresolved changes requested (they should be in "Awaiting Changes" section)
+          !(pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0 &&
+            pr.changes_requested_info?.status !== 'new_commit_from_author' &&
+            pr.changes_requested_info?.status !== 'new_comment_from_author') &&
           (
             // Special case: platform-atlas PRs don't need approval to be ready for review
             pr.repository_name === 'platform-atlas' ||
@@ -704,6 +708,10 @@ function Dashboard() {
                         !needsTeamApproval(pr) &&
                         // Exclude PRs with failing CI checks
                         !(pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) &&
+                        // Exclude PRs with unresolved changes requested
+                        !(pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0 &&
+                          pr.changes_requested_info?.status !== 'new_commit_from_author' &&
+                          pr.changes_requested_info?.status !== 'new_comment_from_author') &&
                         (
                           // Special case: platform-atlas PRs don't need approval to be ready for review
                           pr.repository_name === 'platform-atlas' ||
