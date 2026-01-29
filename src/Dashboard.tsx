@@ -115,7 +115,7 @@ interface ApiResponse {
 }
 
 
-const BACKEND_REVIEWERS = ['ericboehs', 'LindseySaari', 'rmtolmach', 'stiehlrod', 'RachalCassity', 'rjohnson2011', 'stevenjcumming']
+const BACKEND_REVIEWERS = ['ericboehs', 'LindseySaari', 'rmtolmach', 'stiehlrod', 'RachalCassity', 'rjohnson2011', 'stevenjcumming', 'voidspooks', 'Crankums']
 
 // Lighthouse teams (lighthouse-dash, lighthouse-pivot, lighthouse-banana-peels)
 // were removed from the exemption list on Dec 1, 2025 per PR #25353
