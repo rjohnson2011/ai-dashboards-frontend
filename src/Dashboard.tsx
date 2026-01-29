@@ -416,8 +416,8 @@ function Dashboard() {
             pr.changes_requested_info?.status !== 'new_commit_from_author' &&
             pr.changes_requested_info?.status !== 'new_comment_from_author') &&
           (
-            // Special case: platform-atlas PRs don't need approval to be ready for review
-            pr.repository_name === 'platform-atlas' ||
+            // Special case: non-vets-api repos (platform-atlas, vets-api-mockdata) go straight to ready for review
+            (pr.repository_name === 'platform-atlas' || pr.repository_name === 'vets-api-mockdata') ||
             // PRs with non-backend team approvals are ready for backend review
             (pr.approval_summary &&
              pr.approval_summary.approved_count > 0 &&
@@ -455,8 +455,9 @@ function Dashboard() {
           !pr.draft &&
           // Exclude dependabot PRs (they have their own section)
           pr.author !== 'dependabot[bot]' &&
-          // Exclude platform-atlas PRs (they go straight to Ready for Review)
+          // Exclude non-vets-api repos (they go straight to Ready for Review)
           pr.repository_name !== 'platform-atlas' &&
+          pr.repository_name !== 'vets-api-mockdata' &&
           // Exclude PRs with exempt-be-review label
           !isTrulyExemptFromBackendReview(pr) &&
           (
@@ -628,7 +629,7 @@ function Dashboard() {
             <div>
               <h2 className="text-2xl font-semibold tracking-tight">Repositories Dashboard</h2>
               <p className="text-sm text-muted-foreground mt-1">Pull requests across configured repositories:</p>
-              <p className="text-xs text-muted-foreground">vets-api, vets-json-schema, vets-api-mockdata, platform-atlas</p>
+              <p className="text-xs text-muted-foreground">vets-api, vets-api-mockdata, platform-atlas</p>
             </div>
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
@@ -696,8 +697,8 @@ function Dashboard() {
                           pr.changes_requested_info?.status !== 'new_commit_from_author' &&
                           pr.changes_requested_info?.status !== 'new_comment_from_author') &&
                         (
-                          // Special case: platform-atlas PRs don't need approval to be ready for review
-                          pr.repository_name === 'platform-atlas' ||
+                          // Special case: non-vets-api repos go straight to ready for review
+                          (pr.repository_name === 'platform-atlas' || pr.repository_name === 'vets-api-mockdata') ||
                           // PRs with non-backend team approvals are ready for backend review
                           (pr.approval_summary &&
                            pr.approval_summary.approved_count > 0 &&
@@ -828,8 +829,9 @@ function Dashboard() {
                         !pr.draft &&
                         // Exclude dependabot PRs (they have their own section)
                         pr.author !== 'dependabot[bot]' &&
-                        // Exclude platform-atlas PRs (they go straight to Ready for Review)
+                        // Exclude non-vets-api repos (they go straight to Ready for Review)
                         pr.repository_name !== 'platform-atlas' &&
+                        pr.repository_name !== 'vets-api-mockdata' &&
                         // Exclude PRs with exempt-be-review label
                         !isTrulyExemptFromBackendReview(pr) &&
                         (
