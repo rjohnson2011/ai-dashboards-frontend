@@ -409,6 +409,8 @@ function Dashboard() {
           pr.author !== 'dependabot[bot]' &&
           // Exclude PRs with exempt-be-review label (they should be in "Exempt BE Review" section)
           !isTrulyExemptFromBackendReview(pr) &&
+          // Exclude PRs with waiting-for-team-approval label (they need team review first)
+          !pr.labels?.includes('waiting-for-team-approval') &&
           // Exclude PRs with failing CI checks (they should be in "Failing CI" section)
           !(pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) &&
           (
@@ -696,6 +698,8 @@ function Dashboard() {
                         pr.author !== 'dependabot[bot]' &&
                         // Exclude PRs with exempt-be-review label
                         !isTrulyExemptFromBackendReview(pr) &&
+                        // Exclude PRs with waiting-for-team-approval label
+                        !pr.labels?.includes('waiting-for-team-approval') &&
                         // Exclude PRs with failing CI checks
                         !(pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) &&
                         (
@@ -1165,6 +1169,9 @@ function Dashboard() {
                                   {pr.approval_summary?.approved_users?.map((user, idx) => (
                                     <div key={idx} className="text-xs">
                                       {user}
+                                      {pr.changes_requested_info?.status === 'new_commits_after_approval' && (
+                                        <span className="text-muted-foreground ml-1">(dismissed)</span>
+                                      )}
                                     </div>
                                   ))}
                                 </a>
