@@ -416,8 +416,9 @@ function Dashboard() {
             pr.changes_requested_info?.status !== 'new_commit_from_author' &&
             pr.changes_requested_info?.status !== 'new_comment_from_author') &&
           (
-            // Special case: non-vets-api repos (platform-atlas, vets-api-mockdata) go straight to ready for review
-            (pr.repository_name === 'platform-atlas' || pr.repository_name === 'vets-api-mockdata') ||
+            // Special case: non-vets-api repos go to ready for review, unless already finished (CI passing + has approvals)
+            ((pr.repository_name === 'platform-atlas' || pr.repository_name === 'vets-api-mockdata') &&
+             !(pr.ci_status === 'success' && pr.approval_summary && pr.approval_summary.approved_count > 0)) ||
             // PRs with non-backend team approvals are ready for backend review
             (pr.approval_summary &&
              pr.approval_summary.approved_count > 0 &&
@@ -504,16 +505,22 @@ function Dashboard() {
       case 'finished':
         filtered = filtered.filter(pr =>
           !pr.draft &&
+          // Exclude dependabot PRs (they have their own section)
+          pr.author !== 'dependabot[bot]' &&
           // Exclude PRs with exempt-be-review label (they should be in "Exempt BE Review" section)
           !isTrulyExemptFromBackendReview(pr) &&
           // Exclude PRs that still need team approval
           !needsTeamApproval(pr) &&
           // Exclude PRs with failing CI
           pr.ci_status !== 'failure' &&
-          // PR has backend approval (from API or frontend reviewer list)
           (
+            // PR has backend approval (from API or frontend reviewer list)
             pr.backend_approval_status === 'approved' ||
-            (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
+            (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))) ||
+            // Non-vets-api repos: finished if all CI passes and has any approval
+            ((pr.repository_name === 'platform-atlas' || pr.repository_name === 'vets-api-mockdata') &&
+             pr.ci_status === 'success' &&
+             pr.approval_summary && pr.approval_summary.approved_count > 0)
           )
         )
         break
@@ -699,8 +706,9 @@ function Dashboard() {
                           pr.changes_requested_info?.status !== 'new_commit_from_author' &&
                           pr.changes_requested_info?.status !== 'new_comment_from_author') &&
                         (
-                          // Special case: non-vets-api repos go straight to ready for review
-                          (pr.repository_name === 'platform-atlas' || pr.repository_name === 'vets-api-mockdata') ||
+                          // Special case: non-vets-api repos go to ready for review, unless already finished
+                          ((pr.repository_name === 'platform-atlas' || pr.repository_name === 'vets-api-mockdata') &&
+                           !(pr.ci_status === 'success' && pr.approval_summary && pr.approval_summary.approved_count > 0)) ||
                           // PRs with non-backend team approvals are ready for backend review
                           (pr.approval_summary &&
                            pr.approval_summary.approved_count > 0 &&
@@ -889,12 +897,16 @@ function Dashboard() {
                     <div className="text-2xl font-semibold">
                       {pullRequests.filter(pr =>
                         !pr.draft &&
+                        pr.author !== 'dependabot[bot]' &&
                         !isTrulyExemptFromBackendReview(pr) &&
                         !needsTeamApproval(pr) &&
                         pr.ci_status !== 'failure' &&
                         (
                           pr.backend_approval_status === 'approved' ||
-                          (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))
+                          (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))) ||
+                          ((pr.repository_name === 'platform-atlas' || pr.repository_name === 'vets-api-mockdata') &&
+                           pr.ci_status === 'success' &&
+                           pr.approval_summary && pr.approval_summary.approved_count > 0)
                         )
                       ).length}
                     </div>
