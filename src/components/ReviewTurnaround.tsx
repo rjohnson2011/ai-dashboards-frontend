@@ -167,7 +167,7 @@ const ReviewTurnaround: React.FC<ReviewTurnaroundProps> = ({ sprintOffset }) => 
           Review Turnaround Time
         </CardTitle>
         <div className="text-sm text-gray-400 font-light mt-1">
-          Time from "Ready for Backend Review" to "Backend Approved"
+          Business hours (9am-5pm EST, Mon-Fri) from "Ready for Backend Review" to "Backend Approved"
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -178,21 +178,21 @@ const ReviewTurnaround: React.FC<ReviewTurnaroundProps> = ({ sprintOffset }) => 
             <div className="text-2xl font-light text-teal-400">
               {formatHours(metrics.average_turnaround_hours)}
             </div>
-            <div className="text-xs text-gray-500">total time</div>
+            <div className="text-xs text-gray-500">business hours</div>
           </div>
           <div className="bg-gray-800/50 rounded-lg p-4">
             <div className="text-sm text-gray-400 font-light">Median</div>
             <div className="text-2xl font-light text-teal-400">
               {formatHours(metrics.median_turnaround_hours)}
             </div>
-            <div className="text-xs text-gray-500">total time</div>
+            <div className="text-xs text-gray-500">business hours</div>
           </div>
           <div className="bg-gray-800/50 rounded-lg p-4">
-            <div className="text-sm text-gray-400 font-light">Business Hours Avg</div>
+            <div className="text-sm text-gray-400 font-light">Min</div>
             <div className="text-2xl font-light text-cyan-400">
-              {formatHours(metrics.average_business_hours)}
+              {formatHours(metrics.min_turnaround_hours)}
             </div>
-            <div className="text-xs text-gray-500">9am-5pm ET</div>
+            <div className="text-xs text-gray-500">business hours</div>
           </div>
           <div className="bg-gray-800/50 rounded-lg p-4">
             <div className="text-sm text-gray-400 font-light">PRs Reviewed</div>

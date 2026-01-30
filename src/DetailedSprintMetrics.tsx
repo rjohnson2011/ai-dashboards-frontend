@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ArrowLeft, ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import ReviewTurnaround from './components/ReviewTurnaround';
 
 interface SprintInfo {
   sprint_number: number;
@@ -297,6 +298,9 @@ const DetailedSprintMetrics: React.FC = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Review Turnaround Time */}
+        <ReviewTurnaround sprintOffset={sprintOffset} />
 
         {/* Sprint Comparison - 3 Months */}
         <Card>
