@@ -13,6 +13,8 @@ interface ReviewTurnaroundData {
   approved_by: string;
   turnaround_hours: number;
   turnaround_business_hours: number;
+  author_feedback_hours: number;
+  review_rounds: number;
 }
 
 interface TurnaroundDistribution {
@@ -37,6 +39,7 @@ interface TurnaroundMetrics {
   median_turnaround_hours: number;
   average_business_hours: number;
   median_business_hours: number;
+  average_author_feedback_hours: number;
   min_turnaround_hours: number;
   max_turnaround_hours: number;
   distribution: TurnaroundDistribution;
@@ -167,7 +170,7 @@ const ReviewTurnaround: React.FC<ReviewTurnaroundProps> = ({ sprintOffset }) => 
           Review Turnaround Time
         </CardTitle>
         <div className="text-sm text-gray-400 font-light mt-1">
-          Business hours (9am-5pm EST, Mon-Fri) from "Ready for Backend Review" to "Backend Approved"
+          Reviewer time only (9am-5pm EST, Mon-Fri) — excludes time author spent addressing feedback
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -188,11 +191,11 @@ const ReviewTurnaround: React.FC<ReviewTurnaroundProps> = ({ sprintOffset }) => 
             <div className="text-xs text-gray-500">business hours</div>
           </div>
           <div className="bg-gray-800/50 rounded-lg p-4">
-            <div className="text-sm text-gray-400 font-light">Min</div>
-            <div className="text-2xl font-light text-cyan-400">
-              {formatHours(metrics.min_turnaround_hours)}
+            <div className="text-sm text-gray-400 font-light">Avg Author Time</div>
+            <div className="text-2xl font-light text-amber-400">
+              {formatHours(metrics.average_author_feedback_hours || 0)}
             </div>
-            <div className="text-xs text-gray-500">business hours</div>
+            <div className="text-xs text-gray-500">excluded from review</div>
           </div>
           <div className="bg-gray-800/50 rounded-lg p-4">
             <div className="text-sm text-gray-400 font-light">PRs Reviewed</div>
@@ -313,9 +316,15 @@ const ReviewTurnaround: React.FC<ReviewTurnaroundProps> = ({ sprintOffset }) => 
                     <div className="text-sm font-light text-teal-400">
                       {formatHours(review.turnaround_hours)}
                     </div>
-                    <div className="text-xs text-gray-500">
-                      {formatDateTime(review.approved_at)}
-                    </div>
+                    {review.review_rounds > 1 ? (
+                      <div className="text-xs text-amber-400/70">
+                        {review.review_rounds} rounds · {formatHours(review.author_feedback_hours)} excluded
+                      </div>
+                    ) : (
+                      <div className="text-xs text-gray-500">
+                        {formatDateTime(review.approved_at)}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
