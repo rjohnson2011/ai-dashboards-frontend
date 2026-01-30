@@ -443,6 +443,8 @@ function Dashboard() {
           !pr.draft &&
           pr.ci_status === 'failure' &&
           hasNonReviewFailingChecks(pr) &&
+          // Exclude dependabot PRs (they have their own section)
+          pr.author !== 'dependabot[bot]' &&
           // Exclude PRs with exempt-be-review label (they should be in "Exempt BE Review" section)
           !isTrulyExemptFromBackendReview(pr)
         )
@@ -789,7 +791,7 @@ function Dashboard() {
                   </CardHeader>
                   <CardContent className="h-[85px]">
                     <div className="text-2xl font-semibold">
-                      {pullRequests.filter(pr => !pr.draft && pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)).length}
+                      {pullRequests.filter(pr => !pr.draft && pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr) && pr.author !== 'dependabot[bot]').length}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Failing multiple checks
