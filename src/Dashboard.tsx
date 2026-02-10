@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
 import { authService } from './services/auth'
+import { subscribeToPullRequests } from './services/actionCable'
 import { APP_VERSION } from './version'
 import { CHANGELOG } from './changelog'
 // import { LoginButton } from './components/LoginButton'
@@ -152,25 +153,36 @@ function Dashboard() {
   const [showSearch, setShowSearch] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
 
+  // Use ref to avoid stale closure in polling interval
+  const lastUpdatedRef = useRef<string | null>(null)
+
   useEffect(() => {
     // Fetch PRs immediately on mount
     fetchPullRequests()
   }, [])
 
-  // Polling effect - always on
+  // Polling effect - fallback when WebSocket is disconnected
   useEffect(() => {
-    // Poll every 5 seconds when updating, every 30 seconds otherwise
-    const interval = isUpdating ? 5000 : 30000
-    
+    // Poll every 5 seconds when updating, every 60 seconds otherwise
+    const interval = isUpdating ? 5000 : 60000
+
     const timer = setInterval(() => {
       fetchPullRequests(true)
     }, interval)
-    
-    return () => clearInterval(timer)
-  }, [isUpdating, lastUpdated])
 
-  
-  const fetchPullRequests = async (isPolling = false, retryCount = 0) => {
+    return () => clearInterval(timer)
+  }, [isUpdating])
+
+  // ActionCable WebSocket - real-time updates from server
+  useEffect(() => {
+    const unsubscribe = subscribeToPullRequests(() => {
+      fetchPullRequests(true)
+    })
+    return unsubscribe
+  }, [])
+
+
+  const fetchPullRequests = useCallback(async (isPolling = false, retryCount = 0) => {
     const maxRetries = 3
 
     if (!isPolling) {
@@ -199,11 +211,12 @@ function Dashboard() {
       // Update the updating status
       setIsUpdating(data.updating || false)
 
-      // Only update data if it has changed
-      if (!isPolling || data.last_updated !== lastUpdated) {
+      // Only update data if it has changed (use ref to avoid stale closure)
+      if (!isPolling || data.last_updated !== lastUpdatedRef.current) {
         // Combine both regular and approved pull requests
         const allPRs = [...(data.pull_requests || []), ...(data.approved_pull_requests || [])]
         setPullRequests(allPRs)
+        lastUpdatedRef.current = data.last_updated
         setLastUpdated(data.last_updated)
         setRateLimit(data.rate_limit || null)
       }
@@ -228,7 +241,7 @@ function Dashboard() {
       }
       setLoading(false)
     }
-  }
+  }, [])
 
 
   const getCIStatusIcon = (status: string) => {
