@@ -6,6 +6,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "5.0.0",
+    date: new Date().toISOString(),
+    changes: [
+      "NEW: Real-time dashboard updates via WebSocket",
+      "Dashboard now refreshes within ~1 second of GitHub events",
+      "60-second polling kept as fallback"
+    ]
+  },
+  {
     version: "2.4.0",
     date: new Date().toISOString(),
     changes: [
