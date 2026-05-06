@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceArea, Label } from 'recharts';
 import { ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import ReviewTurnaround from './components/ReviewTurnaround';
+import { displayUser } from './lib/utils';
 
 interface SprintInfo {
   sprint_number: number;
@@ -251,7 +252,8 @@ const SprintMetrics: React.FC = () => {
       'Crankums': 'Craig Donavin',
       'jweissman': 'Joseph Weissman'
     };
-    return nameMap[githubHandle] || githubHandle;
+    if (nameMap[githubHandle]) return nameMap[githubHandle];
+    return displayUser(githubHandle);
   };
 
   const getGitHubAvatarUrl = (githubHandle: string): string => {

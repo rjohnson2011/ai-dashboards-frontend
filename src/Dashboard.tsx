@@ -35,6 +35,7 @@ import {
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './components/ui/tooltip'
 import { useTheme } from './contexts/ThemeContext'
+import { displayUser, isGhostUser } from './lib/utils'
 
 interface CheckRun {
   name: string
@@ -1092,15 +1093,19 @@ function Dashboard() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <a
-                              href={`https://va.ghe.com/${pr.author}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="hover:underline text-primary"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {pr.author}
-                            </a>
+                            {isGhostUser(pr.author) ? (
+                              <span className="text-muted-foreground italic">{displayUser(pr.author)}</span>
+                            ) : (
+                              <a
+                                href={`https://va.ghe.com/${pr.author}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:underline text-primary"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {pr.author}
+                              </a>
+                            )}
                           </TableCell>
                           <TableCell>
                             <Tooltip>
@@ -1185,8 +1190,8 @@ function Dashboard() {
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   {pr.approval_summary?.approved_users?.map((user, idx) => (
-                                    <div key={idx} className="text-xs">
-                                      {user}
+                                    <div key={idx} className={`text-xs ${isGhostUser(user) ? 'italic text-muted-foreground' : ''}`}>
+                                      {displayUser(user)}
                                       {pr.changes_requested_info?.status === 'new_commits_after_approval' && (
                                         <span className="text-muted-foreground ml-1">(dismissed)</span>
                                       )}
@@ -1244,7 +1249,7 @@ function Dashboard() {
                                   title={pr.latest_reviewer_activity.preview || pr.latest_reviewer_activity.message}
                                   onClick={(e) => e.stopPropagation()}
                                 >
-                                  {pr.latest_reviewer_activity.user} {pr.latest_reviewer_activity.type === 'comment' ? 'commented' : pr.latest_reviewer_activity.type}
+                                  {displayUser(pr.latest_reviewer_activity.user)} {pr.latest_reviewer_activity.type === 'comment' ? 'commented' : pr.latest_reviewer_activity.type}
                                   <br />
                                   <span className="text-muted-foreground">
                                     {new Date(pr.latest_reviewer_activity.timestamp).toLocaleTimeString('en-US', {
@@ -1263,8 +1268,8 @@ function Dashboard() {
                           <TableCell>
                             <div className="space-y-1">
                               {pr.approval_summary?.commented_users?.map((user, idx) => (
-                                <div key={idx} className="text-xs">
-                                  {user}
+                                <div key={idx} className={`text-xs ${isGhostUser(user) ? 'italic text-muted-foreground' : ''}`}>
+                                  {displayUser(user)}
                                 </div>
                               ))}
                               {(!pr.approval_summary?.commented_users || pr.approval_summary.commented_users.length === 0) && (

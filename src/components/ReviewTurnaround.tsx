@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Clock, TrendingUp, Users } from 'lucide-react';
+import { displayUser } from '../lib/utils';
 
 interface ReviewTurnaroundData {
   pr_number: number;
@@ -263,7 +264,7 @@ const ReviewTurnaround: React.FC<ReviewTurnaroundProps> = ({ sprintOffset }) => 
                   />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-light text-white truncate">
-                      {reviewer.reviewer}
+                      {displayUser(reviewer.reviewer)}
                     </div>
                     <div className="text-xs text-gray-400">
                       {reviewer.review_count} reviews
@@ -309,7 +310,7 @@ const ReviewTurnaround: React.FC<ReviewTurnaroundProps> = ({ sprintOffset }) => 
                       {review.title}
                     </a>
                     <div className="text-xs text-gray-400">
-                      by {review.author} • approved by {review.approved_by}
+                      by {displayUser(review.author)} • approved by {displayUser(review.approved_by)}
                     </div>
                   </div>
                   <div className="text-right whitespace-nowrap">
