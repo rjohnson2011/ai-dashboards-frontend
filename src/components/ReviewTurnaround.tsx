@@ -4,6 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Clock, TrendingUp, Users } from 'lucide-react';
 import { displayUser } from '../lib/utils';
 import { authService } from '../services/auth';
+import InitialsAvatar from './InitialsAvatar';
 
 interface ReviewTurnaroundData {
   pr_number: number;
@@ -113,10 +114,6 @@ const ReviewTurnaround: React.FC<ReviewTurnaroundProps> = ({ sprintOffset }) => 
       minute: '2-digit',
       hour12: true
     });
-  };
-
-  const getGitHubAvatarUrl = (githubHandle: string): string => {
-    return `https://va.ghe.com/${githubHandle}.png?size=40`;
   };
 
   if (loading) {
@@ -264,11 +261,7 @@ const ReviewTurnaround: React.FC<ReviewTurnaroundProps> = ({ sprintOffset }) => 
                   key={reviewer.reviewer}
                   className="flex items-center gap-3 bg-gray-800/30 rounded-lg p-3"
                 >
-                  <img
-                    src={getGitHubAvatarUrl(reviewer.reviewer)}
-                    alt={reviewer.reviewer}
-                    className="w-8 h-8 rounded-full border border-teal-500/50"
-                  />
+                  <InitialsAvatar name={displayUser(reviewer.reviewer)} size={32} />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-light text-white truncate">
                       {displayUser(reviewer.reviewer)}

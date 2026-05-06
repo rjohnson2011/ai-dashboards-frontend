@@ -6,6 +6,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lu
 import ReviewTurnaround from './components/ReviewTurnaround';
 import { displayUser } from './lib/utils';
 import { authService } from './services/auth';
+import InitialsAvatar from './components/InitialsAvatar';
 
 interface SprintInfo {
   sprint_number: number;
@@ -264,10 +265,6 @@ const SprintMetrics: React.FC = () => {
     return displayUser(githubHandle);
   };
 
-  const getGitHubAvatarUrl = (githubHandle: string): string => {
-    return `https://va.ghe.com/${githubHandle}.png?size=80`;
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-black">
@@ -512,10 +509,10 @@ const SprintMetrics: React.FC = () => {
             <div className="mb-4 p-4 bg-teal-900/30 rounded border border-teal-500/30">
               <div className="text-sm text-teal-400 font-light mb-2">Support Engineer on Duty</div>
               <div className="flex items-center gap-3">
-                <img
-                  src={getGitHubAvatarUrl(data.current_sprint.engineer_name)}
-                  alt={getEngineerDisplayName(data.current_sprint.engineer_name)}
-                  className="w-16 h-16 rounded-full border-2 border-teal-500"
+                <InitialsAvatar
+                  name={getEngineerDisplayName(data.current_sprint.engineer_name)}
+                  size={64}
+                  className="border-2 border-teal-500"
                 />
                 <div>
                   <div className="text-2xl font-light text-white">
@@ -556,10 +553,10 @@ const SprintMetrics: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center gap-4">
-                    <img
-                      src={getGitHubAvatarUrl(rotation.engineer_name)}
-                      alt={getEngineerDisplayName(rotation.engineer_name)}
-                      className="w-20 h-20 rounded-full border-2 border-teal-500"
+                    <InitialsAvatar
+                      name={getEngineerDisplayName(rotation.engineer_name)}
+                      size={80}
+                      className="border-2 border-teal-500"
                     />
                     <div className="flex-1">
                       <div className="text-2xl font-light text-white">
@@ -856,10 +853,9 @@ const SprintMetrics: React.FC = () => {
                         <tr key={engineer.engineer}>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-3">
-                              <img
-                                src={getGitHubAvatarUrl(engineer.engineer)}
-                                alt={getEngineerDisplayName(engineer.engineer)}
-                                className="w-10 h-10 rounded-full border border-teal-500"
+                              <InitialsAvatar
+                                name={getEngineerDisplayName(engineer.engineer)}
+                                size={40}
                               />
                               <div>
                                 <div className="text-sm font-light text-white">
