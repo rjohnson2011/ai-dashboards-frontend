@@ -247,7 +247,9 @@ const SprintMetrics: React.FC = () => {
       'rmtolmach': 'Rebecca Tolmach',
       'ericboehs': 'Eric Boehs',
       'LindseySaari': 'Lindsey Saari',
-      'stevenjcumming': 'Steven Cumming'
+      'stevenjcumming': 'Steven Cumming',
+      'Crankums': 'Craig Donavin',
+      'jweissman': 'Joseph Weissman'
     };
     return nameMap[githubHandle] || githubHandle;
   };
