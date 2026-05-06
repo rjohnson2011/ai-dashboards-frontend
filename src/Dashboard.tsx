@@ -622,6 +622,14 @@ function Dashboard() {
                 <span className="hidden xs:inline sm:inline">Sprint Metrics</span>
               </Button>
             </Link>
+            <Link to="/redesign">
+              <Button variant="ghost" size="sm" className="flex items-center gap-2 text-amber-500 hover:text-amber-400">
+                <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider ring-1 ring-amber-500/30">
+                  New
+                </span>
+                <span className="hidden md:inline">Try redesign</span>
+              </Button>
+            </Link>
             <div className="ml-auto flex items-center gap-1 sm:gap-2">
               {lastUpdated && (
                 <span className="hidden md:inline text-sm text-muted-foreground">
