@@ -36,6 +36,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './components/ui/tooltip'
 import { useTheme } from './contexts/ThemeContext'
 import { displayUser, isGhostUser } from './lib/utils'
+import UserMenu from './components/UserMenu'
 
 interface CheckRun {
   name: string
@@ -659,17 +660,9 @@ function Dashboard() {
                     <Sun className="h-4 w-4" />
                   )}
                 </Button>
-                {authService.getUser()?.email && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => authService.logout()}
-                    className="ml-1 text-xs text-muted-foreground"
-                    title={`Signed in as ${authService.getUser()?.email}`}
-                  >
-                    Sign out
-                  </Button>
-                )}
+                <div className="ml-1">
+                  <UserMenu />
+                </div>
               </div>
             </div>
           </div>
