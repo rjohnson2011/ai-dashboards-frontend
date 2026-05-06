@@ -1093,7 +1093,7 @@ function Dashboard() {
                           </TableCell>
                           <TableCell>
                             <a
-                              href={`https://github.com/${pr.author}`}
+                              href={`https://va.ghe.com/${pr.author}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="hover:underline text-primary"

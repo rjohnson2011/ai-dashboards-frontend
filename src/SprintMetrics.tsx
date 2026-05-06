@@ -255,7 +255,7 @@ const SprintMetrics: React.FC = () => {
   };
 
   const getGitHubAvatarUrl = (githubHandle: string): string => {
-    return `https://github.com/${githubHandle}.png?size=80`;
+    return `https://va.ghe.com/${githubHandle}.png?size=80`;
   };
 
   if (loading) {

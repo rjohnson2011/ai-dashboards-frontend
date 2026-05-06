@@ -108,7 +108,7 @@ const ReviewTurnaround: React.FC<ReviewTurnaroundProps> = ({ sprintOffset }) => 
   };
 
   const getGitHubAvatarUrl = (githubHandle: string): string => {
-    return `https://github.com/${githubHandle}.png?size=40`;
+    return `https://va.ghe.com/${githubHandle}.png?size=40`;
   };
 
   if (loading) {
