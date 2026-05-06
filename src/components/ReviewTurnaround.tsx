@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Clock, TrendingUp, Users } from 'lucide-react';
 import { displayUser } from '../lib/utils';
+import { authService } from '../services/auth';
 
 interface ReviewTurnaroundData {
   pr_number: number;
@@ -70,7 +71,13 @@ const ReviewTurnaround: React.FC<ReviewTurnaroundProps> = ({ sprintOffset }) => 
         ? `${apiUrl}/api/v1/sprint_metrics/review_turnaround`
         : `${apiUrl}/api/v1/sprint_metrics/review_turnaround?sprint_offset=${sprintOffset}`;
 
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: { ...authService.getAuthHeaders() },
+      });
+      if (response.status === 401 || response.status === 403) {
+        authService.logout();
+        return;
+      }
       if (!response.ok) {
         throw new Error('Failed to fetch review turnaround metrics');
       }

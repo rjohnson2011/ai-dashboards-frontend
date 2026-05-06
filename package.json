@@ -34,6 +34,7 @@
     "@radix-ui/react-tabs": "^1.1.12",
     "@radix-ui/react-tooltip": "^1.2.7",
     "@rails/actioncable": "^8.1.200",
+    "@react-oauth/google": "^0.13.5",
     "@types/node": "^24.0.14",
     "@uswds/uswds": "^3.13.0",
     "@vercel/analytics": "^1.5.0",

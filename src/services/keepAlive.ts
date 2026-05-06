@@ -8,9 +8,10 @@ let pingInterval: number | null = null;
 
 async function pingAPI(): Promise<boolean> {
   try {
-    const response = await fetch(`${API_URL}/api/v1/reviews`, {
-      method: 'HEAD', // Just check if server is up, don't fetch data
-      signal: AbortSignal.timeout(10000), // 10 second timeout
+    // Use the public version endpoint so the ping works without a valid auth token.
+    const response = await fetch(`${API_URL}/api/v1/reviews/version`, {
+      method: 'GET',
+      signal: AbortSignal.timeout(10000),
     });
     return response.ok;
   } catch {

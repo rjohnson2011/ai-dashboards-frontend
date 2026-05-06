@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ArrowLeft, ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import ReviewTurnaround from './components/ReviewTurnaround';
+import { authService } from './services/auth';
 
 interface SprintInfo {
   sprint_number: number;
@@ -115,8 +116,14 @@ const DetailedSprintMetrics: React.FC = () => {
       const url = offset === 0
         ? `${apiUrl}/api/v1/sprint_metrics/detailed`
         : `${apiUrl}/api/v1/sprint_metrics/detailed?sprint_offset=${offset}`;
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: { ...authService.getAuthHeaders() },
+      });
 
+      if (response.status === 401 || response.status === 403) {
+        authService.logout();
+        return;
+      }
       if (!response.ok) {
         throw new Error('Failed to fetch detailed metrics');
       }

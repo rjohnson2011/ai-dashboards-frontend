@@ -5,6 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import ReviewTurnaround from './components/ReviewTurnaround';
 import { displayUser } from './lib/utils';
+import { authService } from './services/auth';
 
 interface SprintInfo {
   sprint_number: number;
@@ -147,9 +148,16 @@ const SprintMetrics: React.FC = () => {
       const timeoutId = setTimeout(() => controller.abort(), 30000);
 
       try {
-        const response = await fetch(url, { signal: controller.signal });
+        const response = await fetch(url, {
+          signal: controller.signal,
+          headers: { ...authService.getAuthHeaders() },
+        });
         clearTimeout(timeoutId);
 
+        if (response.status === 401 || response.status === 403) {
+          authService.logout();
+          return;
+        }
         if (!response.ok) {
           throw new Error(`Failed to fetch sprint metrics (HTTP ${response.status})`);
         }

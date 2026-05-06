@@ -216,6 +216,10 @@ function Dashboard() {
       })
       clearTimeout(timeoutId)
 
+      if (response.status === 401 || response.status === 403) {
+        authService.logout()
+        return
+      }
       if (!response.ok) {
         throw new Error('Failed to fetch pull requests')
       }
@@ -655,6 +659,17 @@ function Dashboard() {
                     <Sun className="h-4 w-4" />
                   )}
                 </Button>
+                {authService.getUser()?.email && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => authService.logout()}
+                    className="ml-1 text-xs text-muted-foreground"
+                    title={`Signed in as ${authService.getUser()?.email}`}
+                  >
+                    Sign out
+                  </Button>
+                )}
               </div>
             </div>
           </div>
