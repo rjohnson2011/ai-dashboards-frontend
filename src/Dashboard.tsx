@@ -609,81 +609,67 @@ function Dashboard() {
 
   return (
     <TooltipProvider>
-      <div className="flex-col md:flex min-h-screen bg-background">
+      <div className="flex flex-col min-h-screen bg-background">
         <div className="border-b bg-white dark:bg-zinc-900">
-          <div className="flex h-16 items-center px-4">
-            <GitPullRequest className="mr-2 h-4 w-4 text-muted-foreground" />
-            <h2 className="text-lg font-medium">Pull Request Dashboard</h2>
-            <Link to="/sprint-metrics" className="ml-6">
+          <div className="flex h-auto sm:h-16 flex-wrap items-center gap-2 px-3 py-2 sm:px-4 sm:py-0">
+            <div className="flex items-center min-w-0">
+              <GitPullRequest className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
+              <h2 className="text-base sm:text-lg font-medium truncate">PR Dashboard</h2>
+            </div>
+            <Link to="/sprint-metrics" className="sm:ml-4">
               <Button variant="ghost" size="sm" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
-                Sprint Metrics
+                <span className="hidden xs:inline sm:inline">Sprint Metrics</span>
               </Button>
             </Link>
-            <div className="ml-auto flex items-center space-x-4">
-              {/* Authentication UI - Temporarily disabled during OAuth setup */}
-              {/* {authService.isAuthenticated() ? (
-                <UserProfile />
-              ) : (
-                <LoginButton />
-              )} */}
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  {lastUpdated && (
-                    <>
-                      <span className="text-sm text-muted-foreground">
-                        Data refreshed at {new Date(lastUpdated).toLocaleString('en-US', {
-                          timeZone: 'America/New_York',
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                          hour: 'numeric',
-                          minute: '2-digit',
-                          hour12: true
-                        })} ET
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        • Version {APP_VERSION.version}
-                      </span>
-                    </>
-                  )}
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={toggleTheme}
-                  className="ml-2"
-                >
-                  {theme === 'light' ? (
-                    <Moon className="h-4 w-4" />
-                  ) : (
-                    <Sun className="h-4 w-4" />
-                  )}
-                </Button>
-                <div className="ml-1">
-                  <UserMenu />
-                </div>
-              </div>
+            <div className="ml-auto flex items-center gap-1 sm:gap-2">
+              {lastUpdated && (
+                <span className="hidden md:inline text-sm text-muted-foreground">
+                  Updated {new Date(lastUpdated).toLocaleString('en-US', {
+                    timeZone: 'America/New_York',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                  })} ET
+                </span>
+              )}
+              <span className="hidden lg:inline text-sm text-muted-foreground">
+                • v{APP_VERSION.version}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleTheme}
+                aria-label="Toggle theme"
+              >
+                {theme === 'light' ? (
+                  <Moon className="h-4 w-4" />
+                ) : (
+                  <Sun className="h-4 w-4" />
+                )}
+              </Button>
+              <UserMenu />
             </div>
           </div>
         </div>
-        <div className="flex-1 space-y-8 px-2 py-6">
-          <div className="flex items-center justify-between">
+        <div className="flex-1 space-y-6 sm:space-y-8 px-3 sm:px-2 py-4 sm:py-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h2 className="text-2xl font-semibold tracking-tight">Repositories Dashboard</h2>
+              <h2 className="text-xl sm:text-2xl font-semibold tracking-tight">Repositories Dashboard</h2>
               <p className="text-sm text-muted-foreground mt-1">Pull requests across configured repositories:</p>
               <p className="text-xs text-muted-foreground">vets-api, vets-api-mockdata, platform-atlas</p>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               {showSearch ? (
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
                   <Input
                     type="text"
-                    placeholder="Search PRs by title, author, number..."
+                    placeholder="Search..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-64"
+                    className="w-full sm:w-64"
                   />
                   <Button
                     variant="ghost"
@@ -706,11 +692,10 @@ function Dashboard() {
                   Search
                 </Button>
               )}
-              </div>
             </div>
           </div>
           <div className="space-y-8">
-              <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-9">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-9 gap-2 sm:gap-3">
                 <Card 
                   className={`gradient-card gradient-ready-review cursor-pointer ${activeFilter === 'ready' ? 'selected' : ''}`}
                   onClick={() => setActiveFilter('ready')}

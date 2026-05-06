@@ -32,10 +32,16 @@ export default function UserMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger className="flex items-center gap-2 rounded-full px-2 py-1 text-sm hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
         <Avatar className="h-8 w-8">
-          {user.picture && <AvatarImage src={user.picture} alt={user.name || user.email} />}
+          {user.picture && (
+            <AvatarImage
+              src={user.picture}
+              alt={user.name || user.email}
+              referrerPolicy="no-referrer"
+            />
+          )}
           <AvatarFallback>{initials(user.name, user.email)}</AvatarFallback>
         </Avatar>
-        <span className="hidden sm:inline">{display}</span>
+        <span className="hidden sm:inline max-w-[120px] truncate">{display}</span>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-56">
