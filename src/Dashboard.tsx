@@ -117,7 +117,19 @@ interface ApiResponse {
 }
 
 
-const BACKEND_REVIEWERS = ['ericboehs', 'LindseySaari', 'rmtolmach', 'stiehlrod', 'RachalCassity', 'rjohnson2011', 'stevenjcumming', 'Crankums', 'jweissman']
+// GHE handles for the backend-review-group team. Synced manually with
+// https://va.ghe.com/orgs/software/teams/backend-review-group/members
+const BACKEND_REVIEWERS = [
+  'Lindsey-Hattamer',
+  'Rebecca-Tolmach',
+  'STEVEN-CUMMING',
+  'Joseph-Weissman',
+  'Jennica-Stiehl',
+  'CURT-BONADE',
+  'Craig-Donavin',
+  'RYAN-JOHNSON26',
+  'Rachal-Cassity',
+]
 
 // Lighthouse teams (lighthouse-dash, lighthouse-pivot, lighthouse-banana-peels)
 // were removed from the exemption list on Dec 1, 2025 per PR #25353
