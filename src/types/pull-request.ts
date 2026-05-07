@@ -127,42 +127,88 @@ export function hasNonReviewFailingChecks(pr: PullRequest): boolean {
 
 // Filtering helpers shared across dashboard variants.
 
+function authorHasRespondedToChanges(pr: PullRequest): boolean {
+  return (
+    pr.changes_requested_info?.status === 'new_commit_from_author' ||
+    pr.changes_requested_info?.status === 'new_comment_from_author'
+  )
+}
+
+function hasUnresolvedChangesRequested(pr: PullRequest): boolean {
+  return !!(
+    pr.approval_summary?.changes_requested_count &&
+    pr.approval_summary.changes_requested_count > 0 &&
+    !authorHasRespondedToChanges(pr)
+  )
+}
+
+function needsTeamApproval(pr: PullRequest): boolean {
+  if (!pr.labels?.includes('waiting-for-team-approval')) return false
+  const hasNonBackendApproval =
+    !!pr.approval_summary &&
+    pr.approval_summary.approved_count > 0 &&
+    !!pr.approval_summary.approved_users?.some(u => !BACKEND_REVIEWERS.includes(u))
+  return !hasNonBackendApproval
+}
+
 export function isReadyForReview(pr: PullRequest): boolean {
+  // Hard exclusions
   if (pr.draft) return false
   if (pr.author === 'dependabot[bot]') return false
   if (isTrulyExemptFromBackendReview(pr)) return false
   if (pr.backend_approval_status === 'approved') return false
   if (pr.approval_summary?.approved_users?.some(u => BACKEND_REVIEWERS.includes(u))) return false
+  if (needsTeamApproval(pr)) return false
 
-  // Failing CI (in a non-review-related way) should send the PR to the
-  // Failing CI bucket, not Ready for Review.
+  // Real CI failures (not the "backend review required" chicken-and-egg)
+  // belong in Failing CI.
   if (pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) return false
 
-  // Unresolved changes-requested goes to Awaiting Changes, not Ready.
-  const blockingChangesRequested = !!(
-    pr.approval_summary?.changes_requested_count &&
-    pr.approval_summary.changes_requested_count > 0 &&
-    pr.changes_requested_info?.status !== 'new_commit_from_author' &&
-    pr.changes_requested_info?.status !== 'new_comment_from_author'
-  )
-  if (blockingChangesRequested) return false
+  // Unresolved changes-requested → Awaiting Changes, not Ready.
+  // (Once the author commits or comments after, the PR comes back here.)
+  if (hasUnresolvedChangesRequested(pr)) return false
 
-  // Has team approval (non-backend) → ready for backend review.
+  // Inclusion criteria — any of:
+  // 1. Non-backend team has approved
   const hasNonBackendApproval = !!(
     pr.approval_summary &&
     pr.approval_summary.approved_count > 0 &&
     pr.approval_summary.approved_users?.some(u => !BACKEND_REVIEWERS.includes(u))
   )
-  // Repos that don't require backend review still surface in "Ready" so
-  // someone notices them.
+  if (hasNonBackendApproval) return true
+
+  // 2. Author is themselves a backend reviewer (auto-ready)
+  if (BACKEND_REVIEWERS.includes(pr.author)) return true
+
+  // 3. Backend flagged as ready for review (with approvals)
+  if (pr.ready_for_backend_review && pr.approval_summary && pr.approval_summary.approved_count > 0) {
+    return true
+  }
+
+  // 4. Author responded to a previous changes-request — needs re-review
+  if (authorHasRespondedToChanges(pr)) return true
+
+  // 5. Repos that don't require backend review still surface in Ready so
+  //    someone notices them, unless they're already done.
   const isNonVetsApi =
     pr.repository_name === 'platform-atlas' || pr.repository_name === 'vets-api-mockdata'
+  if (isNonVetsApi && pr.ci_status !== 'success') return true
 
-  return hasNonBackendApproval || (isNonVetsApi && pr.ci_status !== 'success')
+  return false
 }
 
 export function isAwaitingAuthorChanges(pr: PullRequest): boolean {
   if (pr.draft) return false
+  if (isTrulyExemptFromBackendReview(pr)) return false
+  // True meaning: a backend reviewer requested changes, and the author
+  // hasn't responded yet (no new commit or comment from them since).
+  if (!hasUnresolvedChangesRequested(pr)) return false
+  // Only count if a backend reviewer was the one requesting changes.
+  const blamedBackendReviewer = pr.approval_summary?.changes_requested_users?.some(u =>
+    BACKEND_REVIEWERS.includes(u)
+  )
+  if (blamedBackendReviewer) return true
+  // Fallback to the server-side flag for non-backend reviewer cases.
   return !!pr.awaiting_author_changes
 }
 

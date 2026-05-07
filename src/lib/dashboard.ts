@@ -4,7 +4,9 @@ import {
   isAwaitingAuthorChanges,
   isFinishedUnmerged,
   hasFailingCi,
+  hasNonReviewFailingChecks,
   isDependabot,
+  isTrulyExemptFromBackendReview,
 } from '../types/pull-request'
 import { isGhostUser } from './utils'
 
@@ -23,10 +25,20 @@ export interface FilterDef {
   predicate: (pr: PullRequest) => boolean
 }
 
+// Failing CI bucket should only include PRs whose CI is failing on a
+// "real" check — i.e., not just "Backend review required" or other
+// review-related chicken-and-egg checks.
+function isInFailingCiBucket(pr: PullRequest): boolean {
+  if (pr.draft) return false
+  if (pr.author === 'dependabot[bot]') return false
+  if (isTrulyExemptFromBackendReview(pr)) return false
+  return hasFailingCi(pr) && hasNonReviewFailingChecks(pr)
+}
+
 export const FILTERS: FilterDef[] = [
   { key: 'ready', label: 'Ready', predicate: isReadyForReview },
   { key: 'awaiting', label: 'Awaiting author', predicate: isAwaitingAuthorChanges },
-  { key: 'failing', label: 'Failing CI', predicate: pr => hasFailingCi(pr) && !pr.draft },
+  { key: 'failing', label: 'Failing CI', predicate: isInFailingCiBucket },
   { key: 'approved', label: 'Approved · unmerged', predicate: isFinishedUnmerged },
   { key: 'drafts', label: 'Drafts', predicate: pr => pr.draft },
   { key: 'dependabot', label: 'Dependabot', predicate: isDependabot },
