@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import {
   type PullRequest,
   BACKEND_REVIEWERS,
-  isReadyForReview,
   isTrulyExemptFromBackendReview,
 } from '../types/pull-request'
 import {
@@ -44,14 +43,23 @@ export default function RefinedMinimal({ pullRequests }: Props) {
     () => applyFilter(pullRequests, activeFilter, searchTerm),
     [pullRequests, activeFilter, searchTerm]
   )
-  const heroNames = useMemo(
-    () =>
-      pullRequests
-        .filter(isReadyForReview)
-        .slice(0, 3)
-        .map(pr => displayUser(pr.author)),
-    [pullRequests]
-  )
+  // "New today" — count reviewer activity that landed today, broken down
+  // by review vs comment. Uses latest_reviewer_activity (one event per PR),
+  // so this is "PRs touched today by a reviewer" rather than total events.
+  const todaysActivity = useMemo(() => {
+    const startOfDay = new Date()
+    startOfDay.setHours(0, 0, 0, 0)
+    let reviews = 0
+    let comments = 0
+    pullRequests.forEach(pr => {
+      const lra = pr.latest_reviewer_activity
+      if (!lra?.timestamp) return
+      if (new Date(lra.timestamp) < startOfDay) return
+      if (lra.type === 'review') reviews += 1
+      else if (lra.type === 'comment') comments += 1
+    })
+    return { reviews, comments }
+  }, [pullRequests])
 
   return (
     <div className="design-isolated refined-shell min-h-[calc(100vh-48px)]">
@@ -77,10 +85,14 @@ export default function RefinedMinimal({ pullRequests }: Props) {
                 </span>
               </div>
             </div>
-            {heroNames.length > 0 && (
+            {(todaysActivity.reviews > 0 || todaysActivity.comments > 0) && (
               <div className="mt-8 font-mono text-[16px] text-neutral-500">
-                Next up:{' '}
-                <span className="text-neutral-900">{heroNames.join(', ')}</span>
+                New today:{' '}
+                <span className="text-neutral-900">
+                  {todaysActivity.reviews} review{todaysActivity.reviews === 1 ? '' : 's'}
+                  {' · '}
+                  {todaysActivity.comments} comment{todaysActivity.comments === 1 ? '' : 's'}
+                </span>
               </div>
             )}
           </div>
