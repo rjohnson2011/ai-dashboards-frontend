@@ -220,6 +220,52 @@ export function summarizeFailingChecks(pr: PullRequest): string {
     .join(' · ')
 }
 
+// Compact failure summary for tight layouts (Brutalist's 2-line clamp).
+// Maps verbose workflow names to short tags and groups by family — so a
+// PR failing 3 different "Build And Publish Preview Environment" steps
+// shows as "preview build ×3" instead of one truncated line.
+const SHORT_NAME_PATTERNS: Array<[RegExp, string]> = [
+  [/build\s*and\s*publish\s*preview/i, 'preview build'],
+  [/build\s*and\s*cache\s*docker/i, 'docker build'],
+  [/^code\s*checks$/i, 'code checks'],
+  [/^test\b.*\bgroup/i, 'test groups'],
+  [/^test\s*results/i, 'test results'],
+  [/^lint/i, 'lint'],
+  [/codeql/i, 'codeql'],
+  [/danger/i, 'danger'],
+  [/^pr\s*labeler/i, 'pr labeler'],
+  [/codeowners/i, 'codeowners'],
+  [/service[_\s]*tag/i, 'service tags'],
+  [/datadog/i, 'datadog'],
+  [/settings/i, 'settings'],
+]
+
+function shortFailureTag(name: string): string {
+  const tidied = tidyCheckName(name)
+  for (const [re, tag] of SHORT_NAME_PATTERNS) {
+    if (re.test(tidied)) return tag
+  }
+  // Fallback: lowercase + drop bracket noise, cap at 22 chars
+  const cleaned = tidied.toLowerCase().replace(/\s*\(.*?\)\s*$/, '').trim()
+  return cleaned.length > 22 ? cleaned.slice(0, 22) + '…' : cleaned
+}
+
+export function summarizeFailingChecksCompact(pr: PullRequest): string {
+  if (!pr.failing_checks || pr.failing_checks.length === 0) return ''
+  const groups: Record<string, number> = {}
+  for (const check of pr.failing_checks) {
+    const raw = (check.name || '').trim()
+    if (!raw) continue
+    if (isReviewGate(raw)) continue
+    const tag = shortFailureTag(raw)
+    groups[tag] = (groups[tag] || 0) + 1
+  }
+  return Object.entries(groups)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, n]) => (n > 1 ? `${name} ×${n}` : name))
+    .join(' · ')
+}
+
 export interface ActivitySummary {
   // Most recent event for the headline
   latestLabel: string // "Author responded" | "Backend reviewer commented" | "Approved"

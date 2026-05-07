@@ -14,7 +14,7 @@ import {
   nameFromHandle,
   countByFilter,
   applyFilter,
-  summarizeFailingChecks,
+  summarizeFailingChecksCompact,
   summarizeActivity,
 } from '../lib/dashboard'
 import { displayUser } from '../lib/utils'
@@ -250,7 +250,7 @@ function BrutalistRow({ pr, idx }: { pr: PullRequest; idx: number }) {
         </span>
         {status.key === 'failing' && (
           <span className="font-mono text-[12px] uppercase tracking-[0.16em] text-black/65 group-hover:text-[var(--brut-bg)]/70 line-clamp-2">
-            {summarizeFailingChecks(pr)}
+            {summarizeFailingChecksCompact(pr)}
           </span>
         )}
       </div>
