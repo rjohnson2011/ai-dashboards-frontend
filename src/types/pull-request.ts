@@ -237,16 +237,39 @@ export function isReadyForReview(pr: PullRequest): boolean {
 export function isAwaitingAuthorChanges(pr: PullRequest): boolean {
   if (pr.draft) return false
   if (isTrulyExemptFromBackendReview(pr)) return false
-  // True meaning: a backend reviewer requested changes, and the author
-  // hasn't responded yet (no new commit or comment from them since).
-  if (!hasUnresolvedChangesRequested(pr)) return false
-  // Only count if a backend reviewer was the one requesting changes.
-  const blamedBackendReviewer = pr.approval_summary?.changes_requested_users?.some(u =>
-    BACKEND_REVIEWERS.includes(u)
-  )
-  if (blamedBackendReviewer) return true
-  // Fallback to the server-side flag for non-backend reviewer cases.
-  return !!pr.awaiting_author_changes
+
+  // (a) A backend reviewer formally requested changes, and the author has
+  // not responded since.
+  if (hasUnresolvedChangesRequested(pr)) {
+    const blamedBackendReviewer = pr.approval_summary?.changes_requested_users?.some(u =>
+      BACKEND_REVIEWERS.includes(u)
+    )
+    if (blamedBackendReviewer) return true
+    if (pr.awaiting_author_changes) return true
+  }
+
+  // (b) The most recent reviewer activity is from a backend reviewer
+  // (line comments / commented-review state) and there's no standing
+  // approval yet — i.e. the BE just left feedback the author hasn't
+  // resolved. We treat this as "awaiting changes" even without a formal
+  // CHANGES_REQUESTED, since BE comments on lines are real feedback.
+  const lra = pr.latest_reviewer_activity
+  const beActivityWithoutApproval =
+    lra?.reviewer_type === 'backend' &&
+    lra.user !== pr.author &&
+    !pr.approval_summary?.approved_users?.some(u => BACKEND_REVIEWERS.includes(u))
+  if (beActivityWithoutApproval) {
+    // Check that there isn't a non-BE approval — if a teammate approved,
+    // the PR is in a "Ready" state, not "awaiting changes".
+    const hasNonBeApproval = !!(
+      pr.approval_summary &&
+      pr.approval_summary.approved_count > 0 &&
+      pr.approval_summary.approved_users?.some(u => !BACKEND_REVIEWERS.includes(u))
+    )
+    if (!hasNonBeApproval) return true
+  }
+
+  return false
 }
 
 export function isFinishedUnmerged(pr: PullRequest): boolean {
@@ -286,6 +309,10 @@ export function needsFirstTeamReview(pr: PullRequest): boolean {
   if (hasAnyApproval || beApproved) return false
 
   if (needsTeamApproval(pr)) return true
+
+  // PRs already in "Awaiting Changes" (formal CR or BE line-comment feedback
+  // without resolution) don't double-bucket as NTR.
+  if (isAwaitingAuthorChanges(pr)) return false
 
   const blockingCR = !!(
     pr.approval_summary?.changes_requested_count &&
