@@ -250,12 +250,14 @@ export function isAwaitingAuthorChanges(pr: PullRequest): boolean {
 }
 
 export function isFinishedUnmerged(pr: PullRequest): boolean {
-  // Backend-approved + open + green CI. A BE-approved PR with broken CI
-  // belongs in Failing CI (since it can't actually be merged).
+  // Backend-approved + open + green CI + not dependabot. A BE-approved PR
+  // with broken CI belongs in Failing CI (since it can't be merged), and
+  // dependabot PRs have their own bucket.
   return (
     pr.backend_approval_status === 'approved' &&
     pr.state === 'open' &&
-    pr.ci_status !== 'failure'
+    pr.ci_status !== 'failure' &&
+    !isDependabot(pr)
   )
 }
 
