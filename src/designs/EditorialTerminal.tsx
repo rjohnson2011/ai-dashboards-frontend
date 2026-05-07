@@ -11,11 +11,12 @@ import {
   FILTERS,
   classifyStatus,
   reviewerBadgesFor,
-  timeAgo,
   absoluteTime,
   nameFromHandle,
   countByFilter,
   applyFilter,
+  summarizeFailingChecks,
+  summarizeActivity,
 } from '../lib/dashboard'
 import { displayUser } from '../lib/utils'
 
@@ -169,7 +170,7 @@ export default function EditorialTerminal({ pullRequests }: Props) {
 
         {/* Table */}
         <section className="border-t border-[var(--ed-rule)]">
-          <div className="grid grid-cols-[12px_1fr_220px_180px_100px] gap-x-4 px-3 py-2 border-b border-[var(--ed-rule)]">
+          <div className="grid grid-cols-[12px_1fr_220px_160px_140px] gap-x-4 px-3 py-2 border-b border-[var(--ed-rule)]">
             <span />
             <ColHead label="Pull request" />
             <ColHead label="Status" />
@@ -220,7 +221,7 @@ function PrRow({ pr }: { pr: PullRequest }) {
 
   return (
     <button
-      className="group w-full grid grid-cols-[12px_1fr_220px_180px_100px] items-start gap-x-4 px-3 py-3 border-b border-[var(--ed-rule-soft)] last:border-0 text-left hover:bg-[rgba(255,255,255,0.025)] transition-colors"
+      className="group w-full grid grid-cols-[12px_1fr_220px_160px_140px] items-start gap-x-4 px-3 py-3 border-b border-[var(--ed-rule-soft)] last:border-0 text-left hover:bg-[rgba(255,255,255,0.025)] transition-colors"
       onClick={() => window.open(pr.url, '_blank', 'noopener,noreferrer')}
     >
       <span className="self-stretch w-[3px] -my-3" style={{ backgroundColor: colors.stripe, opacity: 0.85 }} />
@@ -254,19 +255,24 @@ function PrRow({ pr }: { pr: PullRequest }) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-1.5 min-w-0">
         <span
-          className="inline-flex items-center gap-1 self-start font-mono text-[16px] uppercase tracking-[0.16em] px-1.5 py-0.5 rounded-sm"
+          className="inline-flex items-center gap-1 self-start font-mono text-[12px] uppercase tracking-[0.16em] px-1.5 py-0.5 rounded-sm"
           style={{ backgroundColor: colors.pillBg, color: colors.pillText }}
         >
-          {status.key === 'failing' && <AlertTriangle className="h-2.5 w-2.5" />}
-          {status.key === 'changes_requested' && <AlertOctagon className="h-2.5 w-2.5" />}
-          {status.key === 'ci_pending' && <Clock className="h-2.5 w-2.5" />}
-          {status.key === 'approved' && <GitMerge className="h-2.5 w-2.5" />}
+          {status.key === 'failing' && <AlertTriangle className="h-3 w-3" />}
+          {status.key === 'changes_requested' && <AlertOctagon className="h-3 w-3" />}
+          {status.key === 'ci_pending' && <Clock className="h-3 w-3" />}
+          {status.key === 'approved' && <GitMerge className="h-3 w-3" />}
           {status.label}
         </span>
-        {pr.changes_requested_info?.message && (
-          <span className="font-mono text-[16px] text-stone-500 line-clamp-1">
+        {status.key === 'failing' && (
+          <span className="font-mono text-[12px] text-stone-500 line-clamp-2">
+            {summarizeFailingChecks(pr)}
+          </span>
+        )}
+        {pr.changes_requested_info?.message && status.key !== 'failing' && (
+          <span className="font-mono text-[12px] text-stone-500 line-clamp-1">
             {pr.changes_requested_info.message}
           </span>
         )}
@@ -281,13 +287,21 @@ function PrRow({ pr }: { pr: PullRequest }) {
         )}
       </div>
 
-      <div
-        className="text-right font-mono text-[16px] tabular-nums leading-tight"
-        title={`Created ${absoluteTime(pr.created_at)}\nUpdated ${absoluteTime(pr.updated_at)}`}
-      >
-        <div className="text-stone-300">{timeAgo(pr.updated_at)} ago</div>
-        <div className="text-stone-600 mt-0.5">opened {timeAgo(pr.created_at)}</div>
-      </div>
+      {(() => {
+        const activity = summarizeActivity(pr, BACKEND_REVIEWERS)
+        return (
+          <div
+            className="text-right font-mono text-[12px] leading-tight"
+            title={`Created ${absoluteTime(pr.created_at)}\nUpdated ${absoluteTime(pr.updated_at)}`}
+          >
+            <div className="text-stone-200">{activity.latestLabel}</div>
+            <div className="text-stone-500 mt-0.5 tabular-nums">{activity.latestTimeAgo}</div>
+            {activity.rollup && (
+              <div className="text-stone-600 mt-1 tabular-nums">{activity.rollup}</div>
+            )}
+          </div>
+        )
+      })()}
     </button>
   )
 }

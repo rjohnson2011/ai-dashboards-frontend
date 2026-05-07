@@ -119,6 +119,89 @@ export function absoluteTime(iso: string): string {
   })
 }
 
+// Group failing CI checks into a compact summary.
+// "rspec / unit (4/8), rspec / unit (5/8), brakeman" → "rspec ×2 · brakeman"
+export function summarizeFailingChecks(pr: PullRequest): string {
+  if (!pr.failing_checks || pr.failing_checks.length === 0) return ''
+  const groups: Record<string, number> = {}
+  for (const check of pr.failing_checks) {
+    const name = (check.name || '').trim()
+    if (!name) continue
+    // Strip common parametric suffixes: "(4/8)", "[node 18]", trailing numbers
+    const root =
+      name
+        .replace(/\s*\(\d+\/\d+\)\s*/, '')
+        .replace(/\s*\[[^\]]+\]\s*/, '')
+        .replace(/\s*\d+$/, '')
+        .trim() || name
+    groups[root] = (groups[root] || 0) + 1
+  }
+  return Object.entries(groups)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, n]) => (n > 1 ? `${name} ×${n}` : name))
+    .join(' · ')
+}
+
+export interface ActivitySummary {
+  // Most recent event for the headline
+  latestLabel: string // "Author responded" | "Backend reviewer commented" | "Approved"
+  latestTimeAgo: string // "5h ago"
+  // Optional rollup line
+  rollup: string // "3 author · 1 BR cmt · 2 team"
+}
+
+export function summarizeActivity(
+  pr: PullRequest,
+  backendReviewers: string[]
+): ActivitySummary {
+  const latestTimeAgo = `${timeAgo(pr.updated_at)} ago`
+  let latestLabel = 'updated'
+
+  // Determine the most recent meaningful action.
+  if (pr.changes_requested_info?.status === 'new_commit_from_author') {
+    latestLabel = 'Author pushed commit'
+  } else if (pr.changes_requested_info?.status === 'new_comment_from_author') {
+    latestLabel = 'Author responded'
+  } else if (pr.backend_approval_status === 'approved') {
+    latestLabel = 'Backend approved'
+  } else if (pr.approval_summary && pr.approval_summary.approved_count > 0) {
+    const beApprover = pr.approval_summary.approved_users?.find(u =>
+      backendReviewers.includes(u)
+    )
+    latestLabel = beApprover ? 'Backend approved' : 'Team approved'
+  } else if (
+    pr.approval_summary?.changes_requested_users?.some(u => backendReviewers.includes(u))
+  ) {
+    latestLabel = 'BR requested changes'
+  } else if (pr.approval_summary?.changes_requested_count) {
+    latestLabel = 'Changes requested'
+  } else if (pr.latest_reviewer_activity?.type === 'comment') {
+    const isBE = backendReviewers.includes(pr.latest_reviewer_activity.user)
+    latestLabel = isBE ? 'BR commented' : 'Reviewer commented'
+  } else if (pr.draft) {
+    latestLabel = 'Draft updated'
+  }
+
+  // Build the rollup. We need counts split by author/BR/team.
+  // We can only infer from approval_summary, since we don't have a full
+  // per-comment timeline. Use commented_users + author = assumption.
+  const commenters = pr.approval_summary?.commented_users || []
+  const authorComments = commenters.filter(u => u === pr.author).length
+  const beComments = commenters.filter(u => backendReviewers.includes(u) && u !== pr.author).length
+  const teamComments = commenters.length - authorComments - beComments
+
+  const parts: string[] = []
+  if (authorComments) parts.push(`${authorComments} author`)
+  if (beComments) parts.push(`${beComments} BR`)
+  if (teamComments) parts.push(`${teamComments} team`)
+
+  return {
+    latestLabel,
+    latestTimeAgo,
+    rollup: parts.join(' · '),
+  }
+}
+
 export function nameFromHandle(handle: string): string {
   if (!handle) return ''
   if (isGhostUser(handle)) return '?'
