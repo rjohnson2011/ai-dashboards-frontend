@@ -143,7 +143,7 @@ export default function RefinedMinimal({ pullRequests }: Props) {
           {filtered.length === 0 ? (
             <RefinedEmpty filterKey={activeFilter} hasSearch={!!searchTerm} />
           ) : (
-            <ul className="divide-y divide-neutral-100">
+            <ul className="divide-y divide-neutral-200">
               {filtered.map(pr => (
                 <RefinedRow key={pr.id} pr={pr} />
               ))}
@@ -178,7 +178,7 @@ function RefinedRow({ pr }: { pr: PullRequest }) {
   return (
     <li>
       <button
-        className="group w-full grid grid-cols-[1fr_auto_auto] items-start gap-x-8 py-5 text-left hover:bg-neutral-50 transition-colors -mx-3 px-3"
+        className="group w-full grid grid-cols-[1fr_auto_auto] items-start gap-x-8 py-6 text-left hover:bg-neutral-50 transition-colors -mx-3 px-3"
         onClick={() => window.open(pr.url, '_blank', 'noopener,noreferrer')}
       >
         <div className="min-w-0">
