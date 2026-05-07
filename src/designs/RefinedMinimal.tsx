@@ -10,11 +10,12 @@ import {
   FILTERS,
   classifyStatus,
   reviewerBadgesFor,
-  timeAgo,
   absoluteTime,
   nameFromHandle,
   countByFilter,
   applyFilter,
+  summarizeFailingChecks,
+  summarizeActivity,
 } from '../lib/dashboard'
 import { displayUser } from '../lib/utils'
 
@@ -204,9 +205,12 @@ function RefinedRow({ pr }: { pr: PullRequest }) {
           <div className="font-display text-[18px] leading-snug text-neutral-900 group-hover:text-black truncate transition-colors">
             {pr.title}
           </div>
-          <div className="mt-1.5 font-mono text-[16px] text-neutral-500">
+          <div className="mt-1.5 font-mono text-[12px] text-neutral-500">
             {displayUser(pr.author)}
-            {pr.changes_requested_info?.message && (
+            {status.key === 'failing' && (
+              <span className="text-neutral-400"> — {summarizeFailingChecks(pr)}</span>
+            )}
+            {pr.changes_requested_info?.message && status.key !== 'failing' && (
               <span className="text-neutral-400"> — {pr.changes_requested_info.message}</span>
             )}
           </div>
@@ -225,13 +229,21 @@ function RefinedRow({ pr }: { pr: PullRequest }) {
           )}
         </div>
 
-        <div
-          className="text-right font-mono text-[16px] tabular-nums leading-tight self-center"
-          title={`Updated ${absoluteTime(pr.updated_at)}\nCreated ${absoluteTime(pr.created_at)}`}
-        >
-          <div className="text-neutral-700">{timeAgo(pr.updated_at)} ago</div>
-          <div className="text-neutral-400 mt-0.5">opened {timeAgo(pr.created_at)}</div>
-        </div>
+        {(() => {
+          const activity = summarizeActivity(pr, BACKEND_REVIEWERS)
+          return (
+            <div
+              className="text-right font-mono text-[12px] leading-tight self-center"
+              title={`Updated ${absoluteTime(pr.updated_at)}\nCreated ${absoluteTime(pr.created_at)}`}
+            >
+              <div className="text-neutral-700">{activity.latestLabel}</div>
+              <div className="text-neutral-400 mt-0.5 tabular-nums">{activity.latestTimeAgo}</div>
+              {activity.rollup && (
+                <div className="text-neutral-400 mt-0.5 tabular-nums">{activity.rollup}</div>
+              )}
+            </div>
+          )
+        })()}
       </button>
     </li>
   )

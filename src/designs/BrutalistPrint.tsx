@@ -10,11 +10,12 @@ import {
   FILTERS,
   classifyStatus,
   reviewerBadgesFor,
-  timeAgo,
   absoluteTime,
   nameFromHandle,
   countByFilter,
   applyFilter,
+  summarizeFailingChecks,
+  summarizeActivity,
 } from '../lib/dashboard'
 import { displayUser } from '../lib/utils'
 
@@ -245,8 +246,13 @@ function BrutalistRow({ pr, idx }: { pr: PullRequest; idx: number }) {
           </span>
           {status.label}
         </span>
-        {pr.changes_requested_info?.message && (
-          <span className="font-mono text-[16px] uppercase tracking-[0.18em] text-black/60 group-hover:text-[var(--brut-bg)]/70 line-clamp-1">
+        {isFailing && (
+          <span className="font-mono text-[12px] uppercase tracking-[0.16em] text-black/65 group-hover:text-[var(--brut-bg)]/70 line-clamp-2">
+            {summarizeFailingChecks(pr)}
+          </span>
+        )}
+        {pr.changes_requested_info?.message && !isFailing && (
+          <span className="font-mono text-[12px] uppercase tracking-[0.18em] text-black/60 group-hover:text-[var(--brut-bg)]/70 line-clamp-1">
             {pr.changes_requested_info.message}
           </span>
         )}
@@ -285,15 +291,25 @@ function BrutalistRow({ pr, idx }: { pr: PullRequest; idx: number }) {
         )}
       </div>
 
-      <div
-        className="text-right font-mono text-[16px] tabular-nums leading-tight uppercase tracking-[0.16em]"
-        title={`Updated ${absoluteTime(pr.updated_at)}\nCreated ${absoluteTime(pr.created_at)}`}
-      >
-        <div>{timeAgo(pr.updated_at)} ago</div>
-        <div className="text-black/50 group-hover:text-[var(--brut-bg)]/55 mt-0.5">
-          opened {timeAgo(pr.created_at)}
-        </div>
-      </div>
+      {(() => {
+        const activity = summarizeActivity(pr, BACKEND_REVIEWERS)
+        return (
+          <div
+            className="text-right font-mono text-[12px] leading-tight uppercase tracking-[0.14em]"
+            title={`Updated ${absoluteTime(pr.updated_at)}\nCreated ${absoluteTime(pr.created_at)}`}
+          >
+            <div>{activity.latestLabel}</div>
+            <div className="text-black/50 group-hover:text-[var(--brut-bg)]/55 mt-0.5 tabular-nums">
+              {activity.latestTimeAgo}
+            </div>
+            {activity.rollup && (
+              <div className="text-black/40 group-hover:text-[var(--brut-bg)]/45 mt-0.5 tabular-nums">
+                {activity.rollup}
+              </div>
+            )}
+          </div>
+        )
+      })()}
     </button>
   )
 }

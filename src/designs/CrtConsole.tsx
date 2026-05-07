@@ -10,11 +10,12 @@ import {
   FILTERS,
   classifyStatus,
   reviewerBadgesFor,
-  timeAgo,
   absoluteTime,
   nameFromHandle,
   countByFilter,
   applyFilter,
+  summarizeFailingChecks,
+  summarizeActivity,
 } from '../lib/dashboard'
 import { displayUser } from '../lib/utils'
 
@@ -227,12 +228,17 @@ function CrtRow({ pr, idx }: { pr: PullRequest; idx: number }) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-0.5">
-        <span className="text-[16px] tabular-nums" style={{ color }}>
+      <div className="flex flex-col gap-0.5 min-w-0">
+        <span className="text-[12px] tabular-nums" style={{ color }}>
           [{STATUS_TAG[status.key] || 'OPEN'}] {status.label}
         </span>
-        {pr.changes_requested_info?.message && (
-          <span className="text-[16px] opacity-60 line-clamp-1">
+        {status.key === 'failing' && (
+          <span className="text-[11px] opacity-70 line-clamp-2">
+            {summarizeFailingChecks(pr)}
+          </span>
+        )}
+        {pr.changes_requested_info?.message && status.key !== 'failing' && (
+          <span className="text-[11px] opacity-60 line-clamp-1">
             {pr.changes_requested_info.message}
           </span>
         )}
@@ -267,13 +273,21 @@ function CrtRow({ pr, idx }: { pr: PullRequest; idx: number }) {
         )}
       </div>
 
-      <div
-        className="text-right text-[16px] tabular-nums leading-tight tracking-wide"
-        title={`Updated ${absoluteTime(pr.updated_at)}\nCreated ${absoluteTime(pr.created_at)}`}
-      >
-        <div>{timeAgo(pr.updated_at).padStart(4, ' ')} ago</div>
-        <div className="opacity-50">opn {timeAgo(pr.created_at)}</div>
-      </div>
+      {(() => {
+        const activity = summarizeActivity(pr, BACKEND_REVIEWERS)
+        return (
+          <div
+            className="text-right text-[12px] leading-tight tracking-wide"
+            title={`Updated ${absoluteTime(pr.updated_at)}\nCreated ${absoluteTime(pr.created_at)}`}
+          >
+            <div className="opacity-90 truncate">{activity.latestLabel.toLowerCase()}</div>
+            <div className="opacity-60 tabular-nums">{activity.latestTimeAgo}</div>
+            {activity.rollup && (
+              <div className="opacity-40 tabular-nums">{activity.rollup.toLowerCase()}</div>
+            )}
+          </div>
+        )
+      })()}
     </button>
   )
 }
