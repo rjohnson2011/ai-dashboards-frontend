@@ -28,7 +28,7 @@ export interface FilterDef {
 // Failing CI bucket should only include PRs whose CI is failing on a
 // "real" check — i.e., not just "Backend review required" or other
 // review-related chicken-and-egg checks.
-function isInFailingCiBucket(pr: PullRequest): boolean {
+export function isInFailingCiBucket(pr: PullRequest): boolean {
   if (pr.draft) return false
   if (pr.author === 'dependabot[bot]') return false
   if (isTrulyExemptFromBackendReview(pr)) return false

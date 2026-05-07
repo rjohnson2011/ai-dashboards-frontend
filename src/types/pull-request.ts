@@ -154,7 +154,7 @@ function hasUnresolvedChangesRequested(pr: PullRequest): boolean {
   )
 }
 
-function needsTeamApproval(pr: PullRequest): boolean {
+export function needsTeamApproval(pr: PullRequest): boolean {
   if (!pr.labels?.includes('waiting-for-team-approval')) return false
   const hasNonBackendApproval =
     !!pr.approval_summary &&
@@ -236,6 +236,37 @@ export function isAwaitingAuthorChanges(pr: PullRequest): boolean {
 
 export function isFinishedUnmerged(pr: PullRequest): boolean {
   return pr.backend_approval_status === 'approved' && pr.state === 'open'
+}
+
+// "Needing team review" — vets-api PR that hasn't been picked up yet.
+// Either explicitly tagged waiting-for-team-approval, OR has no approvals
+// AND no unresolved changes-requested. Used by the old dashboard's
+// "PRs Needing Team Review" card.
+export function needsFirstTeamReview(pr: PullRequest): boolean {
+  if (pr.draft) return false
+  if (pr.author === 'dependabot[bot]') return false
+  if (isTrulyExemptFromBackendReview(pr)) return false
+  // Only applies to vets-api (other repos don't require team review)
+  if (pr.repository_name === 'platform-atlas') return false
+  if (pr.repository_name === 'vets-api-mockdata') return false
+
+  if (needsTeamApproval(pr)) return true
+
+  const hasAnyApproval = !!(
+    pr.approval_summary && pr.approval_summary.approved_count > 0
+  )
+  const beApproved =
+    pr.backend_approval_status === 'approved' ||
+    !!pr.approval_summary?.approved_users?.some(u => BACKEND_REVIEWERS.includes(u))
+  if (hasAnyApproval || beApproved) return false
+
+  const blockingCR = !!(
+    pr.approval_summary?.changes_requested_count &&
+    pr.approval_summary.changes_requested_count > 0 &&
+    pr.changes_requested_info?.status !== 'new_commit_from_author' &&
+    pr.changes_requested_info?.status !== 'new_comment_from_author'
+  )
+  return !blockingCR
 }
 
 export function hasFailingCi(pr: PullRequest): boolean {

@@ -118,40 +118,19 @@ interface ApiResponse {
 }
 
 
-// GHE handles for the backend-review-group team. Synced manually with
-// https://va.ghe.com/orgs/software/teams/backend-review-group/members
-const BACKEND_REVIEWERS = [
-  'Lindsey-Hattamer',
-  'Rebecca-Tolmach',
-  'STEVEN-CUMMING',
-  'Joseph-Weissman',
-  'Jennica-Stiehl',
-  'CURT-BONADE',
-  'Craig-Donavin',
-  'RYAN-JOHNSON26',
-  'Rachal-Cassity',
-]
-
-// Lighthouse teams (lighthouse-dash, lighthouse-pivot, lighthouse-banana-peels)
-// were removed from the exemption list on Dec 1, 2025 per PR #25353
-// However, existing PRs still have the exempt-be-review label
-// This function provides the correct exemption status, ignoring the label for Lighthouse PRs
-const LIGHTHOUSE_LABELS = ['claimsApi']
-
-function isTrulyExemptFromBackendReview(pr: PullRequest): boolean {
-  // If no exempt label, definitely not exempt
-  if (!pr.labels || !pr.labels.includes('exempt-be-review')) {
-    return false
-  }
-
-  // If PR has Lighthouse team indicators, it's NOT exempt (policy changed Dec 1, 2025)
-  if (pr.labels.some(label => LIGHTHOUSE_LABELS.includes(label))) {
-    return false
-  }
-
-  // Otherwise, respect the exempt label
-  return true
-}
+// All bucketing predicates and the backend reviewer list live in
+// types/pull-request.ts so that /dashboard and /redesign share one
+// source of truth.
+import {
+  BACKEND_REVIEWERS,
+  isTrulyExemptFromBackendReview,
+  isReadyForReview,
+  isAwaitingAuthorChanges,
+  isFinishedUnmerged,
+  needsFirstTeamReview,
+  isDependabot,
+} from './types/pull-request'
+import { isInFailingCiBucket } from './lib/dashboard'
 
 function Dashboard() {
   const { theme, toggleTheme } = useTheme()
@@ -385,187 +364,47 @@ function Dashboard() {
     })
   }
 
-  const hasNonReviewFailingChecks = (pr: PullRequest) => {
-    // List of checks that are review-related and shouldn't prevent Ready for Review
-    const reviewRelatedChecks = [
-      'Pull Request Ready for Review',
-      'Danger',
-      'Status Checks',
-      'Get PR data',
-      'Get PR Data',
-      'Check Workflow Statuses'
-    ]
-
-    return pr.failing_checks.some(check => {
-      // Check if it's a backend-related check (including "Succeed if backend approval")
-      if (check.name.toLowerCase().includes('backend')) return false
-
-      // Check if it's in our review-related list
-      if (reviewRelatedChecks.some(reviewCheck => check.name === reviewCheck)) return false
-
-      // Check if it contains "Get PR Data" in any form
-      if (check.name.includes('Get PR Data')) return false
-
-      // Check if it's the backend approval confirmation check
-      if (check.name.includes('Succeed if backend approval')) return false
-
-      // Check if it contains "Check Workflow Statuses" in any form
-      if (check.name.includes('Check Workflow Statuses')) return false
-
-      // Check if it's Danger in any form
-      if (check.name.toLowerCase().includes('danger')) return false
-
-      // This is a non-review failing check
-      return true
-    })
-  }
-
-  // Check if PR still needs team approval (has waiting-for-team-approval label and no non-backend approvals)
-  const needsTeamApproval = (pr: PullRequest) => {
-    if (!pr.labels?.includes('waiting-for-team-approval')) return false
-    // If there are non-backend approvals, team approval is satisfied
-    const hasNonBackendApproval = pr.approval_summary &&
-      pr.approval_summary.approved_count > 0 &&
-      pr.approval_summary.approved_users?.some(user => !BACKEND_REVIEWERS.includes(user))
-    return !hasNonBackendApproval
-  }
+  // hasNonReviewFailingChecks, needsTeamApproval, isTrulyExemptFromBackendReview
+  // are now imported from types/pull-request.ts so /dashboard and /redesign
+  // share the same logic.
 
   const filterPullRequests = (prs: PullRequest[]) => {
     let filtered = prs
     
-    // Apply card filter
+    // Apply card filter via the shared predicates from types/pull-request.ts
+    // and lib/dashboard.ts, so /dashboard and /redesign agree on bucketing.
     switch (activeFilter) {
       case 'ready':
-        filtered = filtered.filter(pr =>
-          !pr.draft &&
-          // PR must not have backend approval (from API or frontend reviewer list)
-          pr.backend_approval_status !== 'approved' &&
-          !(pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))) &&
-          // Exclude dependabot PRs (they have their own section)
-          pr.author !== 'dependabot[bot]' &&
-          // Exclude PRs with exempt-be-review label (they should be in "Exempt BE Review" section)
-          !isTrulyExemptFromBackendReview(pr) &&
-          // Exclude PRs that still need team approval
-          !needsTeamApproval(pr) &&
-          // Exclude PRs with failing CI checks (they should be in "Failing CI" section)
-          !(pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) &&
-          // Exclude PRs with unresolved changes requested (they should be in "Awaiting Changes" section)
-          !(pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0 &&
-            pr.changes_requested_info?.status !== 'new_commit_from_author' &&
-            pr.changes_requested_info?.status !== 'new_comment_from_author') &&
-          (
-            // Special case: non-vets-api repos go to ready for review, unless already finished (CI passing + has approvals)
-            ((pr.repository_name === 'platform-atlas' || pr.repository_name === 'vets-api-mockdata') &&
-             !(pr.ci_status === 'success' && pr.approval_summary && pr.approval_summary.approved_count > 0)) ||
-            // PRs with non-backend team approvals are ready for backend review
-            (pr.approval_summary &&
-             pr.approval_summary.approved_count > 0 &&
-             pr.approval_summary.approved_users?.some(user => !BACKEND_REVIEWERS.includes(user))) ||
-            // PRs from backend team members (auto-ready for review)
-            BACKEND_REVIEWERS.includes(pr.author) ||
-            // Backend has flagged as ready for review
-            (pr.ready_for_backend_review &&
-             (pr.approval_summary && pr.approval_summary.approved_count > 0))
-          )
-        )
+        filtered = filtered.filter(isReadyForReview)
         // Default to showing newest updated PRs first for ready for review
         if (!sortColumn) {
           filtered = filtered.sort((a, b) => {
             const aTime = new Date(a.updated_at).getTime()
             const bTime = new Date(b.updated_at).getTime()
-            return bTime - aTime // Descending = newest first
+            return bTime - aTime
           })
         }
         break
       case 'failing':
-        filtered = filtered.filter(pr =>
-          !pr.draft &&
-          pr.ci_status === 'failure' &&
-          hasNonReviewFailingChecks(pr) &&
-          // Exclude dependabot PRs (they have their own section)
-          pr.author !== 'dependabot[bot]' &&
-          // Exclude PRs with exempt-be-review label (they should be in "Exempt BE Review" section)
-          !isTrulyExemptFromBackendReview(pr)
-        )
+        filtered = filtered.filter(isInFailingCiBucket)
         break
       case 'draft':
         filtered = filtered.filter(pr => pr.draft)
         break
       case 'reviewed-today':
-        filtered = filtered.filter(pr =>
-          !pr.draft &&
-          // Exclude dependabot PRs (they have their own section)
-          pr.author !== 'dependabot[bot]' &&
-          // Exclude non-vets-api repos (they go straight to Ready for Review)
-          pr.repository_name !== 'platform-atlas' &&
-          pr.repository_name !== 'vets-api-mockdata' &&
-          // Exclude PRs with exempt-be-review label
-          !isTrulyExemptFromBackendReview(pr) &&
-          (
-            // Include PRs that still need team approval (label + no non-backend approvals)
-            needsTeamApproval(pr) ||
-            // OR include PRs without backend approval and without team approvals
-            (
-              pr.backend_approval_status !== 'approved' &&
-              !(pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))) &&
-              // Exclude PRs that already have approvals (they should be in "Ready for Review")
-              !(pr.approval_summary && pr.approval_summary.approved_count > 0) &&
-              // Exclude PRs awaiting author changes (they have their own section)
-              // BUT include PRs where author has responded to change requests
-              !(pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0 &&
-                pr.changes_requested_info?.status !== 'new_commit_from_author' &&
-                pr.changes_requested_info?.status !== 'new_comment_from_author')
-            )
-          )
-        )
+        filtered = filtered.filter(needsFirstTeamReview)
         break
       case 'awaiting-changes':
-        filtered = filtered.filter(pr =>
-          !pr.draft &&
-          // Exclude dependabot PRs
-          pr.author !== 'dependabot[bot]' &&
-          // Exclude PRs with exempt-be-review label
-          !isTrulyExemptFromBackendReview(pr) &&
-          // Include PRs where changes were requested
-          (pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0) &&
-          // BUT exclude PRs where author has already responded with new commits/comments
-          // These should go back to the review queue
-          pr.changes_requested_info?.status !== 'new_commit_from_author' &&
-          pr.changes_requested_info?.status !== 'new_comment_from_author' &&
-          pr.changes_requested_info?.status !== 'new_commits_after_approval'
-        )
+        filtered = filtered.filter(isAwaitingAuthorChanges)
         break
       case 'exempt':
-        filtered = filtered.filter(pr =>
-          !pr.draft && isTrulyExemptFromBackendReview(pr)
-        )
+        filtered = filtered.filter(pr => !pr.draft && isTrulyExemptFromBackendReview(pr))
         break
       case 'finished':
-        filtered = filtered.filter(pr =>
-          !pr.draft &&
-          // Exclude dependabot PRs (they have their own section)
-          pr.author !== 'dependabot[bot]' &&
-          // Exclude PRs with exempt-be-review label (they should be in "Exempt BE Review" section)
-          !isTrulyExemptFromBackendReview(pr) &&
-          // Exclude PRs that still need team approval
-          !needsTeamApproval(pr) &&
-          // Exclude PRs with failing CI
-          pr.ci_status !== 'failure' &&
-          (
-            // PR has backend approval (from API or frontend reviewer list)
-            pr.backend_approval_status === 'approved' ||
-            (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))) ||
-            // Non-vets-api repos: finished if all CI passes and has any approval
-            ((pr.repository_name === 'platform-atlas' || pr.repository_name === 'vets-api-mockdata') &&
-             pr.ci_status === 'success' &&
-             pr.approval_summary && pr.approval_summary.approved_count > 0)
-          )
-        )
+        filtered = filtered.filter(isFinishedUnmerged)
         break
       case 'dependabot':
-        filtered = filtered.filter(pr => 
-          !pr.draft && pr.author === 'dependabot[bot]'
-        )
+        filtered = filtered.filter(isDependabot)
         break
     }
     
@@ -722,38 +561,7 @@ function Dashboard() {
                   </CardHeader>
                   <CardContent className="h-[85px]">
                     <div className="text-2xl font-semibold">
-                      {pullRequests.filter(pr =>
-                        !pr.draft &&
-                        // PR must not have backend approval (from API or frontend reviewer list)
-                        pr.backend_approval_status !== 'approved' &&
-                        !(pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))) &&
-                        // Exclude dependabot PRs (they have their own section)
-                        pr.author !== 'dependabot[bot]' &&
-                        // Exclude PRs with exempt-be-review label
-                        !isTrulyExemptFromBackendReview(pr) &&
-                        // Exclude PRs that still need team approval
-                        !needsTeamApproval(pr) &&
-                        // Exclude PRs with failing CI checks
-                        !(pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) &&
-                        // Exclude PRs with unresolved changes requested
-                        !(pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0 &&
-                          pr.changes_requested_info?.status !== 'new_commit_from_author' &&
-                          pr.changes_requested_info?.status !== 'new_comment_from_author') &&
-                        (
-                          // Special case: non-vets-api repos go to ready for review, unless already finished
-                          ((pr.repository_name === 'platform-atlas' || pr.repository_name === 'vets-api-mockdata') &&
-                           !(pr.ci_status === 'success' && pr.approval_summary && pr.approval_summary.approved_count > 0)) ||
-                          // PRs with non-backend team approvals are ready for backend review
-                          (pr.approval_summary &&
-                           pr.approval_summary.approved_count > 0 &&
-                           pr.approval_summary.approved_users?.some(user => !BACKEND_REVIEWERS.includes(user))) ||
-                          // PRs from backend team members (auto-ready for review)
-                          BACKEND_REVIEWERS.includes(pr.author) ||
-                          // Backend has flagged as ready for review
-                          (pr.ready_for_backend_review &&
-                           (pr.approval_summary && pr.approval_summary.approved_count > 0))
-                        )
-                      ).length}
+                      {pullRequests.filter(isReadyForReview).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       CI passing, team approved or non-vets-api PRs
@@ -771,15 +579,7 @@ function Dashboard() {
                   </CardHeader>
                   <CardContent className="h-[85px]">
                     <div className="text-2xl font-semibold">
-                      {pullRequests.filter(pr =>
-                        !pr.draft &&
-                        pr.author !== 'dependabot[bot]' &&
-                        !isTrulyExemptFromBackendReview(pr) &&
-                        (pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0) &&
-                        pr.changes_requested_info?.status !== 'new_commit_from_author' &&
-                        pr.changes_requested_info?.status !== 'new_comment_from_author' &&
-                        pr.changes_requested_info?.status !== 'new_commits_after_approval'
-                      ).length}
+                      {pullRequests.filter(isAwaitingAuthorChanges).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Reviewer requested changes
@@ -797,9 +597,7 @@ function Dashboard() {
                   </CardHeader>
                   <CardContent className="h-[85px]">
                     <div className="text-2xl font-semibold">
-                      {pullRequests.filter(pr =>
-                        !pr.draft && pr.author === 'dependabot[bot]'
-                      ).length}
+                      {pullRequests.filter(isDependabot).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Automated updates
@@ -833,7 +631,7 @@ function Dashboard() {
                   </CardHeader>
                   <CardContent className="h-[85px]">
                     <div className="text-2xl font-semibold">
-                      {pullRequests.filter(pr => !pr.draft && pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr) && pr.author !== 'dependabot[bot]').length}
+                      {pullRequests.filter(isInFailingCiBucket).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Failing multiple checks
@@ -869,29 +667,7 @@ function Dashboard() {
                   </CardHeader>
                   <CardContent className="h-[85px]">
                     <div className="text-2xl font-semibold">
-                      {pullRequests.filter(pr =>
-                        !pr.draft &&
-                        // Exclude dependabot PRs (they have their own section)
-                        pr.author !== 'dependabot[bot]' &&
-                        // Exclude non-vets-api repos (they go straight to Ready for Review)
-                        pr.repository_name !== 'platform-atlas' &&
-                        pr.repository_name !== 'vets-api-mockdata' &&
-                        // Exclude PRs with exempt-be-review label
-                        !isTrulyExemptFromBackendReview(pr) &&
-                        (
-                          // Include PRs that still need team approval
-                          needsTeamApproval(pr) ||
-                          // OR PRs without backend approval and without team approvals
-                          (
-                            pr.backend_approval_status !== 'approved' &&
-                            !(pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))) &&
-                            !(pr.approval_summary && pr.approval_summary.approved_count > 0) &&
-                            !(pr.approval_summary?.changes_requested_count && pr.approval_summary.changes_requested_count > 0 &&
-                              pr.changes_requested_info?.status !== 'new_commit_from_author' &&
-                              pr.changes_requested_info?.status !== 'new_comment_from_author')
-                          )
-                        )
-                      ).length}
+                      {pullRequests.filter(needsFirstTeamReview).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Awaiting team review
@@ -909,9 +685,7 @@ function Dashboard() {
                   </CardHeader>
                   <CardContent className="h-[85px]">
                     <div className="text-2xl font-semibold">
-                      {pullRequests.filter(pr =>
-                        !pr.draft && isTrulyExemptFromBackendReview(pr)
-                      ).length}
+                      {pullRequests.filter(pr => !pr.draft && isTrulyExemptFromBackendReview(pr)).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Backend review not required
@@ -929,20 +703,7 @@ function Dashboard() {
                   </CardHeader>
                   <CardContent className="h-[85px]">
                     <div className="text-2xl font-semibold">
-                      {pullRequests.filter(pr =>
-                        !pr.draft &&
-                        pr.author !== 'dependabot[bot]' &&
-                        !isTrulyExemptFromBackendReview(pr) &&
-                        !needsTeamApproval(pr) &&
-                        pr.ci_status !== 'failure' &&
-                        (
-                          pr.backend_approval_status === 'approved' ||
-                          (pr.approval_summary?.approved_users?.some(user => BACKEND_REVIEWERS.includes(user))) ||
-                          ((pr.repository_name === 'platform-atlas' || pr.repository_name === 'vets-api-mockdata') &&
-                           pr.ci_status === 'success' &&
-                           pr.approval_summary && pr.approval_summary.approved_count > 0)
-                        )
-                      ).length}
+                      {pullRequests.filter(isFinishedUnmerged).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Ready to merge
