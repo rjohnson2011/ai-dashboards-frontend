@@ -1,7 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700&display=swap');
 @import "tailwindcss";
 @import "./dark-mode-override.css";
-@import "./dark-mode-force-white.css";
+/* dark-mode-force-white.css intentionally not imported — its `.dark *`
+   force-white rule was breaking light-themed designs in /redesign and is
+   no longer needed since /dashboard's Tailwind utilities produce visible
+   colors on their own. */
 
 @layer base {
   :root {

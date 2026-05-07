@@ -1,13 +1,11 @@
 /* Dark mode override styles to ensure text visibility */
 
-/* Force ALL text to be WHITE in dark mode - except status colors */
 .dark {
   color-scheme: dark;
 }
 
-.dark *:not(.text-success):not(.text-warning):not(.text-danger):not(.text-destructive):not(.text-info) {
-  color: rgb(255, 255, 255) !important;
-}
+/* Force-white-text rule removed — it was breaking light-themed designs
+   in /redesign and Tailwind utilities provide proper colors on their own. */
 
 
 /* Status colors - preserve these (including child SVGs with stroke) */
