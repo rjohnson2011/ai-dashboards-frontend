@@ -204,27 +204,34 @@ function Dashboard() {
     }
 
     try {
-      // Add timeout to detect slow/cold server
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+      let data: ApiResponse
+      if (import.meta.env.VITE_USE_MOCK_DATA === 'true') {
+        const { mockApiResponse } = await import('./services/mockData')
+        await new Promise(r => setTimeout(r, 100))
+        data = mockApiResponse() as unknown as ApiResponse
+      } else {
+        // Add timeout to detect slow/cold server
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
 
-      // Fetch all repositories - no params needed
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/reviews`, {
-        headers: {
-          ...authService.getAuthHeaders()
-        },
-        signal: controller.signal
-      })
-      clearTimeout(timeoutId)
+        // Fetch all repositories - no params needed
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/reviews`, {
+          headers: {
+            ...authService.getAuthHeaders()
+          },
+          signal: controller.signal
+        })
+        clearTimeout(timeoutId)
 
-      if (response.status === 401 || response.status === 403) {
-        authService.logout()
-        return
+        if (response.status === 401 || response.status === 403) {
+          authService.logout()
+          return
+        }
+        if (!response.ok) {
+          throw new Error('Failed to fetch pull requests')
+        }
+        data = await response.json()
       }
-      if (!response.ok) {
-        throw new Error('Failed to fetch pull requests')
-      }
-      const data: ApiResponse = await response.json()
 
       // Update the updating status
       setIsUpdating(data.updating || false)

@@ -59,6 +59,49 @@
   fill: currentColor;
 }
 
+/* ─── Old /dashboard support ──────────────────────────────────────────
+   The original dashboard relies on these to keep header + table text
+   readable in dark mode. They're scoped to `body:not(:has(.design-isolated))`
+   so the /redesign gallery (which sets .design-isolated on each variant
+   wrapper) is unaffected. */
+
+/* Dashboard top header bar */
+body:not(:has(.design-isolated)) .dark header,
+body:not(:has(.design-isolated)) .dark header * {
+  color: rgb(243, 244, 246);
+}
+
+/* Table cells/headers */
+body:not(:has(.design-isolated)) .dark table,
+body:not(:has(.design-isolated)) .dark thead,
+body:not(:has(.design-isolated)) .dark tbody,
+body:not(:has(.design-isolated)) .dark th,
+body:not(:has(.design-isolated)) .dark td,
+body:not(:has(.design-isolated)) .dark th *:not(.text-success):not(.text-warning):not(.text-danger):not(.text-destructive):not(.text-info),
+body:not(:has(.design-isolated)) .dark td *:not(.text-success):not(.text-warning):not(.text-danger):not(.text-destructive):not(.text-info):not(a):not(svg) {
+  color: rgb(243, 244, 246);
+}
+
+body:not(:has(.design-isolated)) .dark td a {
+  color: rgb(96, 165, 250);
+}
+body:not(:has(.design-isolated)) .dark td a:hover {
+  color: rgb(147, 197, 253);
+}
+
+/* Headings, paragraphs, body, common text utility classes — only on the
+   non-redesign side. */
+body:not(:has(.design-isolated)) .dark h1,
+body:not(:has(.design-isolated)) .dark h2,
+body:not(:has(.design-isolated)) .dark h3,
+body:not(:has(.design-isolated)) .dark h4,
+body:not(:has(.design-isolated)) .dark .text-foreground {
+  color: rgb(249, 250, 251);
+}
+body:not(:has(.design-isolated)) .dark .text-muted-foreground {
+  color: rgb(156, 163, 175);
+}
+
 /* Note: the broad `.dark span`, `.dark p`, `.dark h1–h6`, `.dark header *`,
    `.dark .text-xs/sm/lg`, `.dark table/td/th`, etc. rules that previously
    lived here have been removed. They were workarounds from before the
