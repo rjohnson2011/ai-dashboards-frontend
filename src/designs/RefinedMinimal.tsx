@@ -43,22 +43,18 @@ export default function RefinedMinimal({ pullRequests }: Props) {
     () => applyFilter(pullRequests, activeFilter, searchTerm),
     [pullRequests, activeFilter, searchTerm]
   )
-  // "New today" — count reviewer activity that landed today, broken down
-  // by review vs comment. Uses latest_reviewer_activity (one event per PR),
-  // so this is "PRs touched today by a reviewer" rather than total events.
-  const todaysActivity = useMemo(() => {
+  // Number of PRs that saw any reviewer activity today. Uses
+  // latest_reviewer_activity, which is one event per PR — so this counts
+  // PRs touched, not total events. Splitting by event type is misleading
+  // because a PR with both a review and a comment today would only show
+  // its most recent activity.
+  const prsActiveToday = useMemo(() => {
     const startOfDay = new Date()
     startOfDay.setHours(0, 0, 0, 0)
-    let reviews = 0
-    let comments = 0
-    pullRequests.forEach(pr => {
-      const lra = pr.latest_reviewer_activity
-      if (!lra?.timestamp) return
-      if (new Date(lra.timestamp) < startOfDay) return
-      if (lra.type === 'review') reviews += 1
-      else if (lra.type === 'comment') comments += 1
-    })
-    return { reviews, comments }
+    return pullRequests.filter(pr => {
+      const ts = pr.latest_reviewer_activity?.timestamp
+      return ts && new Date(ts) >= startOfDay
+    }).length
   }, [pullRequests])
 
   return (
@@ -85,13 +81,11 @@ export default function RefinedMinimal({ pullRequests }: Props) {
                 </span>
               </div>
             </div>
-            {(todaysActivity.reviews > 0 || todaysActivity.comments > 0) && (
+            {prsActiveToday > 0 && (
               <div className="mt-8 font-mono text-[16px] text-neutral-500">
-                New today:{' '}
+                Active today:{' '}
                 <span className="text-neutral-900">
-                  {todaysActivity.reviews} review{todaysActivity.reviews === 1 ? '' : 's'}
-                  {' · '}
-                  {todaysActivity.comments} comment{todaysActivity.comments === 1 ? '' : 's'}
+                  {prsActiveToday} PR{prsActiveToday === 1 ? '' : 's'}
                 </span>
               </div>
             )}
