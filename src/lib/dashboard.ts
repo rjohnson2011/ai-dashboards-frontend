@@ -119,21 +119,58 @@ export function absoluteTime(iso: string): string {
   })
 }
 
+// Filters out "Backend Approval / Succeed if backend approval is confirmed"
+// and similar review-required checks that are chicken-and-egg failures
+// (they're only failing because the review hasn't happened).
+function isReviewGate(name: string): boolean {
+  const n = name.toLowerCase()
+  return (
+    n.includes('backend approval') ||
+    n.includes('succeed if backend') ||
+    n.includes('backend review') ||
+    n.includes('require backend')
+  )
+}
+
+// Tidy up GitHub-style check names so the table can render them readably.
+//
+// Real-world examples and what we want to show:
+//   "Code Checks / Test (Group 15) (pull_request)"
+//     → "Test (Group 15)"
+//   ".github/workflows/build-and-publish.yaml / Test Results (push)"
+//     → "Build and publish / Test Results"
+//   "rspec / unit (4/8)"
+//     → "rspec / unit"
+function tidyCheckName(name: string): string {
+  let n = name.trim()
+  // Drop the workflow trigger suffix: "(push)", "(pull_request)", "(pull_request_review)"
+  n = n.replace(/\s*\((?:push|pull_request|pull_request_review|workflow_dispatch|schedule|workflow_run|merge_group)\)\s*$/i, '')
+  // Convert ".github/workflows/foo-bar.yaml" prefix into "Foo Bar"
+  n = n.replace(/^\.github\/workflows\/([^\/\s]+?)\.ya?ml\s*\/\s*/i, (_m, slug: string) => {
+    const pretty = slug.replace(/[-_]+/g, ' ')
+    return pretty.charAt(0).toUpperCase() + pretty.slice(1) + ' / '
+  })
+  // Drop parametric suffix counters: " (4/8)", " [node 18]"
+  n = n.replace(/\s*\(\d+\/\d+\)\s*$/, '')
+  n = n.replace(/\s*\[[^\]]+\]\s*$/, '')
+  return n.trim() || name
+}
+
 // Group failing CI checks into a compact summary.
-// "rspec / unit (4/8), rspec / unit (5/8), brakeman" → "rspec ×2 · brakeman"
+//
+//   "rspec / unit (4/8)", "rspec / unit (5/8)", "brakeman"
+//     → "rspec / unit ×2 · brakeman"
+//
+// Skips review-gate checks ("Backend Approval / …") since the user already
+// knows the PR needs a review.
 export function summarizeFailingChecks(pr: PullRequest): string {
   if (!pr.failing_checks || pr.failing_checks.length === 0) return ''
   const groups: Record<string, number> = {}
   for (const check of pr.failing_checks) {
-    const name = (check.name || '').trim()
-    if (!name) continue
-    // Strip common parametric suffixes: "(4/8)", "[node 18]", trailing numbers
-    const root =
-      name
-        .replace(/\s*\(\d+\/\d+\)\s*/, '')
-        .replace(/\s*\[[^\]]+\]\s*/, '')
-        .replace(/\s*\d+$/, '')
-        .trim() || name
+    const raw = (check.name || '').trim()
+    if (!raw) continue
+    if (isReviewGate(raw)) continue
+    const root = tidyCheckName(raw)
     groups[root] = (groups[root] || 0) + 1
   }
   return Object.entries(groups)

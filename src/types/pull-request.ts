@@ -114,11 +114,23 @@ const REVIEW_RELATED_CHECKS = new Set([
   'Check Workflow Statuses',
 ])
 
+// Matches "Backend Approval / Succeed if backend approval is confirmed",
+// "Require backend-r…", and similar review-gate checks.
+function isBackendReviewGate(name: string): boolean {
+  const n = name.toLowerCase()
+  return (
+    n.includes('backend approval') ||
+    n.includes('succeed if backend') ||
+    n.includes('backend review') ||
+    n.includes('require backend')
+  )
+}
+
 export function hasNonReviewFailingChecks(pr: PullRequest): boolean {
   if (!pr.failing_checks || pr.failing_checks.length === 0) return false
   return pr.failing_checks.some(check => {
     const name = check.name || ''
-    if (name.toLowerCase().includes('backend')) return false
+    if (isBackendReviewGate(name)) return false
     if (REVIEW_RELATED_CHECKS.has(name)) return false
     if (name.includes('Get PR Data')) return false
     return true
