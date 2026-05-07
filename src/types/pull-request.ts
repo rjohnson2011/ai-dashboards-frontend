@@ -200,11 +200,21 @@ export function isReadyForReview(pr: PullRequest): boolean {
   // 4. Author responded to a previous changes-request — needs re-review
   if (authorHasRespondedToChanges(pr)) return true
 
-  // 5. Repos that don't require backend review still surface in Ready so
-  //    someone notices them, unless they're already done.
+  // 5. Non-vets-api repos (platform-atlas, vets-api-mockdata) only land in
+  //    Ready once CI is green AND someone has at least commented or
+  //    requested changes — i.e., there's evidence a reviewer engaged.
+  //    A bare PR with no signal isn't "ready", it's just open.
   const isNonVetsApi =
     pr.repository_name === 'platform-atlas' || pr.repository_name === 'vets-api-mockdata'
-  if (isNonVetsApi && pr.ci_status !== 'success') return true
+  if (isNonVetsApi && pr.ci_status === 'success') {
+    const hasReviewerSignal = !!(
+      pr.approval_summary &&
+      (pr.approval_summary.approved_count > 0 ||
+        pr.approval_summary.changes_requested_count > 0 ||
+        (pr.approval_summary.commented_users?.length ?? 0) > 0)
+    )
+    if (hasReviewerSignal) return true
+  }
 
   return false
 }
