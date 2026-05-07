@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { authService } from '../services/auth'
 import { subscribeToPullRequests } from '../services/actionCable'
+import { mockApiResponse } from '../services/mockData'
 import type { PullRequest, ApiResponse } from '../types/pull-request'
+
+const USE_MOCK = import.meta.env.VITE_USE_MOCK_DATA === 'true'
 
 interface UsePullRequestsResult {
   pullRequests: PullRequest[]
@@ -23,19 +26,25 @@ export function usePullRequests(): UsePullRequestsResult {
   const fetchPRs = useCallback(async (isPolling = false) => {
     if (!isPolling) setLoading(true)
     try {
-      const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 30000)
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/reviews`,
-        { headers: { ...authService.getAuthHeaders() }, signal: controller.signal }
-      )
-      clearTimeout(timeout)
-      if (response.status === 401 || response.status === 403) {
-        authService.logout()
-        return
+      let data: ApiResponse
+      if (USE_MOCK) {
+        await new Promise(r => setTimeout(r, isPolling ? 0 : 200)) // simulate latency
+        data = mockApiResponse()
+      } else {
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), 30000)
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/reviews`,
+          { headers: { ...authService.getAuthHeaders() }, signal: controller.signal }
+        )
+        clearTimeout(timeout)
+        if (response.status === 401 || response.status === 403) {
+          authService.logout()
+          return
+        }
+        if (!response.ok) throw new Error('Could not load PRs')
+        data = await response.json()
       }
-      if (!response.ok) throw new Error('Could not load PRs')
-      const data: ApiResponse = await response.json()
       setIsUpdating(data.updating || false)
       if (!isPolling || data.last_updated !== lastUpdatedRef.current) {
         const all = [...(data.pull_requests || []), ...(data.approved_pull_requests || [])]
@@ -61,7 +70,10 @@ export function usePullRequests(): UsePullRequestsResult {
     return () => clearInterval(timer)
   }, [fetchPRs, isUpdating])
 
-  useEffect(() => subscribeToPullRequests(() => fetchPRs(true)), [fetchPRs])
+  useEffect(() => {
+    if (USE_MOCK) return
+    return subscribeToPullRequests(() => fetchPRs(true))
+  }, [fetchPRs])
 
   return {
     pullRequests,

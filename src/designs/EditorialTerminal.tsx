@@ -77,19 +77,19 @@ export default function EditorialTerminal({ pullRequests }: Props) {
         <section className="border-y border-[var(--ed-rule)] py-7 mb-6">
           <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] items-end gap-x-12 gap-y-5">
             <div>
-              <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-stone-500 mb-3">
+              <div className="font-mono text-[16px] uppercase tracking-[0.24em] text-stone-500 mb-3">
                 Awaiting your review
               </div>
               <div className="flex items-baseline gap-3">
                 <span className="font-serif italic text-[88px] leading-[0.85] tabular-nums text-stone-100">
                   {counts.ready}
                 </span>
-                <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-stone-500">
+                <span className="font-mono text-[16px] uppercase tracking-[0.18em] text-stone-500">
                   pull{counts.ready === 1 ? '' : 's'}
                 </span>
               </div>
               {heroNames.length > 0 && (
-                <div className="mt-4 font-mono text-[11px] text-stone-400">
+                <div className="mt-4 font-mono text-[16px] text-stone-400">
                   next up:{' '}
                   <span className="text-stone-200">{heroNames.join(', ')}</span>
                 </div>
@@ -97,10 +97,10 @@ export default function EditorialTerminal({ pullRequests }: Props) {
             </div>
 
             <div className="hidden lg:block">
-              <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-stone-500 mb-3">
+              <div className="font-mono text-[16px] uppercase tracking-[0.24em] text-stone-500 mb-3">
                 Status board
               </div>
-              <dl className="grid grid-cols-3 gap-x-6 gap-y-1.5 max-w-md font-mono text-[11px]">
+              <dl className="grid grid-cols-3 gap-x-6 gap-y-1.5 max-w-md font-mono text-[16px]">
                 <Stat label="Failing CI" value={counts.failing} accent="#d27a64" />
                 <Stat label="Approved" value={counts.approved} accent="#9ab877" />
                 <Stat label="Awaiting" value={counts.awaiting} accent="#d4a14a" />
@@ -112,7 +112,7 @@ export default function EditorialTerminal({ pullRequests }: Props) {
 
             <button
               onClick={() => setActiveFilter('ready')}
-              className="self-end inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-stone-300 border-b border-stone-500 hover:text-stone-50 hover:border-stone-200 pb-1 transition-colors"
+              className="self-end inline-flex items-center gap-2 font-mono text-[16px] uppercase tracking-[0.18em] text-stone-300 border-b border-stone-500 hover:text-stone-50 hover:border-stone-200 pb-1 transition-colors"
             >
               Open queue <ArrowUpRight className="h-3 w-3" />
             </button>
@@ -127,7 +127,7 @@ export default function EditorialTerminal({ pullRequests }: Props) {
               <button
                 key={f.key}
                 onClick={() => setActiveFilter(f.key)}
-                className={`group inline-flex items-baseline gap-1.5 px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.16em] transition-all ${
+                className={`group inline-flex items-baseline gap-1.5 px-2.5 py-1 font-mono text-[16px] uppercase tracking-[0.16em] transition-all ${
                   isActive ? 'text-stone-50' : 'text-stone-500 hover:text-stone-200'
                 }`}
                 style={{
@@ -135,7 +135,7 @@ export default function EditorialTerminal({ pullRequests }: Props) {
                 }}
               >
                 {f.label}
-                <span className={`tabular-nums text-[10px] ${isActive ? 'text-stone-400' : 'text-stone-600'}`}>
+                <span className={`tabular-nums text-[16px] ${isActive ? 'text-stone-400' : 'text-stone-600'}`}>
                   {counts[f.key]}
                 </span>
               </button>
@@ -162,7 +162,7 @@ export default function EditorialTerminal({ pullRequests }: Props) {
               </button>
             )}
           </div>
-          <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.18em] text-stone-600 tabular-nums">
+          <span className="ml-auto font-mono text-[16px] uppercase tracking-[0.18em] text-stone-600 tabular-nums">
             {filtered.length} / {counts.all}
           </span>
         </section>
@@ -203,7 +203,7 @@ function Stat({ label, value, accent }: { label: string; value: number; accent?:
 function ColHead({ label, align = 'left' }: { label: string; align?: 'left' | 'right' }) {
   return (
     <span
-      className={`font-mono text-[9px] uppercase tracking-[0.24em] text-stone-600 ${align === 'right' ? 'text-right' : ''}`}
+      className={`font-mono text-[16px] uppercase tracking-[0.24em] text-stone-600 ${align === 'right' ? 'text-right' : ''}`}
     >
       {label}
     </span>
@@ -227,20 +227,20 @@ function PrRow({ pr }: { pr: PullRequest }) {
 
       <div className="min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <span className="font-mono text-[10px] tabular-nums text-stone-500">#{pr.number}</span>
-          <span className="font-mono text-[10px] tracking-wide text-stone-500">{pr.repository_name}</span>
+          <span className="font-mono text-[16px] tabular-nums text-stone-500">#{pr.number}</span>
+          <span className="font-mono text-[16px] tracking-wide text-stone-500">{pr.repository_name}</span>
           {pr.draft && (
-            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-stone-500 border border-stone-800 px-1 py-px">
+            <span className="font-mono text-[16px] uppercase tracking-[0.2em] text-stone-500 border border-stone-800 px-1 py-px">
               draft
             </span>
           )}
           {exempt && (
-            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#9ab8a4] border border-[#3d5a4a] px-1 py-px">
+            <span className="font-mono text-[16px] uppercase tracking-[0.2em] text-[#9ab8a4] border border-[#3d5a4a] px-1 py-px">
               exempt
             </span>
           )}
         </div>
-        <div className="font-serif text-[15px] leading-snug text-stone-100 group-hover:text-white truncate transition-colors">
+        <div className="font-serif text-[16px] leading-snug text-stone-100 group-hover:text-white truncate transition-colors">
           {pr.title}
         </div>
         <div className="flex items-center gap-2 mt-1.5">
@@ -250,13 +250,13 @@ function PrRow({ pr }: { pr: PullRequest }) {
           >
             {nameFromHandle(pr.author)}
           </span>
-          <span className="font-mono text-[10px] text-stone-500 truncate">{displayUser(pr.author)}</span>
+          <span className="font-mono text-[16px] text-stone-500 truncate">{displayUser(pr.author)}</span>
         </div>
       </div>
 
       <div className="flex flex-col gap-1.5">
         <span
-          className="inline-flex items-center gap-1 self-start font-mono text-[10px] uppercase tracking-[0.16em] px-1.5 py-0.5 rounded-sm"
+          className="inline-flex items-center gap-1 self-start font-mono text-[16px] uppercase tracking-[0.16em] px-1.5 py-0.5 rounded-sm"
           style={{ backgroundColor: colors.pillBg, color: colors.pillText }}
         >
           {status.key === 'failing' && <AlertTriangle className="h-2.5 w-2.5" />}
@@ -266,7 +266,7 @@ function PrRow({ pr }: { pr: PullRequest }) {
           {status.label}
         </span>
         {pr.changes_requested_info?.message && (
-          <span className="font-mono text-[10px] text-stone-500 line-clamp-1">
+          <span className="font-mono text-[16px] text-stone-500 line-clamp-1">
             {pr.changes_requested_info.message}
           </span>
         )}
@@ -282,7 +282,7 @@ function PrRow({ pr }: { pr: PullRequest }) {
       </div>
 
       <div
-        className="text-right font-mono text-[10px] tabular-nums leading-tight"
+        className="text-right font-mono text-[16px] tabular-nums leading-tight"
         title={`Created ${absoluteTime(pr.created_at)}\nUpdated ${absoluteTime(pr.updated_at)}`}
       >
         <div className="text-stone-300">{timeAgo(pr.updated_at)} ago</div>
@@ -294,7 +294,7 @@ function PrRow({ pr }: { pr: PullRequest }) {
 
 function ReviewerStack({ badges }: { badges: { user: string; state: string }[] }) {
   if (badges.length === 0) {
-    return <span className="text-[10px] tracking-wide text-stone-600 font-mono">—</span>
+    return <span className="text-[16px] tracking-wide text-stone-600 font-mono">—</span>
   }
   const visible = badges.slice(0, 5)
   const overflow = badges.length - visible.length
@@ -311,7 +311,7 @@ function ReviewerStack({ badges }: { badges: { user: string; state: string }[] }
         return (
           <span
             key={user + state + i}
-            className="relative inline-flex h-[22px] w-[22px] items-center justify-center rounded-full text-[9px] font-mono font-medium"
+            className="relative inline-flex h-[22px] w-[22px] items-center justify-center rounded-full text-[16px] font-mono font-medium"
             style={{
               backgroundColor: c.bg,
               color: c.fg,
@@ -325,7 +325,7 @@ function ReviewerStack({ badges }: { badges: { user: string; state: string }[] }
       })}
       {overflow > 0 && (
         <span
-          className="inline-flex h-[22px] min-w-[22px] px-1 items-center justify-center rounded-full text-[9px] font-mono text-stone-400"
+          className="inline-flex h-[22px] min-w-[22px] px-1 items-center justify-center rounded-full text-[16px] font-mono text-stone-400"
           style={{
             backgroundColor: 'rgba(255,255,255,0.04)',
             boxShadow: '0 0 0 1.5px rgba(255,255,255,0.10), 0 0 0 3px var(--ed-bg)',
@@ -343,7 +343,7 @@ function EmptyState({ filterKey, hasSearch }: { filterKey: FilterKey; hasSearch:
     return (
       <div className="px-6 py-16 text-center">
         <div className="font-serif italic text-xl text-stone-300">No matches.</div>
-        <div className="mt-2 font-mono text-[11px] uppercase tracking-[0.18em] text-stone-600">
+        <div className="mt-2 font-mono text-[16px] uppercase tracking-[0.18em] text-stone-600">
           Try a different term
         </div>
       </div>
@@ -362,7 +362,7 @@ function EmptyState({ filterKey, hasSearch }: { filterKey: FilterKey; hasSearch:
   return (
     <div className="px-6 py-20 text-center">
       <div className="font-serif italic text-2xl text-stone-200">{title}</div>
-      <div className="mt-2 font-mono text-[11px] uppercase tracking-[0.18em] text-stone-500">{sub}</div>
+      <div className="mt-2 font-mono text-[16px] uppercase tracking-[0.18em] text-stone-500">{sub}</div>
     </div>
   )
 }

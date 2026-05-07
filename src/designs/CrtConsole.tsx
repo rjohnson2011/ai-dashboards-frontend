@@ -68,19 +68,19 @@ export default function CrtConsole({ pullRequests }: Props) {
 
       <div className="relative mx-auto max-w-[1480px] px-6 py-6">
         {/* Boot line */}
-        <div className="text-[11px] mb-3 opacity-70">
+        <div className="text-[16px] mb-3 opacity-70">
           <span className="text-[var(--crt-amber)]">[OK]</span> session established · va.ghe.com · pr-control v6.0
         </div>
 
         {/* Hero panel */}
         <section className="crt-panel p-5 mb-5">
-          <div className="flex items-center justify-between mb-3 text-[10px] tracking-[0.18em] uppercase opacity-70">
+          <div className="flex items-center justify-between mb-3 text-[16px] tracking-[0.18em] uppercase opacity-70">
             <span>// review_queue.dat</span>
             <span>cnt={String(counts.ready).padStart(3, '0')}</span>
           </div>
           <div className="grid grid-cols-12 gap-4">
             <div className="col-span-12 md:col-span-7 border-r border-[var(--crt-rule)] pr-6">
-              <div className="text-[11px] tracking-[0.2em] uppercase mb-2 text-[var(--crt-amber)]">
+              <div className="text-[16px] tracking-[0.2em] uppercase mb-2 text-[var(--crt-amber)]">
                 ▎awaiting your review
               </div>
               <div className="flex items-baseline gap-3">
@@ -93,13 +93,13 @@ export default function CrtConsole({ pullRequests }: Props) {
                 >
                   {String(counts.ready).padStart(2, '0')}
                 </span>
-                <div className="text-[12px] opacity-80">
+                <div className="text-[16px] opacity-80">
                   <div>pull requests</div>
                   <div className="opacity-60">awaiting backend reviewer</div>
                 </div>
               </div>
               {heroNames.length > 0 && (
-                <div className="mt-4 text-[12px] opacity-80">
+                <div className="mt-4 text-[16px] opacity-80">
                   &gt; next:{' '}
                   <span className="text-[var(--crt-amber)]">
                     {heroNames.map(n => n.toUpperCase()).join(', ')}
@@ -108,7 +108,7 @@ export default function CrtConsole({ pullRequests }: Props) {
               )}
             </div>
 
-            <div className="col-span-12 md:col-span-5 pl-6 grid grid-cols-2 gap-y-2 gap-x-5 content-start text-[12px] tabular-nums">
+            <div className="col-span-12 md:col-span-5 pl-6 grid grid-cols-2 gap-y-2 gap-x-5 content-start text-[16px] tabular-nums">
               <CrtStat label="FAIL" value={counts.failing} color="#ff5d5d" />
               <CrtStat label="APRV" value={counts.approved} color="#7cd87c" />
               <CrtStat label="CHGS" value={counts.awaiting} color="#ffb347" />
@@ -120,7 +120,7 @@ export default function CrtConsole({ pullRequests }: Props) {
         </section>
 
         {/* Filters */}
-        <section className="mb-3 text-[11px] uppercase tracking-[0.16em] flex flex-wrap items-center gap-x-1 gap-y-1">
+        <section className="mb-3 text-[16px] uppercase tracking-[0.16em] flex flex-wrap items-center gap-x-1 gap-y-1">
           <span className="opacity-60 mr-2">FILTER:</span>
           {FILTERS.map((f, i) => {
             const isActive = activeFilter === f.key
@@ -144,7 +144,7 @@ export default function CrtConsole({ pullRequests }: Props) {
         </section>
 
         {/* Search */}
-        <div className="mb-3 flex items-baseline gap-2 border-b border-[var(--crt-rule)] pb-2 text-[12px]">
+        <div className="mb-3 flex items-baseline gap-2 border-b border-[var(--crt-rule)] pb-2 text-[16px]">
           <span className="opacity-70">$</span>
           <span className="text-[var(--crt-amber)]">grep</span>
           <input
@@ -155,7 +155,7 @@ export default function CrtConsole({ pullRequests }: Props) {
             className="flex-1 bg-transparent outline-none placeholder:opacity-40"
             spellCheck={false}
           />
-          <span className="opacity-60 tabular-nums text-[11px]">
+          <span className="opacity-60 tabular-nums text-[16px]">
             [{String(filtered.length).padStart(3, '0')}/{String(counts.all).padStart(3, '0')}]
           </span>
         </div>
@@ -163,7 +163,7 @@ export default function CrtConsole({ pullRequests }: Props) {
         {/* Listing */}
         <section className="crt-panel">
           {/* Header bar */}
-          <div className="grid grid-cols-[42px_1fr_120px_180px_120px] gap-x-3 px-4 py-2 border-b border-[var(--crt-rule)] text-[10px] uppercase tracking-[0.22em] opacity-70">
+          <div className="grid grid-cols-[42px_1fr_120px_180px_120px] gap-x-3 px-4 py-2 border-b border-[var(--crt-rule)] text-[16px] uppercase tracking-[0.22em] opacity-70">
             <span>idx</span>
             <span>pull request</span>
             <span>status</span>
@@ -178,7 +178,7 @@ export default function CrtConsole({ pullRequests }: Props) {
           )}
         </section>
 
-        <div className="mt-4 text-[10px] opacity-60 text-center tracking-[0.18em] uppercase">
+        <div className="mt-4 text-[16px] opacity-60 text-center tracking-[0.18em] uppercase">
           {filtered.length === 0 ? '// end of buffer' : `// rendered ${filtered.length} record${filtered.length === 1 ? '' : 's'}`}
         </div>
       </div>
@@ -206,39 +206,39 @@ function CrtRow({ pr, idx }: { pr: PullRequest; idx: number }) {
 
   return (
     <button
-      className="group w-full grid grid-cols-[42px_1fr_120px_180px_120px] items-start gap-x-3 px-4 py-2.5 border-b border-[var(--crt-rule-soft)] last:border-0 text-left text-[12px] hover:bg-[rgba(124,216,124,0.04)] transition-colors"
+      className="group w-full grid grid-cols-[42px_1fr_120px_180px_120px] items-start gap-x-3 px-4 py-2.5 border-b border-[var(--crt-rule-soft)] last:border-0 text-left text-[16px] hover:bg-[rgba(124,216,124,0.04)] transition-colors"
       onClick={() => window.open(pr.url, '_blank', 'noopener,noreferrer')}
     >
       <span className="tabular-nums opacity-50">{String(idx).padStart(3, '0')}</span>
 
       <div className="min-w-0">
-        <div className="flex items-center gap-2 mb-0.5 text-[10px] uppercase tracking-[0.16em] opacity-70">
+        <div className="flex items-center gap-2 mb-0.5 text-[16px] uppercase tracking-[0.16em] opacity-70">
           <span>#{pr.number}</span>
           <span>·</span>
           <span>{pr.repository_name}</span>
           {pr.draft && <span className="text-[var(--crt-amber)]">· DRAFT</span>}
           {exempt && <span style={{ color: '#9ad6c4' }}>· EXEMPT</span>}
         </div>
-        <div className="truncate text-[13px] leading-snug">
+        <div className="truncate text-[16px] leading-snug">
           <span style={{ color: 'var(--crt-green)' }}>›</span> {pr.title}
         </div>
-        <div className="mt-0.5 text-[11px] opacity-70">
+        <div className="mt-0.5 text-[16px] opacity-70">
           {displayUser(pr.author).toLowerCase()}
         </div>
       </div>
 
       <div className="flex flex-col gap-0.5">
-        <span className="text-[11px] tabular-nums" style={{ color }}>
+        <span className="text-[16px] tabular-nums" style={{ color }}>
           [{STATUS_TAG[status.key] || 'OPEN'}] {status.label}
         </span>
         {pr.changes_requested_info?.message && (
-          <span className="text-[10px] opacity-60 line-clamp-1">
+          <span className="text-[16px] opacity-60 line-clamp-1">
             {pr.changes_requested_info.message}
           </span>
         )}
       </div>
 
-      <div className="flex items-center gap-1.5 flex-wrap min-h-[20px] text-[10px] tracking-wide">
+      <div className="flex items-center gap-1.5 flex-wrap min-h-[20px] text-[16px] tracking-wide">
         {reviewers.length === 0 ? (
           <span className="opacity-40">—</span>
         ) : (
@@ -268,7 +268,7 @@ function CrtRow({ pr, idx }: { pr: PullRequest; idx: number }) {
       </div>
 
       <div
-        className="text-right text-[10px] tabular-nums leading-tight tracking-wide"
+        className="text-right text-[16px] tabular-nums leading-tight tracking-wide"
         title={`Updated ${absoluteTime(pr.updated_at)}\nCreated ${absoluteTime(pr.created_at)}`}
       >
         <div>{timeAgo(pr.updated_at).padStart(4, ' ')} ago</div>
@@ -288,7 +288,7 @@ function CrtEmpty({ filterKey, hasSearch }: { filterKey: FilterKey; hasSearch: b
   `
   if (hasSearch) {
     return (
-      <div className="px-6 py-12 text-center text-[12px]">
+      <div className="px-6 py-12 text-center text-[16px]">
         <pre className="text-[var(--crt-amber)] opacity-80 inline-block text-left">{ascii}</pre>
         <div className="mt-3 opacity-70">no records match query.</div>
       </div>
@@ -304,7 +304,7 @@ function CrtEmpty({ filterKey, hasSearch }: { filterKey: FilterKey; hasSearch: b
     all: '> repositories clear.',
   }
   return (
-    <div className="px-6 py-12 text-center text-[12px]">
+    <div className="px-6 py-12 text-center text-[16px]">
       <pre className="text-[var(--crt-green)] opacity-70 inline-block text-left">{ascii}</pre>
       <div className="mt-3">{lines[filterKey]}</div>
     </div>

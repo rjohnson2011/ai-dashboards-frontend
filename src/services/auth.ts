@@ -3,6 +3,14 @@
 // signature and the email domain whitelist on every request.
 
 const TOKEN_KEY = 'google_id_token'
+const USE_MOCK = import.meta.env.VITE_USE_MOCK_DATA === 'true'
+
+const MOCK_USER: GoogleJwtPayload = {
+  email: 'ryan@oddball.io',
+  name: 'Ryan Johnson',
+  picture: undefined,
+  exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365,
+}
 
 interface GoogleJwtPayload {
   email: string
@@ -23,6 +31,7 @@ function decodeJwt(token: string): GoogleJwtPayload | null {
 
 class AuthService {
   getToken(): string | null {
+    if (USE_MOCK) return 'mock-token'
     const token = localStorage.getItem(TOKEN_KEY)
     if (!token) return null
     const payload = decodeJwt(token)
@@ -30,7 +39,6 @@ class AuthService {
       this.clear()
       return null
     }
-    // exp is seconds since epoch
     if (Date.now() / 1000 > payload.exp) {
       this.clear()
       return null
@@ -43,12 +51,13 @@ class AuthService {
   }
 
   getUser(): GoogleJwtPayload | null {
+    if (USE_MOCK) return MOCK_USER
     const token = this.getToken()
     return token ? decodeJwt(token) : null
   }
 
   isAuthenticated(): boolean {
-    return this.getToken() !== null
+    return USE_MOCK || this.getToken() !== null
   }
 
   clear(): void {

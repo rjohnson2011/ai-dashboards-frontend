@@ -55,18 +55,21 @@ export default function BrutalistPrint({ pullRequests }: Props) {
       <BrutalistStyle />
 
       <div className="mx-auto max-w-[1480px] px-6 py-6">
-        {/* Masthead */}
-        <header className="border-y-[3px] border-black py-4 mb-6">
+        {/* Masthead — dark navy bar, cream text */}
+        <header
+          className="border-y-[3px] border-black py-5 mb-7 px-6 -mx-6"
+          style={{ backgroundColor: '#0a0a0a', color: 'var(--brut-bg)' }}
+        >
           <div className="flex items-baseline justify-between gap-4 flex-wrap">
             <div className="flex items-baseline gap-3">
-              <span className="font-display text-[44px] leading-none tracking-[-0.04em] font-black">
+              <span className="font-display text-[56px] leading-none tracking-[-0.04em] font-black" style={{ color: 'var(--brut-bg)' }}>
                 THE QUEUE
               </span>
-              <span className="font-mono text-[10px] uppercase tracking-[0.3em]">
+              <span className="font-mono text-[16px] uppercase tracking-[0.3em]" style={{ color: 'var(--brut-bg)' }}>
                 vol. iv · iss. 6
               </span>
             </div>
-            <span className="font-mono text-[10px] uppercase tracking-[0.3em]">
+            <span className="font-mono text-[16px] uppercase tracking-[0.3em]" style={{ color: 'var(--brut-bg)' }}>
               vets-api · platform-atlas · vets-api-mockdata
             </span>
           </div>
@@ -75,7 +78,7 @@ export default function BrutalistPrint({ pullRequests }: Props) {
         {/* Hero block — magazine spread */}
         <section className="grid grid-cols-12 border-y-[3px] border-black mb-6">
           <div className="col-span-12 md:col-span-7 border-r border-black p-6 md:p-8 relative">
-            <div className="font-mono text-[10px] uppercase tracking-[0.3em] mb-2">
+            <div className="font-mono text-[16px] uppercase tracking-[0.3em] mb-2">
               On the desk
             </div>
             <div className="font-display font-black tracking-[-0.05em] leading-[0.78]">
@@ -87,7 +90,7 @@ export default function BrutalistPrint({ pullRequests }: Props) {
               pull requests waiting on a backend reviewer.
             </div>
             {heroNames.length > 0 && (
-              <div className="mt-5 font-mono text-[11px] uppercase tracking-[0.2em]">
+              <div className="mt-5 font-mono text-[16px] uppercase tracking-[0.2em]">
                 Authors of the moment ―{' '}
                 <span className="font-display font-black tracking-tight not-italic">
                   {heroNames.join(' · ')}
@@ -119,10 +122,10 @@ export default function BrutalistPrint({ pullRequests }: Props) {
                     isActive ? 'bg-black text-[var(--brut-bg)]' : 'hover:bg-black/5'
                   }`}
                 >
-                  <span className="font-mono text-[10px] uppercase tracking-[0.22em]">
+                  <span className="font-mono text-[16px] uppercase tracking-[0.22em]">
                     {String(counts[f.key]).padStart(2, '0')}
                   </span>
-                  <span className="font-display font-black text-[15px] tracking-tight mt-1 leading-tight">
+                  <span className="font-display font-black text-[16px] tracking-tight mt-1 leading-tight">
                     {f.label}
                   </span>
                 </button>
@@ -133,7 +136,7 @@ export default function BrutalistPrint({ pullRequests }: Props) {
 
         {/* Search */}
         <div className="mb-2 flex items-baseline gap-3 flex-wrap border-b border-black/40 pb-2">
-          <span className="font-mono text-[10px] uppercase tracking-[0.3em]">Search</span>
+          <span className="font-mono text-[16px] uppercase tracking-[0.3em]">Search</span>
           <input
             type="text"
             placeholder="title · author · repo · #number"
@@ -141,7 +144,7 @@ export default function BrutalistPrint({ pullRequests }: Props) {
             onChange={e => setSearchTerm(e.target.value)}
             className="flex-1 min-w-[200px] bg-transparent outline-none font-mono text-sm placeholder:text-black/35"
           />
-          <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.22em]">
+          <span className="ml-auto font-mono text-[16px] uppercase tracking-[0.22em]">
             {filtered.length} of {counts.all}
           </span>
         </div>
@@ -170,7 +173,7 @@ export default function BrutalistPrint({ pullRequests }: Props) {
 function BrutalistStat({ label, value, accent }: { label: string; value: number; accent?: boolean }) {
   return (
     <div className="border-t-[2px] border-black pt-2">
-      <div className="font-mono text-[10px] uppercase tracking-[0.2em]">{label}</div>
+      <div className="font-mono text-[16px] uppercase tracking-[0.2em]">{label}</div>
       <div
         className="font-display font-black tracking-[-0.04em] text-[44px] leading-none mt-1 tabular-nums"
         style={{ color: accent ? '#e8331c' : '#0a0a0a' }}
@@ -183,7 +186,7 @@ function BrutalistStat({ label, value, accent }: { label: string; value: number;
 
 function ColHead({ children, align = 'left' }: { children: React.ReactNode; align?: 'left' | 'right' }) {
   return (
-    <span className={`font-mono text-[10px] uppercase tracking-[0.3em] ${align === 'right' ? 'text-right' : ''}`}>
+    <span className={`font-mono text-[16px] uppercase tracking-[0.3em] ${align === 'right' ? 'text-right' : ''}`}>
       {children}
     </span>
   )
@@ -201,25 +204,25 @@ function BrutalistRow({ pr, idx }: { pr: PullRequest; idx: number }) {
       className="group w-full grid grid-cols-[34px_1fr_180px_180px_120px] items-start gap-x-4 px-3 py-3 border-b border-black/30 last:border-0 text-left hover:bg-black hover:text-[var(--brut-bg)] transition-colors"
       onClick={() => window.open(pr.url, '_blank', 'noopener,noreferrer')}
     >
-      <span className="font-mono text-[10px] tabular-nums text-black/45 group-hover:text-[var(--brut-bg)]/60 mt-1">
+      <span className="font-mono text-[16px] tabular-nums text-black/45 group-hover:text-[var(--brut-bg)]/60 mt-1">
         {String(idx).padStart(3, '0')}
       </span>
 
       <div className="min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
-          <span className="font-mono text-[10px] tabular-nums text-black/55 group-hover:text-[var(--brut-bg)]/65">
+          <span className="font-mono text-[16px] tabular-nums text-black/55 group-hover:text-[var(--brut-bg)]/65">
             #{pr.number}
           </span>
-          <span className="font-mono text-[10px] tracking-wide uppercase text-black/55 group-hover:text-[var(--brut-bg)]/65">
+          <span className="font-mono text-[16px] tracking-wide uppercase text-black/55 group-hover:text-[var(--brut-bg)]/65">
             {pr.repository_name}
           </span>
           {pr.draft && (
-            <span className="font-mono text-[9px] uppercase tracking-[0.22em] border border-current px-1">
+            <span className="font-mono text-[16px] uppercase tracking-[0.22em] border border-current px-1">
               draft
             </span>
           )}
           {exempt && (
-            <span className="font-mono text-[9px] uppercase tracking-[0.22em] border border-current px-1">
+            <span className="font-mono text-[16px] uppercase tracking-[0.22em] border border-current px-1">
               exempt
             </span>
           )}
@@ -227,7 +230,7 @@ function BrutalistRow({ pr, idx }: { pr: PullRequest; idx: number }) {
         <div className="font-display font-bold text-[18px] leading-snug tracking-[-0.01em] truncate">
           {pr.title}
         </div>
-        <div className="font-mono text-[11px] uppercase tracking-[0.18em] mt-1 text-black/60 group-hover:text-[var(--brut-bg)]/75">
+        <div className="font-mono text-[16px] uppercase tracking-[0.18em] mt-1 text-black/60 group-hover:text-[var(--brut-bg)]/75">
           By {displayUser(pr.author)}
         </div>
       </div>
@@ -237,13 +240,13 @@ function BrutalistRow({ pr, idx }: { pr: PullRequest; idx: number }) {
           className="inline-flex items-baseline gap-2 self-start font-display font-black uppercase tracking-tight text-[16px]"
           style={{ color: isFailing ? '#e8331c' : 'inherit' }}
         >
-          <span className="font-mono text-[10px] tracking-[0.3em] opacity-60">
+          <span className="font-mono text-[16px] tracking-[0.3em] opacity-60">
             {STATUS_GLYPH[status.key] || '·'}
           </span>
           {status.label}
         </span>
         {pr.changes_requested_info?.message && (
-          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-black/60 group-hover:text-[var(--brut-bg)]/70 line-clamp-1">
+          <span className="font-mono text-[16px] uppercase tracking-[0.18em] text-black/60 group-hover:text-[var(--brut-bg)]/70 line-clamp-1">
             {pr.changes_requested_info.message}
           </span>
         )}
@@ -251,14 +254,14 @@ function BrutalistRow({ pr, idx }: { pr: PullRequest; idx: number }) {
 
       <div className="flex items-center gap-2 flex-wrap min-h-[22px]">
         {reviewers.length === 0 ? (
-          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-black/45 group-hover:text-[var(--brut-bg)]/55">
+          <span className="font-mono text-[16px] uppercase tracking-[0.22em] text-black/45 group-hover:text-[var(--brut-bg)]/55">
             none
           </span>
         ) : (
           reviewers.slice(0, 3).map(({ user, state }) => (
             <span
               key={user + state}
-              className="font-mono text-[10px] uppercase tracking-[0.18em] border border-current px-1 py-px"
+              className="font-mono text-[16px] uppercase tracking-[0.18em] border border-current px-1 py-px"
               style={state === 'changes_requested' ? { color: '#e8331c' } : {}}
               title={`${state.replace('_', ' ')}`}
             >
@@ -267,13 +270,13 @@ function BrutalistRow({ pr, idx }: { pr: PullRequest; idx: number }) {
           ))
         )}
         {reviewers.length > 3 && (
-          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-black/45 group-hover:text-[var(--brut-bg)]/55">
+          <span className="font-mono text-[16px] uppercase tracking-[0.22em] text-black/45 group-hover:text-[var(--brut-bg)]/55">
             +{reviewers.length - 3}
           </span>
         )}
         {beApproved && (
           <span
-            className="font-mono text-[9px] uppercase tracking-[0.2em] px-1 py-px"
+            className="font-mono text-[16px] uppercase tracking-[0.2em] px-1 py-px"
             style={{ color: '#0a0a0a', backgroundColor: '#9ab877' }}
             title="Backend approved"
           >
@@ -283,7 +286,7 @@ function BrutalistRow({ pr, idx }: { pr: PullRequest; idx: number }) {
       </div>
 
       <div
-        className="text-right font-mono text-[10px] tabular-nums leading-tight uppercase tracking-[0.16em]"
+        className="text-right font-mono text-[16px] tabular-nums leading-tight uppercase tracking-[0.16em]"
         title={`Updated ${absoluteTime(pr.updated_at)}\nCreated ${absoluteTime(pr.created_at)}`}
       >
         <div>{timeAgo(pr.updated_at)} ago</div>
@@ -300,7 +303,7 @@ function BrutalistEmpty({ filterKey, hasSearch }: { filterKey: FilterKey; hasSea
     return (
       <div className="px-6 py-20 text-center">
         <div className="font-display font-black text-[60px] leading-none tracking-[-0.04em]">NO MATCH.</div>
-        <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.3em]">Try another term</div>
+        <div className="mt-3 font-mono text-[16px] uppercase tracking-[0.3em]">Try another term</div>
       </div>
     )
   }
@@ -327,8 +330,10 @@ function BrutalistStyle() {
     <style>{`
       .brutalist-shell {
         --brut-bg: #f3ede0;
+        --brut-ink: #0a0a0a;
+        --brut-red: #e8331c;
         background-color: var(--brut-bg);
-        color: #0a0a0a;
+        color: var(--brut-ink);
         background-image:
           repeating-linear-gradient(0deg, rgba(0,0,0,0.025) 0 1px, transparent 1px 3px);
       }
@@ -338,6 +343,50 @@ function BrutalistStyle() {
       }
       .brutalist-shell .font-mono {
         font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+      }
+
+      /* Force text inside the brutalist subtree to the design's ink color.
+         Tailwind v4 / shadcn introduce some cascade weirdness that prevents
+         inheritance from working straightforwardly here, so we set color on
+         every text-bearing descendant explicitly. */
+      .brutalist-shell,
+      .brutalist-shell div,
+      .brutalist-shell span,
+      .brutalist-shell p,
+      .brutalist-shell h1,
+      .brutalist-shell h2,
+      .brutalist-shell h3,
+      .brutalist-shell button,
+      .brutalist-shell input,
+      .brutalist-shell a,
+      .brutalist-shell td,
+      .brutalist-shell th {
+        color: var(--brut-ink);
+      }
+      /* Inline styles must still win — they carry the design's accents. */
+      .brutalist-shell [style*="color"] {
+        color: unset;
+      }
+      /* Header masthead: dark navy bar, cream text. */
+      .brutalist-shell header {
+        color: var(--brut-bg);
+      }
+      .brutalist-shell header * {
+        color: var(--brut-bg) !important;
+      }
+      /* Hovered row inverts to dark navy bg + cream text. */
+      .brutalist-shell button:hover,
+      .brutalist-shell button:hover * {
+        color: var(--brut-bg);
+      }
+      /* Active filter chip. */
+      .brutalist-shell .bg-black,
+      .brutalist-shell .bg-black * {
+        color: var(--brut-bg);
+      }
+      /* Search bar input area. */
+      .brutalist-shell input::placeholder {
+        color: rgba(10,10,10,0.4);
       }
     `}</style>
   )

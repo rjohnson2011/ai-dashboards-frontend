@@ -8,9 +8,10 @@ import AuthGate from './components/AuthGate'
 import { ThemeProvider } from './contexts/ThemeContext'
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
+const SKIP_AUTH = import.meta.env.VITE_USE_MOCK_DATA === 'true'
 
 function AppRouter() {
-  if (!GOOGLE_CLIENT_ID) {
+  if (!GOOGLE_CLIENT_ID && !SKIP_AUTH) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 text-center">
         <div>
@@ -23,8 +24,17 @@ function AppRouter() {
     )
   }
 
+  // Wrap children in a no-op provider when running mock-data mode without
+  // a Google client ID, so the app boots locally for design iteration.
+  const Provider = ({ children }: { children: React.ReactNode }) =>
+    GOOGLE_CLIENT_ID ? (
+      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>{children}</GoogleOAuthProvider>
+    ) : (
+      <>{children}</>
+    )
+
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+    <Provider>
       <ThemeProvider>
         <BrowserRouter>
           <AuthGate>
@@ -39,7 +49,7 @@ function AppRouter() {
           </AuthGate>
         </BrowserRouter>
       </ThemeProvider>
-    </GoogleOAuthProvider>
+    </Provider>
   )
 }
 

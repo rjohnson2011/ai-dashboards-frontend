@@ -80,11 +80,12 @@ export default function RedesignGallery() {
                 <button
                   key={d.key}
                   onClick={() => setActiveKey(d.key)}
-                  className={`px-2.5 py-1 text-xs font-medium rounded-sm transition-colors ${
+                  className="px-3 py-1.5 text-sm font-medium rounded-md transition-colors"
+                  style={
                     isActive
-                      ? 'bg-zinc-100 text-zinc-900'
-                      : 'text-zinc-400 hover:text-zinc-100'
-                  }`}
+                      ? { backgroundColor: '#fafafa', color: '#18181b' }
+                      : { color: '#a1a1aa', backgroundColor: 'transparent' }
+                  }
                   title={d.blurb}
                 >
                   {d.label}

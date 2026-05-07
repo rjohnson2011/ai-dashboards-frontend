@@ -58,7 +58,7 @@ export default function RefinedMinimal({ pullRequests }: Props) {
         {/* Hero — generous whitespace, single statement */}
         <section className="mb-16 grid grid-cols-12 gap-6">
           <div className="col-span-12 md:col-span-7">
-            <div className="font-mono text-[11px] tracking-[0.18em] text-neutral-500 uppercase mb-6">
+            <div className="font-mono text-[16px] tracking-[0.18em] text-neutral-500 uppercase mb-6">
               Awaiting your review
             </div>
             <div className="flex items-baseline gap-4">
@@ -75,7 +75,7 @@ export default function RefinedMinimal({ pullRequests }: Props) {
               </div>
             </div>
             {heroNames.length > 0 && (
-              <div className="mt-8 font-mono text-[12px] text-neutral-500">
+              <div className="mt-8 font-mono text-[16px] text-neutral-500">
                 Next up:{' '}
                 <span className="text-neutral-900">{heroNames.join(', ')}</span>
               </div>
@@ -83,10 +83,10 @@ export default function RefinedMinimal({ pullRequests }: Props) {
           </div>
 
           <div className="col-span-12 md:col-span-5 md:pl-8 md:border-l border-neutral-200">
-            <div className="font-mono text-[11px] tracking-[0.18em] text-neutral-500 uppercase mb-6">
+            <div className="font-mono text-[16px] tracking-[0.18em] text-neutral-500 uppercase mb-6">
               Open backlog
             </div>
-            <dl className="grid grid-cols-2 gap-y-3 font-mono text-[12px]">
+            <dl className="grid grid-cols-2 gap-y-3 font-mono text-[16px]">
               <RefinedStat label="Failing CI" value={counts.failing} accent="#dc2626" />
               <RefinedStat label="Approved" value={counts.approved} accent="#16a34a" />
               <RefinedStat label="Awaiting author" value={counts.awaiting} accent="#d97706" />
@@ -106,12 +106,12 @@ export default function RefinedMinimal({ pullRequests }: Props) {
                 <button
                   key={f.key}
                   onClick={() => setActiveFilter(f.key)}
-                  className={`group relative font-display text-[14px] tracking-tight transition-colors ${
+                  className={`group relative font-display text-[16px] tracking-tight transition-colors ${
                     isActive ? 'text-neutral-900' : 'text-neutral-400 hover:text-neutral-700'
                   }`}
                 >
                   {f.label}
-                  <span className="ml-1.5 font-mono text-[11px] tabular-nums opacity-70">{counts[f.key]}</span>
+                  <span className="ml-1.5 font-mono text-[16px] tabular-nums opacity-70">{counts[f.key]}</span>
                   {isActive && (
                     <span className="absolute -bottom-3 left-0 right-0 h-px bg-neutral-900" />
                   )}
@@ -128,9 +128,9 @@ export default function RefinedMinimal({ pullRequests }: Props) {
             placeholder="Search pull requests"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            className="flex-1 max-w-md bg-transparent border-b border-neutral-200 focus:border-neutral-900 px-1 py-2 font-display text-[14px] text-neutral-900 placeholder:text-neutral-400 outline-none transition-colors"
+            className="flex-1 max-w-md bg-transparent border-b border-neutral-200 focus:border-neutral-900 px-1 py-2 font-display text-[16px] text-neutral-900 placeholder:text-neutral-400 outline-none transition-colors"
           />
-          <span className="font-mono text-[11px] text-neutral-500 tabular-nums">
+          <span className="font-mono text-[16px] text-neutral-500 tabular-nums">
             {filtered.length} of {counts.all}
           </span>
         </div>
@@ -157,7 +157,7 @@ function RefinedStat({ label, value, accent }: { label: string; value: number; a
     <>
       <dt className="text-neutral-500">{label}</dt>
       <dd
-        className="text-right font-display tabular-nums text-[15px]"
+        className="text-right font-display tabular-nums text-[16px]"
         style={{ color: accent || '#171717' }}
       >
         {value}
@@ -184,19 +184,19 @@ function RefinedRow({ pr }: { pr: PullRequest }) {
               className="inline-block h-1.5 w-1.5 rounded-full shrink-0"
               style={{ backgroundColor: STATUS_DOT[status.key] }}
             />
-            <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-neutral-500">
+            <span className="font-mono text-[16px] uppercase tracking-[0.14em] text-neutral-500">
               {status.label}
             </span>
-            <span className="font-mono text-[11px] tabular-nums text-neutral-400">
+            <span className="font-mono text-[16px] tabular-nums text-neutral-400">
               · {pr.repository_name} #{pr.number}
             </span>
             {pr.draft && (
-              <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-neutral-400">
+              <span className="font-mono text-[16px] uppercase tracking-[0.16em] text-neutral-400">
                 · draft
               </span>
             )}
             {exempt && (
-              <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-neutral-400">
+              <span className="font-mono text-[16px] uppercase tracking-[0.16em] text-neutral-400">
                 · exempt
               </span>
             )}
@@ -204,7 +204,7 @@ function RefinedRow({ pr }: { pr: PullRequest }) {
           <div className="font-display text-[18px] leading-snug text-neutral-900 group-hover:text-black truncate transition-colors">
             {pr.title}
           </div>
-          <div className="mt-1.5 font-mono text-[11px] text-neutral-500">
+          <div className="mt-1.5 font-mono text-[16px] text-neutral-500">
             {displayUser(pr.author)}
             {pr.changes_requested_info?.message && (
               <span className="text-neutral-400"> — {pr.changes_requested_info.message}</span>
@@ -216,7 +216,7 @@ function RefinedRow({ pr }: { pr: PullRequest }) {
           <RefinedReviewerStack badges={reviewers} />
           {beApproved && (
             <span
-              className="font-mono text-[9px] uppercase tracking-[0.2em] px-1.5 py-0.5 rounded-sm"
+              className="font-mono text-[16px] uppercase tracking-[0.2em] px-1.5 py-0.5 rounded-sm"
               style={{ color: '#16a34a', backgroundColor: 'rgba(22,163,74,0.08)' }}
               title="Backend approved"
             >
@@ -226,7 +226,7 @@ function RefinedRow({ pr }: { pr: PullRequest }) {
         </div>
 
         <div
-          className="text-right font-mono text-[11px] tabular-nums leading-tight self-center"
+          className="text-right font-mono text-[16px] tabular-nums leading-tight self-center"
           title={`Updated ${absoluteTime(pr.updated_at)}\nCreated ${absoluteTime(pr.created_at)}`}
         >
           <div className="text-neutral-700">{timeAgo(pr.updated_at)} ago</div>
@@ -239,7 +239,7 @@ function RefinedRow({ pr }: { pr: PullRequest }) {
 
 function RefinedReviewerStack({ badges }: { badges: { user: string; state: string }[] }) {
   if (badges.length === 0) {
-    return <span className="font-mono text-[11px] text-neutral-400">—</span>
+    return <span className="font-mono text-[16px] text-neutral-400">—</span>
   }
   const visible = badges.slice(0, 4)
   const overflow = badges.length - visible.length
@@ -255,7 +255,7 @@ function RefinedReviewerStack({ badges }: { badges: { user: string; state: strin
         return (
           <span
             key={user + state + i}
-            className="relative inline-flex h-[24px] w-[24px] items-center justify-center rounded-full text-[9px] font-mono font-medium text-neutral-700 bg-neutral-100"
+            className="relative inline-flex h-[24px] w-[24px] items-center justify-center rounded-full text-[16px] font-mono font-medium text-neutral-700 bg-neutral-100"
             style={{ boxShadow: `0 0 0 1.5px ${ringColor}, 0 0 0 3px white` }}
             title={`${displayUser(user)} · ${state.replace('_', ' ')}`}
           >
@@ -265,7 +265,7 @@ function RefinedReviewerStack({ badges }: { badges: { user: string; state: strin
       })}
       {overflow > 0 && (
         <span
-          className="inline-flex h-[24px] min-w-[24px] px-1 items-center justify-center rounded-full text-[9px] font-mono text-neutral-500 bg-neutral-100"
+          className="inline-flex h-[24px] min-w-[24px] px-1 items-center justify-center rounded-full text-[16px] font-mono text-neutral-500 bg-neutral-100"
           style={{ boxShadow: '0 0 0 1.5px #d4d4d4, 0 0 0 3px white' }}
         >
           +{overflow}
@@ -280,7 +280,7 @@ function RefinedEmpty({ filterKey, hasSearch }: { filterKey: FilterKey; hasSearc
     return (
       <div className="py-24 text-center">
         <div className="font-display text-[28px] tracking-tight text-neutral-900">No matches</div>
-        <div className="mt-2 font-mono text-[12px] text-neutral-500">Try a different term</div>
+        <div className="mt-2 font-mono text-[16px] text-neutral-500">Try a different term</div>
       </div>
     )
   }
@@ -297,7 +297,7 @@ function RefinedEmpty({ filterKey, hasSearch }: { filterKey: FilterKey; hasSearc
   return (
     <div className="py-24 text-center">
       <div className="font-display text-[40px] tracking-tight text-neutral-900">{title}</div>
-      <div className="mt-3 font-mono text-[12px] text-neutral-500">{sub}</div>
+      <div className="mt-3 font-mono text-[16px] text-neutral-500">{sub}</div>
     </div>
   )
 }
@@ -317,6 +317,35 @@ function RefinedStyle() {
       .refined-shell .font-mono {
         font-family: 'GT America Mono', 'JetBrains Mono', ui-monospace, monospace;
       }
+
+      /* Explicit color cascade — Tailwind v4 + shadcn break inheritance,
+         so set color on every text-bearing element. Tailwind text-* utility
+         classes still win because they have the same specificity but higher
+         declared order in the bundle, AND they declare a color directly. */
+      .refined-shell,
+      .refined-shell div,
+      .refined-shell span,
+      .refined-shell p,
+      .refined-shell h1,
+      .refined-shell h2,
+      .refined-shell h3,
+      .refined-shell button,
+      .refined-shell a,
+      .refined-shell li,
+      .refined-shell dt,
+      .refined-shell dd {
+        color: #171717;
+      }
+      /* Tailwind utilities for muted/light shades on neutrals must still
+         win — restate them with the same specificity so they survive. */
+      .refined-shell .text-neutral-900 { color: #171717; }
+      .refined-shell .text-neutral-700 { color: #404040; }
+      .refined-shell .text-neutral-500 { color: #737373; }
+      .refined-shell .text-neutral-400 { color: #a3a3a3; }
+      .refined-shell .text-neutral-300 { color: #d4d4d4; }
+      .refined-shell .text-black { color: #000000; }
+      .refined-shell input { color: #171717; background-color: transparent; }
+      .refined-shell input::placeholder { color: #a3a3a3; }
     `}</style>
   )
 }
