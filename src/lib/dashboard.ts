@@ -48,6 +48,7 @@ export const FILTERS: FilterDef[] = [
 export type Status =
   | 'failing'
   | 'failing_be_approval'
+  | 'pending_be_review'
   | 'changes_requested'
   | 'ci_pending'
   | 'approved'
@@ -79,6 +80,17 @@ export function classifyStatus(pr: PullRequest): { key: Status; label: string } 
 
   if (blockingChanges) return { key: 'changes_requested', label: 'Changes requested' }
   if (pr.ci_status === 'pending' || (pr.pending_checks ?? 0) > 0) {
+    // Distinguish "CI is genuinely running" from "the only thing pending is
+    // the backend-approval gate". A PR with `require-backend-approval` label,
+    // no BE approval yet, no blocking changes-requested, and only pending
+    // checks (no real failures) is waiting on BE review group.
+    const requiresBE =
+      !!pr.labels?.includes('require-backend-approval') ||
+      !!pr.ready_for_backend_review
+    const beNotApproved = pr.backend_approval_status !== 'approved'
+    if (requiresBE && beNotApproved) {
+      return { key: 'pending_be_review', label: 'Pending BE review group review' }
+    }
     return { key: 'ci_pending', label: 'CI running' }
   }
   if (isFinishedUnmerged(pr)) return { key: 'approved', label: 'Approved' }
