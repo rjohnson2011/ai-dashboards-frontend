@@ -47,6 +47,7 @@ export const FILTERS: FilterDef[] = [
 
 export type Status =
   | 'failing'
+  | 'failing_be_approval'
   | 'changes_requested'
   | 'ci_pending'
   | 'approved'
@@ -65,8 +66,7 @@ export function classifyStatus(pr: PullRequest): { key: Status; label: string } 
 
   // hasNonReviewFailingChecks already excludes the backend-review gate. If
   // there are real failures, label by count of REAL failing checks (i.e.
-  // exclude the BE gate from the displayed number too). If failed_checks > 0
-  // but they all reduce to the BE gate, treat as ready/non-failing instead.
+  // exclude the BE gate from the displayed number too).
   const realFailingCount = (pr.failing_checks || []).filter(c => {
     const n = (c.name || '').toLowerCase()
     if (n.includes('backend approval') || n.includes('succeed if backend') ||
@@ -82,7 +82,15 @@ export function classifyStatus(pr: PullRequest): { key: Status; label: string } 
     return { key: 'ci_pending', label: 'CI running' }
   }
   if (isFinishedUnmerged(pr)) return { key: 'approved', label: 'Approved' }
-  if (isReadyForReview(pr)) return { key: 'ready', label: 'Ready' }
+  if (isReadyForReview(pr)) {
+    // If CI is "failing" only because of the BE-approval gate, surface that
+    // explicitly — these PRs are ready, but the GHE merge button is blocked
+    // until a backend reviewer approves.
+    if (pr.ci_status === 'failure' && (pr.failed_checks || 0) > 0) {
+      return { key: 'failing_be_approval', label: 'Failing backend approval' }
+    }
+    return { key: 'ready', label: 'Ready' }
+  }
   return { key: 'open', label: 'Open' }
 }
 

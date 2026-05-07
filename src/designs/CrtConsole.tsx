@@ -25,6 +25,7 @@ interface Props {
 
 const STATUS_COLOR: Record<string, string> = {
   failing: '#ff5d5d',
+  failing_be_approval: '#75c2ff',
   changes_requested: '#ffb347',
   ci_pending: '#bfbfa0',
   approved: '#7cd87c',
@@ -35,6 +36,7 @@ const STATUS_COLOR: Record<string, string> = {
 
 const STATUS_TAG: Record<string, string> = {
   failing: 'FAIL',
+  failing_be_approval: 'BREQ',
   changes_requested: 'CHGS',
   ci_pending: 'CIRX',
   approved: 'APRV',

@@ -26,6 +26,8 @@ interface Props {
 
 const STATUS_COLOR: Record<string, { stripe: string; pillBg: string; pillText: string }> = {
   failing: { stripe: '#d27a64', pillBg: 'rgba(210,122,100,0.14)', pillText: '#d27a64' },
+  // Ready PR whose only "failure" is the backend-approval gate — not alarming, just informational.
+  failing_be_approval: { stripe: '#7da3c4', pillBg: 'rgba(125,163,196,0.14)', pillText: '#7da3c4' },
   changes_requested: { stripe: '#d4a14a', pillBg: 'rgba(212,161,74,0.14)', pillText: '#d4a14a' },
   ci_pending: { stripe: '#a89b78', pillBg: 'rgba(168,155,120,0.12)', pillText: '#a89b78' },
   approved: { stripe: '#9ab877', pillBg: 'rgba(154,184,119,0.14)', pillText: '#9ab877' },

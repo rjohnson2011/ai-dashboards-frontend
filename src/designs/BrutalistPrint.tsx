@@ -25,6 +25,7 @@ interface Props {
 
 const STATUS_GLYPH: Record<string, string> = {
   failing: '✕',
+  failing_be_approval: '⌧',
   changes_requested: '!',
   ci_pending: '○',
   approved: '✓',
