@@ -271,11 +271,6 @@ function PrRow({ pr }: { pr: PullRequest }) {
             {summarizeFailingChecks(pr)}
           </span>
         )}
-        {pr.changes_requested_info?.message && status.key !== 'failing' && (
-          <span className="font-mono text-[12px] text-stone-500 line-clamp-1">
-            {pr.changes_requested_info.message}
-          </span>
-        )}
       </div>
 
       <div className="flex items-center gap-2 min-h-[22px]">

@@ -210,9 +210,6 @@ function RefinedRow({ pr }: { pr: PullRequest }) {
             {status.key === 'failing' && (
               <span className="text-neutral-400"> — {summarizeFailingChecks(pr)}</span>
             )}
-            {pr.changes_requested_info?.message && status.key !== 'failing' && (
-              <span className="text-neutral-400"> — {pr.changes_requested_info.message}</span>
-            )}
           </div>
         </div>
 

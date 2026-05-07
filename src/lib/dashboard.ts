@@ -63,7 +63,15 @@ export function classifyStatus(pr: PullRequest): { key: Status; label: string } 
     pr.changes_requested_info?.status !== 'new_comment_from_author'
 
   if (pr.draft) return { key: 'draft', label: 'Draft' }
-  if (failing > 0 && hasFailingCi(pr)) return { key: 'failing', label: `${failing} failing` }
+
+  // hasNonReviewFailingChecks already excludes the backend-review gate. If
+  // there are real failures, label by count. If failed_checks > 0 but they
+  // all reduce to the BE gate, treat as ready/non-failing instead.
+  const hasRealFailure = pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)
+  if (hasRealFailure) {
+    return { key: 'failing', label: `${failing} failing` }
+  }
+
   if (blockingChanges) return { key: 'changes_requested', label: 'Changes requested' }
   if (pr.ci_status === 'pending' || (pr.pending_checks ?? 0) > 0) {
     return { key: 'ci_pending', label: 'CI running' }

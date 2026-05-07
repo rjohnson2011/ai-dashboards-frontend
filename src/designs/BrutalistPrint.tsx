@@ -246,14 +246,9 @@ function BrutalistRow({ pr, idx }: { pr: PullRequest; idx: number }) {
           </span>
           {status.label}
         </span>
-        {isFailing && (
+        {status.key === 'failing' && (
           <span className="font-mono text-[12px] uppercase tracking-[0.16em] text-black/65 group-hover:text-[var(--brut-bg)]/70 line-clamp-2">
             {summarizeFailingChecks(pr)}
-          </span>
-        )}
-        {pr.changes_requested_info?.message && !isFailing && (
-          <span className="font-mono text-[12px] uppercase tracking-[0.18em] text-black/60 group-hover:text-[var(--brut-bg)]/70 line-clamp-1">
-            {pr.changes_requested_info.message}
           </span>
         )}
       </div>

@@ -237,11 +237,6 @@ function CrtRow({ pr, idx }: { pr: PullRequest; idx: number }) {
             {summarizeFailingChecks(pr)}
           </span>
         )}
-        {pr.changes_requested_info?.message && status.key !== 'failing' && (
-          <span className="text-[11px] opacity-60 line-clamp-1">
-            {pr.changes_requested_info.message}
-          </span>
-        )}
       </div>
 
       <div className="flex items-center gap-1.5 flex-wrap min-h-[20px] text-[16px] tracking-wide">
