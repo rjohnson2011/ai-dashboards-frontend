@@ -9,6 +9,7 @@
   color: rgb(255, 255, 255) !important;
 }
 
+
 /* Status colors - preserve these (including child SVGs with stroke) */
 .dark .text-success,
 .dark .text-success *,

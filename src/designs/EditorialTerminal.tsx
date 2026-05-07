@@ -69,7 +69,7 @@ export default function EditorialTerminal({ pullRequests }: Props) {
   )
 
   return (
-    <div className="editorial-shell min-h-[calc(100vh-48px)] py-6">
+    <div className="design-isolated editorial-shell min-h-[calc(100vh-48px)] py-6">
       <EditorialStyle />
 
       <div className="mx-auto max-w-[1480px] px-5 sm:px-7">

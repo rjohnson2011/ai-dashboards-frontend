@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { RefreshCw, Sun, Moon } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
 import UserMenu from './components/UserMenu'
-import { useTheme } from './contexts/ThemeContext'
 import { usePullRequests } from './hooks/usePullRequests'
 import { timeAgo, absoluteTime } from './lib/dashboard'
 
@@ -48,7 +47,6 @@ const DESIGNS: Design[] = [
 const STORAGE_KEY = 'redesign-active-key'
 
 export default function RedesignGallery() {
-  const { theme, toggleTheme } = useTheme()
   const [activeKey, setActiveKey] = useState<string>(() => {
     return localStorage.getItem(STORAGE_KEY) || DESIGNS[0].key
   })
@@ -57,6 +55,18 @@ export default function RedesignGallery() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, activeKey)
   }, [activeKey])
+
+  // Each design owns its own palette. Strip the global .dark class on <html>
+  // while the gallery is mounted so the global force-white rules don't stomp
+  // on light-themed designs (e.g., RefinedMinimal, BrutalistPrint).
+  useEffect(() => {
+    const html = document.documentElement
+    const hadDark = html.classList.contains('dark')
+    if (hadDark) html.classList.remove('dark')
+    return () => {
+      if (hadDark) html.classList.add('dark')
+    }
+  }, [])
 
   const active = DESIGNS.find(d => d.key === activeKey) || DESIGNS[0]
   const ActiveComponent = active.Component
@@ -127,14 +137,6 @@ export default function RedesignGallery() {
             title="Refresh"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isUpdating ? 'animate-spin' : ''}`} />
-          </button>
-
-          <button
-            onClick={toggleTheme}
-            className="rounded p-1.5 text-zinc-500 hover:bg-zinc-900 hover:text-zinc-100 transition-colors"
-            aria-label="Toggle theme"
-          >
-            {theme === 'light' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
           </button>
 
           <UserMenu />

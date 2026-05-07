@@ -5,6 +5,7 @@
   color: rgb(255, 255, 255) !important;
 }
 
+
 /* Status colors - override the global white (color AND stroke for SVG icons) */
 .dark .text-success,
 .dark .text-success *,

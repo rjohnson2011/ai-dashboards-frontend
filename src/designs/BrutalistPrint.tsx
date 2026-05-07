@@ -51,7 +51,7 @@ export default function BrutalistPrint({ pullRequests }: Props) {
   )
 
   return (
-    <div className="brutalist-shell min-h-[calc(100vh-48px)]">
+    <div className="design-isolated brutalist-shell min-h-[calc(100vh-48px)]">
       <BrutalistStyle />
 
       <div className="mx-auto max-w-[1480px] px-6 py-6">

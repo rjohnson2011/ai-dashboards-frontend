@@ -51,7 +51,7 @@ export default function RefinedMinimal({ pullRequests }: Props) {
   )
 
   return (
-    <div className="refined-shell min-h-[calc(100vh-48px)]">
+    <div className="design-isolated refined-shell min-h-[calc(100vh-48px)]">
       <RefinedStyle />
 
       <div className="mx-auto max-w-[1280px] px-8 py-12">

@@ -61,7 +61,7 @@ export default function CrtConsole({ pullRequests }: Props) {
   )
 
   return (
-    <div className="crt-shell min-h-[calc(100vh-48px)] relative">
+    <div className="design-isolated crt-shell min-h-[calc(100vh-48px)] relative">
       <CrtStyle />
       <div className="crt-scanlines" />
       <div className="crt-vignette" />
