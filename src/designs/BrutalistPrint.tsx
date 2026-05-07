@@ -327,8 +327,8 @@ function BrutalistStyle() {
     <style>{`
       .brutalist-shell {
         --brut-bg: #f3ede0;
-        background-color: var(--brut-bg);
-        color: #0a0a0a;
+        background-color: var(--brut-bg) !important;
+        color: #0a0a0a !important;
         background-image:
           repeating-linear-gradient(0deg, rgba(0,0,0,0.025) 0 1px, transparent 1px 3px);
       }
@@ -338,6 +338,28 @@ function BrutalistStyle() {
       }
       .brutalist-shell .font-mono {
         font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+      }
+      /* Counter the global .dark * { color: white !important } */
+      html.dark .brutalist-shell,
+      html.dark .brutalist-shell * {
+        color: #0a0a0a !important;
+      }
+      /* Hovered rows invert: cream text on black */
+      html.dark .brutalist-shell button:hover,
+      html.dark .brutalist-shell button:hover * {
+        color: var(--brut-bg) !important;
+      }
+      /* Active filter chip is dark bg + cream text */
+      html.dark .brutalist-shell .bg-black,
+      html.dark .brutalist-shell .bg-black * {
+        color: var(--brut-bg) !important;
+      }
+      html.dark .brutalist-shell input { color: #0a0a0a !important; }
+      html.dark .brutalist-shell input::placeholder { color: rgba(10,10,10,0.4) !important; }
+      /* Red accents stay red */
+      html.dark .brutalist-shell [style*="rgb(232, 51, 28)"],
+      html.dark .brutalist-shell [style*="#e8331c"] {
+        color: #e8331c !important;
       }
     `}</style>
   )

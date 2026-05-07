@@ -306,8 +306,8 @@ function RefinedStyle() {
   return (
     <style>{`
       .refined-shell {
-        background-color: #ffffff;
-        color: #171717;
+        background-color: #ffffff !important;
+        color: #171717 !important;
       }
       .refined-shell .font-display {
         font-family: 'Söhne', 'Inter Display', 'Helvetica Neue', sans-serif;
@@ -317,6 +317,17 @@ function RefinedStyle() {
       .refined-shell .font-mono {
         font-family: 'GT America Mono', 'JetBrains Mono', ui-monospace, monospace;
       }
+      /* Counter the global .dark * { color: white !important } rule. Each
+         element that sets its own Tailwind text color gets its color back. */
+      html.dark .refined-shell .text-neutral-900 { color: #171717 !important; }
+      html.dark .refined-shell .text-neutral-700 { color: #404040 !important; }
+      html.dark .refined-shell .text-neutral-500 { color: #737373 !important; }
+      html.dark .refined-shell .text-neutral-400 { color: #a3a3a3 !important; }
+      html.dark .refined-shell .text-black { color: #000 !important; }
+      html.dark .refined-shell { color: #171717 !important; }
+      /* Inputs and placeholders */
+      html.dark .refined-shell input { color: #171717 !important; background-color: transparent !important; }
+      html.dark .refined-shell input::placeholder { color: #a3a3a3 !important; }
     `}</style>
   )
 }

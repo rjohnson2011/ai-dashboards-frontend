@@ -56,17 +56,9 @@ export default function RedesignGallery() {
     localStorage.setItem(STORAGE_KEY, activeKey)
   }, [activeKey])
 
-  // Each design owns its own palette. Strip the global .dark class on <html>
-  // while the gallery is mounted so the global force-white rules don't stomp
-  // on light-themed designs (e.g., RefinedMinimal, BrutalistPrint).
-  useEffect(() => {
-    const html = document.documentElement
-    const hadDark = html.classList.contains('dark')
-    if (hadDark) html.classList.remove('dark')
-    return () => {
-      if (hadDark) html.classList.add('dark')
-    }
-  }, [])
+  // Each design's stylesheet uses !important to override the global
+  // `.dark * { color: white !important }` rule from dark-mode-force-white.css.
+  // No theme stripping needed.
 
   const active = DESIGNS.find(d => d.key === activeKey) || DESIGNS[0]
   const ActiveComponent = active.Component

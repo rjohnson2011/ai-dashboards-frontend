@@ -103,6 +103,28 @@ export function isTrulyExemptFromBackendReview(pr: PullRequest): boolean {
   return true
 }
 
+// Some failing checks are review-related chicken-and-egg signals — they fail
+// because there's no review yet. They shouldn't block "Ready for Review".
+const REVIEW_RELATED_CHECKS = new Set([
+  'Pull Request Ready for Review',
+  'Danger',
+  'Status Checks',
+  'Get PR data',
+  'Get PR Data',
+  'Check Workflow Statuses',
+])
+
+export function hasNonReviewFailingChecks(pr: PullRequest): boolean {
+  if (!pr.failing_checks || pr.failing_checks.length === 0) return false
+  return pr.failing_checks.some(check => {
+    const name = check.name || ''
+    if (name.toLowerCase().includes('backend')) return false
+    if (REVIEW_RELATED_CHECKS.has(name)) return false
+    if (name.includes('Get PR Data')) return false
+    return true
+  })
+}
+
 // Filtering helpers shared across dashboard variants.
 
 export function isReadyForReview(pr: PullRequest): boolean {
@@ -112,14 +134,11 @@ export function isReadyForReview(pr: PullRequest): boolean {
   if (pr.backend_approval_status === 'approved') return false
   if (pr.approval_summary?.approved_users?.some(u => BACKEND_REVIEWERS.includes(u))) return false
 
-  // Has team approval (non-backend) and isn't blocked
-  const hasNonBackendApproval = !!(
-    pr.approval_summary &&
-    pr.approval_summary.approved_count > 0 &&
-    pr.approval_summary.approved_users?.some(u => !BACKEND_REVIEWERS.includes(u))
-  )
-  const isNonVetsApi =
-    pr.repository_name === 'platform-atlas' || pr.repository_name === 'vets-api-mockdata'
+  // Failing CI (in a non-review-related way) should send the PR to the
+  // Failing CI bucket, not Ready for Review.
+  if (pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) return false
+
+  // Unresolved changes-requested goes to Awaiting Changes, not Ready.
   const blockingChangesRequested = !!(
     pr.approval_summary?.changes_requested_count &&
     pr.approval_summary.changes_requested_count > 0 &&
@@ -127,6 +146,17 @@ export function isReadyForReview(pr: PullRequest): boolean {
     pr.changes_requested_info?.status !== 'new_comment_from_author'
   )
   if (blockingChangesRequested) return false
+
+  // Has team approval (non-backend) → ready for backend review.
+  const hasNonBackendApproval = !!(
+    pr.approval_summary &&
+    pr.approval_summary.approved_count > 0 &&
+    pr.approval_summary.approved_users?.some(u => !BACKEND_REVIEWERS.includes(u))
+  )
+  // Repos that don't require backend review still surface in "Ready" so
+  // someone notices them.
+  const isNonVetsApi =
+    pr.repository_name === 'platform-atlas' || pr.repository_name === 'vets-api-mockdata'
 
   return hasNonBackendApproval || (isNonVetsApi && pr.ci_status !== 'success')
 }
