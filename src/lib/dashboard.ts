@@ -55,7 +55,6 @@ export type Status =
   | 'open'
 
 export function classifyStatus(pr: PullRequest): { key: Status; label: string } {
-  const failing = pr.failed_checks || 0
   const changesRequested = pr.approval_summary?.changes_requested_count || 0
   const blockingChanges =
     changesRequested > 0 &&
@@ -65,11 +64,17 @@ export function classifyStatus(pr: PullRequest): { key: Status; label: string } 
   if (pr.draft) return { key: 'draft', label: 'Draft' }
 
   // hasNonReviewFailingChecks already excludes the backend-review gate. If
-  // there are real failures, label by count. If failed_checks > 0 but they
-  // all reduce to the BE gate, treat as ready/non-failing instead.
-  const hasRealFailure = pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)
-  if (hasRealFailure) {
-    return { key: 'failing', label: `${failing} failing` }
+  // there are real failures, label by count of REAL failing checks (i.e.
+  // exclude the BE gate from the displayed number too). If failed_checks > 0
+  // but they all reduce to the BE gate, treat as ready/non-failing instead.
+  const realFailingCount = (pr.failing_checks || []).filter(c => {
+    const n = (c.name || '').toLowerCase()
+    if (n.includes('backend approval') || n.includes('succeed if backend') ||
+        n.includes('backend review') || n.includes('require backend')) return false
+    return true
+  }).length
+  if (pr.ci_status === 'failure' && realFailingCount > 0) {
+    return { key: 'failing', label: `${realFailingCount} failing` }
   }
 
   if (blockingChanges) return { key: 'changes_requested', label: 'Changes requested' }
@@ -142,22 +147,30 @@ function isReviewGate(name: string): boolean {
 
 // Tidy up GitHub-style check names so the table can render them readably.
 //
-// Real-world examples and what we want to show:
+// GHE check names come in formats like:
 //   "Code Checks / Test (Group 15) (pull_request)"
 //     → "Test (Group 15)"
+//   "Build And Publish Preview Environment / Test Results (push)"
+//     → "Test Results"
 //   ".github/workflows/build-and-publish.yaml / Test Results (push)"
-//     → "Build and publish / Test Results"
+//     → "Test Results"
 //   "rspec / unit (4/8)"
-//     → "rspec / unit"
+//     → "rspec / unit"   (no trailing trigger suffix, single segment)
+//
+// Strategy: drop the workflow trigger suffix, drop the workflow prefix
+// (everything before the first " / "), then drop matrix counters.
 function tidyCheckName(name: string): string {
   let n = name.trim()
   // Drop the workflow trigger suffix: "(push)", "(pull_request)", "(pull_request_review)"
   n = n.replace(/\s*\((?:push|pull_request|pull_request_review|workflow_dispatch|schedule|workflow_run|merge_group)\)\s*$/i, '')
-  // Convert ".github/workflows/foo-bar.yaml" prefix into "Foo Bar"
-  n = n.replace(/^\.github\/workflows\/([^\/\s]+?)\.ya?ml\s*\/\s*/i, (_m, slug: string) => {
-    const pretty = slug.replace(/[-_]+/g, ' ')
-    return pretty.charAt(0).toUpperCase() + pretty.slice(1) + ' / '
-  })
+  // Drop the workflow prefix — anything before the first " / ", as long as
+  // the remaining segment is still descriptive (more than 3 chars).
+  // This converts "Code Checks / Test (Group 15)" → "Test (Group 15)".
+  const slashSplit = n.split(/\s+\/\s+/)
+  if (slashSplit.length > 1) {
+    const tail = slashSplit.slice(1).join(' / ').trim()
+    if (tail.length >= 4) n = tail
+  }
   // Drop parametric suffix counters: " (4/8)", " [node 18]"
   n = n.replace(/\s*\(\d+\/\d+\)\s*$/, '')
   n = n.replace(/\s*\[[^\]]+\]\s*$/, '')
