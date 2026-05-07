@@ -166,7 +166,7 @@ export function needsTeamApproval(pr: PullRequest): boolean {
 export function isReadyForReview(pr: PullRequest): boolean {
   // Hard exclusions
   if (pr.draft) return false
-  if (pr.author === 'dependabot[bot]') return false
+  if (isDependabot(pr)) return false
   if (isTrulyExemptFromBackendReview(pr)) return false
   if (pr.backend_approval_status === 'approved') return false
   if (pr.approval_summary?.approved_users?.some(u => BACKEND_REVIEWERS.includes(u))) return false
@@ -189,16 +189,31 @@ export function isReadyForReview(pr: PullRequest): boolean {
   )
   if (hasNonBackendApproval) return true
 
-  // 2. Author is themselves a backend reviewer (auto-ready)
-  if (BACKEND_REVIEWERS.includes(pr.author)) return true
+  // 2. Author is themselves a backend reviewer — Ready only after a teammate
+  //    has weighed in (an approval). A BE author's PR still needs review.
+  if (
+    BACKEND_REVIEWERS.includes(pr.author) &&
+    pr.approval_summary &&
+    pr.approval_summary.approved_count > 0
+  ) {
+    return true
+  }
 
   // 3. Backend flagged as ready for review (with approvals)
   if (pr.ready_for_backend_review && pr.approval_summary && pr.approval_summary.approved_count > 0) {
     return true
   }
 
-  // 4. Author responded to a previous changes-request — needs re-review
-  if (authorHasRespondedToChanges(pr)) return true
+  // 4. Author responded to a previous changes-request — Ready only if there
+  //    is an actual standing approval. Without one, the author's response
+  //    means "re-review pending," not ready.
+  if (
+    authorHasRespondedToChanges(pr) &&
+    pr.approval_summary &&
+    pr.approval_summary.approved_count > 0
+  ) {
+    return true
+  }
 
   // 5. Non-vets-api repos (platform-atlas, vets-api-mockdata) only land in
   //    Ready once CI is green AND someone has at least commented or
@@ -235,7 +250,13 @@ export function isAwaitingAuthorChanges(pr: PullRequest): boolean {
 }
 
 export function isFinishedUnmerged(pr: PullRequest): boolean {
-  return pr.backend_approval_status === 'approved' && pr.state === 'open'
+  // Backend-approved + open + green CI. A BE-approved PR with broken CI
+  // belongs in Failing CI (since it can't actually be merged).
+  return (
+    pr.backend_approval_status === 'approved' &&
+    pr.state === 'open' &&
+    pr.ci_status !== 'failure'
+  )
 }
 
 // "Needing team review" — vets-api PR that hasn't been picked up yet.
@@ -244,14 +265,16 @@ export function isFinishedUnmerged(pr: PullRequest): boolean {
 // "PRs Needing Team Review" card.
 export function needsFirstTeamReview(pr: PullRequest): boolean {
   if (pr.draft) return false
-  if (pr.author === 'dependabot[bot]') return false
+  if (isDependabot(pr)) return false
   if (isTrulyExemptFromBackendReview(pr)) return false
   // Only applies to vets-api (other repos don't require team review)
   if (pr.repository_name === 'platform-atlas') return false
   if (pr.repository_name === 'vets-api-mockdata') return false
 
-  if (needsTeamApproval(pr)) return true
-
+  // BE approval (or any approval) is decisive — those PRs aren't waiting
+  // for a first team review even if they still carry the
+  // waiting-for-team-approval label. Check this *before* needsTeamApproval
+  // so a stale label doesn't override an existing approval.
   const hasAnyApproval = !!(
     pr.approval_summary && pr.approval_summary.approved_count > 0
   )
@@ -259,6 +282,8 @@ export function needsFirstTeamReview(pr: PullRequest): boolean {
     pr.backend_approval_status === 'approved' ||
     !!pr.approval_summary?.approved_users?.some(u => BACKEND_REVIEWERS.includes(u))
   if (hasAnyApproval || beApproved) return false
+
+  if (needsTeamApproval(pr)) return true
 
   const blockingCR = !!(
     pr.approval_summary?.changes_requested_count &&
@@ -274,7 +299,13 @@ export function hasFailingCi(pr: PullRequest): boolean {
 }
 
 export function isDependabot(pr: PullRequest): boolean {
-  return pr.author === 'dependabot[bot]'
+  if (pr.author === 'dependabot[bot]') return true
+  // GHE migration anonymized some author names to opaque archive identifiers
+  // (long alphanumeric strings). Detect dependabot via the title signature
+  // ("Bump <pkg> from <x> to <y>") and a non-human-looking author.
+  const looksLikeArchiveId = /^[A-Za-z0-9]{20,}$/.test(pr.author || '')
+  const titleLooksLikeDependabot = /^Bump [\w@.\-/[\]]+ from [\d.]+ to [\d.]+/.test(pr.title || '')
+  return looksLikeArchiveId && titleLooksLikeDependabot
 }
 
 export function repoFullName(pr: PullRequest): string {

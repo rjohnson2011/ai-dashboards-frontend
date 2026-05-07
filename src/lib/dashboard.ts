@@ -30,7 +30,7 @@ export interface FilterDef {
 // review-related chicken-and-egg checks.
 export function isInFailingCiBucket(pr: PullRequest): boolean {
   if (pr.draft) return false
-  if (pr.author === 'dependabot[bot]') return false
+  if (isDependabot(pr)) return false
   if (isTrulyExemptFromBackendReview(pr)) return false
   return hasFailingCi(pr) && hasNonReviewFailingChecks(pr)
 }

@@ -973,9 +973,6 @@ function Dashboard() {
                                   {pr.approval_summary?.approved_users?.map((user, idx) => (
                                     <div key={idx} className={`text-xs ${isGhostUser(user) ? 'italic text-muted-foreground' : ''}`}>
                                       {displayUser(user)}
-                                      {pr.changes_requested_info?.status === 'new_commits_after_approval' && (
-                                        <span className="text-muted-foreground ml-1">(dismissed)</span>
-                                      )}
                                     </div>
                                   ))}
                                 </a>
