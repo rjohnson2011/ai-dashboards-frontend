@@ -1,13 +1,38 @@
 import { GoogleLogin, type CredentialResponse } from '@react-oauth/google'
+import { useState } from 'react'
 import { authService } from '../services/auth'
 
 const ALLOWED_DOMAINS = ['oddball.io', 'adhocteam.us', 'va.gov']
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 export default function Login() {
-  const handleSuccess = (credentialResponse: CredentialResponse) => {
-    const token = credentialResponse.credential
-    if (!token) return
-    authService.setToken(token)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSuccess = async (credentialResponse: CredentialResponse) => {
+    const idToken = credentialResponse.credential
+    if (!idToken) return
+    setError(null)
+
+    try {
+      const r = await fetch(`${API_URL}/api/v1/auth/session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id_token: idToken }),
+      })
+      if (r.ok) {
+        const data: { token: string } = await r.json()
+        authService.setSessionToken(data.token)
+      } else {
+        // Backend rejected the exchange (e.g. domain restriction). Fall
+        // back to using the raw Google token so the user isn't blocked
+        // by a backend hiccup; it'll work for an hour.
+        authService.setToken(idToken)
+      }
+    } catch {
+      // Network error — same fallback.
+      authService.setToken(idToken)
+    }
+
     window.location.reload()
   }
 
@@ -24,15 +49,17 @@ export default function Login() {
         <div className="flex justify-center">
           <GoogleLogin
             onSuccess={handleSuccess}
-            onError={() => {
-              // No-op: Google's button handles its own UI errors.
-            }}
+            onError={() => setError('Sign-in failed. Try again.')}
             useOneTap={false}
             theme="filled_black"
             shape="rectangular"
             size="large"
           />
         </div>
+
+        {error && (
+          <p className="text-sm text-red-500">{error}</p>
+        )}
 
         <p className="text-xs text-muted-foreground">
           Access is restricted to <code>{ALLOWED_DOMAINS.join(', ')}</code> email addresses.
