@@ -1,9 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { RefreshCw } from 'lucide-react'
-import UserMenu from './components/UserMenu'
+import AppHeader from './components/AppHeader'
 import { usePullRequests } from './hooks/usePullRequests'
-import { timeAgo, absoluteTime } from './lib/dashboard'
 
 import EditorialTerminal from './designs/EditorialTerminal'
 import BrutalistPrint from './designs/BrutalistPrint'
@@ -65,85 +62,16 @@ export default function RedesignGallery() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-zinc-100">
-      {/* Gallery chrome — always present, neutral */}
-      <div className="sticky top-0 z-50 border-b border-zinc-900 bg-[#0a0a0a]/95 backdrop-blur">
-        <div className="mx-auto flex h-12 max-w-[1480px] items-center gap-4 px-5 sm:px-7">
-          <span className="font-medium tracking-tight text-sm">PR Dashboard</span>
-          <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-amber-400 ring-1 ring-amber-500/30">
-            Gallery
-          </span>
-
-          <div className="ml-2 hidden md:flex items-center gap-1 bg-zinc-900/60 rounded-md p-0.5 ring-1 ring-zinc-800">
-            {DESIGNS.map(d => {
-              const isActive = d.key === activeKey
-              return (
-                <button
-                  key={d.key}
-                  onClick={() => setActiveKey(d.key)}
-                  className="px-3 py-1.5 text-sm font-medium rounded-md transition-colors"
-                  style={
-                    isActive
-                      ? { backgroundColor: '#fafafa', color: '#18181b' }
-                      : { color: '#a1a1aa', backgroundColor: 'transparent' }
-                  }
-                  title={d.blurb}
-                >
-                  {d.label}
-                </button>
-              )
-            })}
-          </div>
-
-          {/* Mobile selector */}
-          <select
-            value={activeKey}
-            onChange={e => setActiveKey(e.target.value)}
-            className="md:hidden ml-2 bg-zinc-900 border border-zinc-800 text-xs px-2 py-1 rounded text-zinc-200"
-          >
-            {DESIGNS.map(d => (
-              <option key={d.key} value={d.key}>
-                {d.label}
-              </option>
-            ))}
-          </select>
-
-          <Link
-            to="/dashboard"
-            className="ml-auto hidden sm:inline text-xs text-zinc-500 hover:text-zinc-200 transition-colors"
-          >
-            ← Old dashboard
-          </Link>
-
-          {lastUpdated && (
-            <span
-              className="hidden lg:inline text-[11px] text-zinc-500 tabular-nums"
-              title={absoluteTime(lastUpdated)}
-            >
-              Updated {timeAgo(lastUpdated)} ago
-            </span>
-          )}
-
-          <button
-            onClick={refresh}
-            className="rounded p-1.5 text-zinc-500 hover:bg-zinc-900 hover:text-zinc-100 transition-colors"
-            aria-label="Refresh"
-            title="Refresh"
-          >
-            <RefreshCw className={`h-3.5 w-3.5 ${isUpdating ? 'animate-spin' : ''}`} />
-          </button>
-
-          <UserMenu />
-        </div>
-
-        {/* Description band */}
-        <div className="mx-auto max-w-[1480px] px-5 sm:px-7 pb-2.5">
-          <p className="text-[11px] text-zinc-500">
-            <span className="text-zinc-300">{active.label}</span>
-            <span className="mx-2 text-zinc-700">·</span>
-            {active.blurb}
-          </p>
-        </div>
-      </div>
+      <AppHeader
+        variant="gallery"
+        designs={DESIGNS.map(({ key, label, blurb }) => ({ key, label, blurb }))}
+        activeKey={activeKey}
+        onSelect={setActiveKey}
+        activeBlurb={active.blurb}
+        lastUpdated={lastUpdated}
+        isUpdating={isUpdating}
+        onRefresh={refresh}
+      />
 
       <FontPreloader />
 

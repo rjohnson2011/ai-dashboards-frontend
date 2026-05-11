@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { Link } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
 import { authService } from './services/auth'
 import { subscribeToPullRequests } from './services/actionCable'
@@ -19,7 +18,6 @@ import {
   TableRow,
 } from './components/ui/table'
 import {
-  GitPullRequest,
   AlertCircle,
   CheckCircle2,
   XCircle,
@@ -29,14 +27,11 @@ import {
   ArrowUp,
   ArrowDown,
   ArrowUpDown,
-  Sun,
-  Moon,
-  BarChart3
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './components/ui/tooltip'
 import { useTheme } from './contexts/ThemeContext'
 import { displayUser, isGhostUser } from './lib/utils'
-import UserMenu from './components/UserMenu'
+import AppHeader from './components/AppHeader'
 
 interface CheckRun {
   name: string
@@ -133,7 +128,7 @@ import {
 import { isInFailingCiBucket } from './lib/dashboard'
 
 function Dashboard() {
-  const { theme, toggleTheme } = useTheme()
+  useTheme()
   const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -456,58 +451,12 @@ function Dashboard() {
   return (
     <TooltipProvider>
       <div className="flex flex-col min-h-screen bg-background">
-        <div className="border-b bg-white dark:bg-zinc-900">
-          <div className="flex h-auto sm:h-16 flex-wrap items-center gap-2 px-3 py-2 sm:px-4 sm:py-0">
-            <div className="flex items-center min-w-0">
-              <GitPullRequest className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
-              <h2 className="text-base sm:text-lg font-medium truncate">PR Dashboard</h2>
-            </div>
-            <Link to="/sprint-metrics" className="sm:ml-4">
-              <Button variant="ghost" size="sm" className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
-                <span className="hidden xs:inline sm:inline">Sprint Metrics</span>
-              </Button>
-            </Link>
-            <Link to="/redesign">
-              <Button variant="ghost" size="sm" className="flex items-center gap-2 text-amber-500 hover:text-amber-400">
-                <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider ring-1 ring-amber-500/30">
-                  New
-                </span>
-                <span className="hidden md:inline">Try redesign</span>
-              </Button>
-            </Link>
-            <div className="ml-auto flex items-center gap-1 sm:gap-2">
-              {lastUpdated && (
-                <span className="hidden md:inline text-sm text-muted-foreground">
-                  Updated {new Date(lastUpdated).toLocaleString('en-US', {
-                    timeZone: 'America/New_York',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    hour12: true
-                  })} ET
-                </span>
-              )}
-              <span className="hidden lg:inline text-sm text-muted-foreground">
-                • v{APP_VERSION.version}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleTheme}
-                aria-label="Toggle theme"
-              >
-                {theme === 'light' ? (
-                  <Moon className="h-4 w-4" />
-                ) : (
-                  <Sun className="h-4 w-4" />
-                )}
-              </Button>
-              <UserMenu />
-            </div>
-          </div>
-        </div>
+        <AppHeader
+          variant="classic"
+          lastUpdated={lastUpdated}
+          isUpdating={isUpdating}
+          onRefresh={() => fetchPullRequests()}
+        />
         <div className="flex-1 space-y-6 sm:space-y-8 px-3 sm:px-2 py-4 sm:py-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
