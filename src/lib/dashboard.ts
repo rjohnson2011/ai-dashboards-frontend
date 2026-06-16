@@ -5,6 +5,7 @@ import {
   isFinishedUnmerged,
   hasFailingCi,
   hasNonReviewFailingChecks,
+  hasCommitsAfterApproval,
   isDependabot,
   isTrulyExemptFromBackendReview,
 } from '../types/pull-request'
@@ -50,6 +51,7 @@ export type Status =
   | 'failing_be_approval'
   | 'pending_be_review'
   | 'changes_requested'
+  | 'needs_reapproval'
   | 'ci_pending'
   | 'approved'
   | 'ready'
@@ -76,6 +78,13 @@ export function classifyStatus(pr: PullRequest): { key: Status; label: string } 
   }).length
   if (pr.ci_status === 'failure' && realFailingCount > 0) {
     return { key: 'failing', label: `${realFailingCount} failing` }
+  }
+
+  // Author pushed commits after a backend approval — the approval is stale and
+  // the PR needs a re-review. CI isn't really broken here (checked above), so
+  // surface it distinctly rather than as a fresh "Ready".
+  if (hasCommitsAfterApproval(pr)) {
+    return { key: 'needs_reapproval', label: 'Needs re-approval' }
   }
 
   if (blockingChanges) return { key: 'changes_requested', label: 'Changes requested' }
