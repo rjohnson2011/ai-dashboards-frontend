@@ -958,6 +958,10 @@ function Dashboard() {
                                   <span className="text-xs font-medium text-orange-500">
                                     New commits after approval
                                   </span>
+                                ) : pr.changes_requested_info.status === 'backend_approval_dismissed' ? (
+                                  <span className="text-xs font-medium text-red-500">
+                                    BE approval dismissed
+                                  </span>
                                 ) : (
                                   <span className="text-xs text-warning">
                                     {pr.changes_requested_info.message}

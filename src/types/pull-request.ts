@@ -168,11 +168,13 @@ export function isReadyForReview(pr: PullRequest): boolean {
   if (pr.draft) return false
   if (isDependabot(pr)) return false
   if (isTrulyExemptFromBackendReview(pr)) return false
-  // Re-review needed: the author pushed new commits AFTER a backend approval,
-  // so the standing approval is stale. These PRs carry backend_approval_status
-  // === 'approved', which the exclusions below would otherwise drop — surface
-  // them as Ready (for re-approval) instead, as long as CI isn't really broken.
-  if (hasCommitsAfterApproval(pr)) {
+  // Re-review needed: either the author pushed new commits AFTER a backend
+  // approval (stale approval still on record), or a backend approval was
+  // DISMISSED (e.g. the author merged master in). Both can carry a stale
+  // backend_approval_status / approved_users that the exclusions below would
+  // otherwise drop — surface them as Ready (for re-approval) instead, as long
+  // as CI isn't really broken.
+  if (needsReReview(pr)) {
     if (pr.ci_status === 'failure' && hasNonReviewFailingChecks(pr)) return false
     return true
   }
@@ -285,14 +287,27 @@ export function hasCommitsAfterApproval(pr: PullRequest): boolean {
   return pr.changes_requested_info?.status === 'new_commits_after_approval'
 }
 
+// A backend reviewer's approval was DISMISSED (commonly because the author
+// merged master/main into the branch) with no current backend approval.
+export function hasDismissedBackendApproval(pr: PullRequest): boolean {
+  return pr.changes_requested_info?.status === 'backend_approval_dismissed'
+}
+
+// Either re-review trigger: new commits after approval, or a dismissed backend
+// approval. In both cases the PR needs a fresh backend review.
+export function needsReReview(pr: PullRequest): boolean {
+  return hasCommitsAfterApproval(pr) || hasDismissedBackendApproval(pr)
+}
+
 export function isFinishedUnmerged(pr: PullRequest): boolean {
   // Backend-approved + open + green CI + not dependabot. A BE-approved PR
   // with broken CI belongs in Failing CI (since it can't be merged), and
   // dependabot PRs have their own bucket.
   //
-  // A PR whose author pushed new commits AFTER the backend approval needs a
-  // re-approval — it's no longer "finished". Send it back to Ready for Review.
-  if (hasCommitsAfterApproval(pr)) return false
+  // A PR that needs re-review (new commits after approval, or a dismissed
+  // backend approval) is no longer "finished" — send it back to Ready for
+  // Review.
+  if (needsReReview(pr)) return false
   return (
     pr.backend_approval_status === 'approved' &&
     pr.state === 'open' &&

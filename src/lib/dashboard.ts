@@ -6,6 +6,7 @@ import {
   hasFailingCi,
   hasNonReviewFailingChecks,
   hasCommitsAfterApproval,
+  hasDismissedBackendApproval,
   isDependabot,
   isTrulyExemptFromBackendReview,
 } from '../types/pull-request'
@@ -80,11 +81,15 @@ export function classifyStatus(pr: PullRequest): { key: Status; label: string } 
     return { key: 'failing', label: `${realFailingCount} failing` }
   }
 
-  // Author pushed commits after a backend approval — the approval is stale and
-  // the PR needs a re-review. CI isn't really broken here (checked above), so
-  // surface it distinctly rather than as a fresh "Ready".
+  // The PR needs a re-review and the stale approval shouldn't read as "Ready":
+  // either the author pushed commits after a backend approval, or a backend
+  // approval was dismissed (e.g. master merged in). CI isn't really broken here
+  // (checked above), so surface it distinctly.
   if (hasCommitsAfterApproval(pr)) {
     return { key: 'needs_reapproval', label: 'Needs re-approval' }
+  }
+  if (hasDismissedBackendApproval(pr)) {
+    return { key: 'needs_reapproval', label: 'BE approval dismissed' }
   }
 
   if (blockingChanges) return { key: 'changes_requested', label: 'Changes requested' }
