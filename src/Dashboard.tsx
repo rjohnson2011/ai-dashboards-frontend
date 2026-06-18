@@ -27,6 +27,7 @@ import {
   ArrowUp,
   ArrowDown,
   ArrowUpDown,
+  ExternalLink,
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './components/ui/tooltip'
 import { useTheme } from './contexts/ThemeContext'
@@ -140,6 +141,7 @@ function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('')
   const [showSearch, setShowSearch] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
+  const [popupsBlocked, setPopupsBlocked] = useState(false)
 
   // Use ref to avoid stale closure in polling interval
   const lastUpdatedRef = useRef<string | null>(null)
@@ -419,6 +421,39 @@ function Dashboard() {
 
   const filteredPullRequests = sortPullRequests(filterPullRequests(pullRequests))
 
+  // Open every currently visible PR (respecting the active filter + sort order)
+  // in a new browser tab.
+  //
+  // Browsers gate opening multiple tabs on the site having pop-ups allowed:
+  // without that, only the FIRST window.open() per user gesture succeeds and the
+  // rest are blocked (verified in Chrome — anchor-click loops and setTimeout
+  // staggering are blocked too; staggering is worse because it runs outside the
+  // gesture). So we open all tabs synchronously inside the click gesture — which
+  // opens every tab once the user allows pop-ups for the site — and detect the
+  // blocked case to show a one-time "allow pop-ups" hint.
+  const handleOpenAll = () => {
+    const urls = filteredPullRequests.map((pr) => pr.url).filter(Boolean)
+    if (urls.length === 0) return
+
+    if (
+      urls.length > 10 &&
+      !window.confirm(`Open all ${urls.length} visible PRs in new tabs?`)
+    ) {
+      return
+    }
+
+    let openedCount = 0
+    urls.forEach((url) => {
+      const win = window.open(url, '_blank', 'noopener,noreferrer')
+      if (win) openedCount++
+    })
+
+    // If we tried to open more than one but the browser only let one (or none)
+    // through, pop-ups are blocked for this site. Surface a hint; otherwise
+    // clear any previous hint.
+    setPopupsBlocked(urls.length > 1 && openedCount < urls.length)
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -662,7 +697,8 @@ function Dashboard() {
               </div>
               <Card>
                 <CardHeader>
-                  <div>
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
                     <CardTitle>Pull Requests</CardTitle>
                     <CardDescription>
                       {activeFilter === 'ready' && 'Ready for Review - PRs with team approvals awaiting backend review'}
@@ -675,7 +711,41 @@ function Dashboard() {
                       {activeFilter === 'finished' && 'Finished but Unmerged - Backend approved PRs ready to merge'}
                       {activeFilter === 'dependabot' && 'Dependabot PRs - Automated dependency updates'}
                     </CardDescription>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleOpenAll}
+                      disabled={filteredPullRequests.length === 0}
+                      className="shrink-0 whitespace-nowrap"
+                      title="Open every visible PR in a new tab (in the current sort order)"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Open All ({filteredPullRequests.length})
+                    </Button>
                   </div>
+                  {popupsBlocked && (
+                    <div className="mt-3 flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+                      <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                      <div className="flex-1">
+                        Your browser blocked some of the new tabs. Click the
+                        pop-up icon in the address bar and choose{' '}
+                        <span className="font-medium">
+                          “Always allow pop-ups from this site”
+                        </span>
+                        , then click <span className="font-medium">Open All</span>{' '}
+                        again.
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setPopupsBlocked(false)}
+                        className="shrink-0 text-amber-300/80 hover:text-amber-100"
+                        aria-label="Dismiss"
+                      >
+                        <XCircle className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
                 </CardHeader>
                 <CardContent>
                   <div className="rounded-md border overflow-x-auto">
