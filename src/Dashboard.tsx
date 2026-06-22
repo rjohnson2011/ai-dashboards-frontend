@@ -142,6 +142,8 @@ function Dashboard() {
   const [showSearch, setShowSearch] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const [popupsBlocked, setPopupsBlocked] = useState(false)
+  const [scraperRunning, setScraperRunning] = useState(false)
+  const [scraperMessage, setScraperMessage] = useState<string | null>(null)
 
   // Use ref to avoid stale closure in polling interval
   const lastUpdatedRef = useRef<string | null>(null)
@@ -454,6 +456,54 @@ function Dashboard() {
     setPopupsBlocked(urls.length > 1 && openedCount < urls.length)
   }
 
+  // Trigger a fresh scraper run on the backend. Uses the logged-in user's
+  // session token (no admin secret in the browser). The run takes several
+  // minutes; we don't block the UI on it — we mark it running, let the request
+  // proceed in the background, and refresh once it returns. The existing
+  // auto-refresh/WebSocket also surfaces partial results as they land.
+  const handleRerunScraper = async () => {
+    if (scraperRunning) return
+    setScraperRunning(true)
+    setScraperMessage('Scraper started — this can take a few minutes…')
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/v1/admin/trigger_scraper`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authService.getAuthHeaders(),
+          },
+        }
+      )
+
+      if (response.status === 401 || response.status === 403) {
+        setScraperMessage('Not authorized to run the scraper.')
+        return
+      }
+
+      const data = await response.json().catch(() => null)
+      if (response.ok && data?.success) {
+        setScraperMessage('Scraper finished — refreshing data…')
+        await fetchPullRequests()
+        setScraperMessage('Data refreshed.')
+      } else {
+        setScraperMessage(data?.message || 'Scraper run failed.')
+      }
+    } catch {
+      // A long run may exceed the request timeout even though work continues
+      // server-side; tell the user it's still going rather than show an error.
+      setScraperMessage(
+        'Scraper is still running on the server — data will update automatically.'
+      )
+    } finally {
+      setScraperRunning(false)
+      // Clear the status note after a short while.
+      setTimeout(() => setScraperMessage(null), 8000)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -500,6 +550,18 @@ function Dashboard() {
               <p className="text-xs text-muted-foreground">vets-api, vets-api-mockdata, platform-atlas</p>
             </div>
             <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRerunScraper}
+                disabled={scraperRunning}
+                title="Run the PR scraper now to refresh data from GitHub"
+              >
+                <RefreshCw
+                  className={`mr-2 h-4 w-4 ${scraperRunning ? 'animate-spin' : ''}`}
+                />
+                {scraperRunning ? 'Rerunning…' : 'Rerun Scraper'}
+              </Button>
               {showSearch ? (
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <Input
@@ -532,6 +594,14 @@ function Dashboard() {
               )}
             </div>
           </div>
+          {scraperMessage && (
+            <div className="flex items-center gap-2 rounded-md border border-blue-500/40 bg-blue-500/10 px-3 py-2 text-xs text-blue-200">
+              <RefreshCw
+                className={`h-4 w-4 shrink-0 ${scraperRunning ? 'animate-spin' : ''}`}
+              />
+              <span>{scraperMessage}</span>
+            </div>
+          )}
           <div className="space-y-8">
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-9 gap-2 sm:gap-3">
                 <Card 
