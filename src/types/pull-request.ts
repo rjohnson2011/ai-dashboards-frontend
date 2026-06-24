@@ -191,6 +191,14 @@ export function isReadyForReview(pr: PullRequest): boolean {
   // (Once the author commits or comments after, the PR comes back here.)
   if (hasUnresolvedChangesRequested(pr)) return false
 
+  // Unresolved BACKEND-comment feedback (not a formal CR, but a BE reviewer
+  // commented and no later approval/author-response supersedes it) → Awaiting
+  // Changes, not Ready — even if a teammate has approved. The backend computes
+  // this with full timestamps and signals it via changes_requested_info. Once
+  // the author responds, the status flips to new_comment/commit_from_author and
+  // the PR returns to Ready.
+  if (pr.changes_requested_info?.status === 'changes_requested') return false
+
   // Inclusion criteria — any of:
   // 1. Non-backend team has approved
   const hasNonBackendApproval = !!(
@@ -259,26 +267,17 @@ export function isAwaitingAuthorChanges(pr: PullRequest): boolean {
     if (pr.awaiting_author_changes) return true
   }
 
-  // (b) The most recent reviewer activity is from a backend reviewer
-  // (line comments / commented-review state) and there's no standing
-  // approval yet — i.e. the BE just left feedback the author hasn't
-  // resolved. We treat this as "awaiting changes" even without a formal
-  // CHANGES_REQUESTED, since BE comments on lines are real feedback.
-  const lra = pr.latest_reviewer_activity
-  const beActivityWithoutApproval =
-    lra?.reviewer_type === 'backend' &&
-    lra.user !== pr.author &&
-    !pr.approval_summary?.approved_users?.some(u => BACKEND_REVIEWERS.includes(u))
-  if (beActivityWithoutApproval) {
-    // Check that there isn't a non-BE approval — if a teammate approved,
-    // the PR is in a "Ready" state, not "awaiting changes".
-    const hasNonBeApproval = !!(
-      pr.approval_summary &&
-      pr.approval_summary.approved_count > 0 &&
-      pr.approval_summary.approved_users?.some(u => !BACKEND_REVIEWERS.includes(u))
-    )
-    if (!hasNonBeApproval) return true
-  }
+  // (b) A backend reviewer left feedback (a comment or COMMENTED review) that
+  // the author hasn't responded to and that no approval supersedes. The backend
+  // computes this with full timestamps in `changes_requested_info`: it returns
+  // status 'changes_requested' only when the latest BE feedback has no later
+  // approval (BE or teammate) AND no later author response. Trust that signal —
+  // it correctly honors the "comment after approval" timing rule, which the
+  // frontend can't compute itself (approval_summary has no timestamps).
+  //
+  // 'new_comment_from_author'/'new_commit_from_author' mean the author HAS
+  // responded → those flip back toward Ready, so they are NOT awaiting-changes.
+  if (pr.changes_requested_info?.status === 'changes_requested') return true
 
   return false
 }
