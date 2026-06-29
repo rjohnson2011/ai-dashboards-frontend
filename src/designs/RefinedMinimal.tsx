@@ -27,6 +27,7 @@ const STATUS_DOT: Record<string, string> = {
   failing_be_approval: '#1d4ed8',
   pending_be_review: '#1d4ed8',
   changes_requested: '#d97706',
+  needs_reapproval: '#d97706',
   ci_pending: '#a3a3a3',
   approved: '#16a34a',
   ready: '#1d4ed8',

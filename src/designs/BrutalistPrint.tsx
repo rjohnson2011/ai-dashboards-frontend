@@ -28,6 +28,7 @@ const STATUS_GLYPH: Record<string, string> = {
   failing_be_approval: '⌧',
   pending_be_review: '○',
   changes_requested: '!',
+  needs_reapproval: '!',
   ci_pending: '○',
   approved: '✓',
   ready: '→',

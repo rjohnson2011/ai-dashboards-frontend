@@ -30,6 +30,8 @@ const STATUS_COLOR: Record<string, { stripe: string; pillBg: string; pillText: s
   failing_be_approval: { stripe: '#7da3c4', pillBg: 'rgba(125,163,196,0.14)', pillText: '#7da3c4' },
   pending_be_review: { stripe: '#7da3c4', pillBg: 'rgba(125,163,196,0.14)', pillText: '#7da3c4' },
   changes_requested: { stripe: '#d4a14a', pillBg: 'rgba(212,161,74,0.14)', pillText: '#d4a14a' },
+  // PR needs re-approval (new commits / dismissed approval after a BE approval) — amber, like changes_requested.
+  needs_reapproval: { stripe: '#d4a14a', pillBg: 'rgba(212,161,74,0.14)', pillText: '#d4a14a' },
   ci_pending: { stripe: '#a89b78', pillBg: 'rgba(168,155,120,0.12)', pillText: '#a89b78' },
   approved: { stripe: '#9ab877', pillBg: 'rgba(154,184,119,0.14)', pillText: '#9ab877' },
   ready: { stripe: '#7da3c4', pillBg: 'rgba(125,163,196,0.14)', pillText: '#7da3c4' },
@@ -216,7 +218,10 @@ function ColHead({ label, align = 'left' }: { label: string; align?: 'left' | 'r
 
 function PrRow({ pr }: { pr: PullRequest }) {
   const status = classifyStatus(pr)
-  const colors = STATUS_COLOR[status.key]
+  // Fall back to the neutral 'open' palette for any status key not explicitly
+  // mapped, so a newly-added Status never crashes the gallery (e.g. reading
+  // colors.stripe on undefined).
+  const colors = STATUS_COLOR[status.key] ?? STATUS_COLOR.open
   const reviewers = reviewerBadgesFor(pr)
   const exempt = isTrulyExemptFromBackendReview(pr)
   const authorColor = colorForHandle(pr.author)
