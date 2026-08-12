@@ -28,6 +28,8 @@ export interface PullRequest {
   pending_checks?: number
   backend_approval_status: string
   ready_for_backend_review: boolean
+  pending_reviewers?: string[]
+  pending_teams?: string[]
   approval_summary?: {
     status: string
     approved_count: number
@@ -298,7 +300,18 @@ export function needsReReview(pr: PullRequest): boolean {
   return hasCommitsAfterApproval(pr) || hasDismissedBackendApproval(pr)
 }
 
+// A PR can carry approvals and green CI and still be unmergeable because a
+// codeowner team (or individual) has an outstanding review request. GitHub
+// surfaces this as "Waiting on code owner review"; we read it from the
+// requested_reviewers/requested_teams fields on the PR list payload.
+export function hasPendingTeamReview(pr: PullRequest): boolean {
+  return (pr.pending_reviewers?.length ?? 0) > 0 || (pr.pending_teams?.length ?? 0) > 0
+}
+
 export function isFinishedUnmerged(pr: PullRequest): boolean {
+  // Still awaiting a requested reviewer/codeowner -> not finished. It belongs
+  // in "PRs Needing Team Review" until that review lands.
+  if (hasPendingTeamReview(pr)) return false
   // Backend-approved + open + green CI + not dependabot. A BE-approved PR
   // with broken CI belongs in Failing CI (since it can't be merged), and
   // dependabot PRs have their own bucket.
@@ -326,6 +339,12 @@ export function needsFirstTeamReview(pr: PullRequest): boolean {
   // Only applies to vets-api (other repos don't require team review)
   if (pr.repository_name === 'platform-atlas') return false
   if (pr.repository_name === 'vets-api-mockdata') return false
+
+  // An outstanding codeowner/reviewer request keeps the PR in this bucket even
+  // when it already has approvals — a required review is still pending, so it
+  // cannot merge. Checked before the approval short-circuit below, which would
+  // otherwise eject it on the strength of those existing approvals.
+  if (hasPendingTeamReview(pr)) return true
 
   // BE approval (or any approval) is decisive — those PRs aren't waiting
   // for a first team review even if they still carry the
