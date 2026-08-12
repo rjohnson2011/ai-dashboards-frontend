@@ -124,6 +124,9 @@ function isBackendReviewGate(name: string): boolean {
     n.includes('backend approval') ||
     n.includes('succeed if backend') ||
     n.includes('backend review') ||
+    // Hyphenated team name: "Check for backend-review-group approval" is a
+    // review gate, but "backend review" above doesn't match it.
+    n.includes('backend-review-group') ||
     n.includes('require backend')
   )
 }
@@ -309,9 +312,12 @@ export function hasPendingTeamReview(pr: PullRequest): boolean {
 }
 
 export function isFinishedUnmerged(pr: PullRequest): boolean {
-  // Still awaiting a requested reviewer/codeowner -> not finished. It belongs
-  // in "PRs Needing Team Review" until that review lands.
-  if (hasPendingTeamReview(pr)) return false
+  // Still awaiting a requested reviewer/codeowner -> not finished; it belongs
+  // in "PRs Needing Team Review" until that review lands. Scoped to PRs without
+  // backend approval: once backend has approved, a lingering secondary review
+  // request no longer keeps the PR out of "finished" (GitHub leaves those
+  // requests standing indefinitely).
+  if (hasPendingTeamReview(pr) && pr.backend_approval_status !== 'approved') return false
   // Backend-approved + open + green CI + not dependabot. A BE-approved PR
   // with broken CI belongs in Failing CI (since it can't be merged), and
   // dependabot PRs have their own bucket.
@@ -340,11 +346,23 @@ export function needsFirstTeamReview(pr: PullRequest): boolean {
   if (pr.repository_name === 'platform-atlas') return false
   if (pr.repository_name === 'vets-api-mockdata') return false
 
-  // An outstanding codeowner/reviewer request keeps the PR in this bucket even
-  // when it already has approvals — a required review is still pending, so it
-  // cannot merge. Checked before the approval short-circuit below, which would
-  // otherwise eject it on the strength of those existing approvals.
-  if (hasPendingTeamReview(pr)) return true
+  // An outstanding codeowner/reviewer request keeps the PR in this bucket, but
+  // only when that review is actually what's blocking it. GitHub leaves
+  // requested_reviewers populated as a standing request, so "has a pending
+  // reviewer" alone is true of ~2/3 of open PRs and would swamp the bucket.
+  //
+  // Two exclusions make it meaningful: a real CI failure belongs in Failing CI
+  // (note a failing "Backend Approval Check" is NOT one — that check failing IS
+  // the awaiting-review signal, which hasNonReviewFailingChecks filters out),
+  // and a PR that already has backend approval has had its review, so a pending
+  // secondary reviewer doesn't put it back in the first-review queue.
+  if (
+    hasPendingTeamReview(pr) &&
+    !hasNonReviewFailingChecks(pr) &&
+    pr.backend_approval_status !== 'approved'
+  ) {
+    return true
+  }
 
   // BE approval (or any approval) is decisive — those PRs aren't waiting
   // for a first team review even if they still carry the

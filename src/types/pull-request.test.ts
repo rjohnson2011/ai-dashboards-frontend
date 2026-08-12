@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { hasPendingTeamReview, isFinishedUnmerged } from './pull-request'
+import {
+  hasPendingTeamReview,
+  isFinishedUnmerged,
+  hasNonReviewFailingChecks,
+  needsFirstTeamReview,
+} from './pull-request'
 import type { PullRequest } from './pull-request'
 
 // Minimal PR shaped like the API payload — only the fields these predicates read.
@@ -42,7 +47,11 @@ describe('hasPendingTeamReview', () => {
 
 describe('isFinishedUnmerged', () => {
   it('excludes a PR still blocked on a pending codeowner (PR #29601 today)', () => {
-    expect(isFinishedUnmerged(base({ pending_teams: ['benefits-non-disability'] }))).toBe(false)
+    expect(
+      isFinishedUnmerged(
+        base({ pending_teams: ['benefits-non-disability'], backend_approval_status: 'not_approved' }),
+      ),
+    ).toBe(false)
   })
 
   it('includes it once the codeowner approves (PR #29601 after approval)', () => {
@@ -52,6 +61,84 @@ describe('isFinishedUnmerged', () => {
   it('still excludes PRs with failing CI and no backend approval (#29631/#29627)', () => {
     expect(
       isFinishedUnmerged(base({ ci_status: 'failure', backend_approval_status: 'not_approved' })),
+    ).toBe(false)
+  })
+
+  // #28565 / #29650: backend-approved, only a standing secondary review request
+  // and a review-gate "failure" — those are finished, not awaiting review.
+  it('includes a backend-approved PR whose only pending review is secondary', () => {
+    expect(
+      isFinishedUnmerged(base({ pending_teams: ['qa-standards'], backend_approval_status: 'approved' })),
+    ).toBe(true)
+  })
+})
+
+describe('hasNonReviewFailingChecks', () => {
+  const withChecks = (names: string[]) =>
+    base({ ci_status: 'failure', failing_checks: names.map(name => ({ name })) as never })
+
+  // 37 of 41 pending+failing PRs fail ONLY on the backend-approval gate; their
+  // real CI is green. Verified against GHE.
+  it('does not treat a failing "Status Checks" rollup as a real CI failure', () => {
+    expect(hasNonReviewFailingChecks(withChecks(['Status Checks']))).toBe(false)
+  })
+
+  it('treats real test failures as CI failures (#29850)', () => {
+    expect(hasNonReviewFailingChecks(withChecks(['Test (Group 22)']))).toBe(true)
+  })
+
+  it('treats lint/security failures as CI failures (#29893)', () => {
+    expect(hasNonReviewFailingChecks(withChecks(['Linting and Security']))).toBe(true)
+  })
+
+  // #29808: hyphenated team name — a review gate, not a CI failure.
+  it('recognizes "Check for backend-review-group approval" as a review gate', () => {
+    expect(hasNonReviewFailingChecks(withChecks(['Check for backend-review-group approval']))).toBe(
+      false,
+    )
+  })
+})
+
+describe('needsFirstTeamReview', () => {
+  const vetsApi = (over: Partial<PullRequest> = {}) =>
+    base({ backend_approval_status: 'not_approved', ...over })
+
+  it('includes a PR awaiting first review whose only failure is the approval gate', () => {
+    expect(
+      needsFirstTeamReview(
+        vetsApi({
+          pending_teams: ['benefits-non-disability'],
+          ci_status: 'failure',
+          failing_checks: [{ name: 'Status Checks' }] as never,
+        }),
+      ),
+    ).toBe(true)
+  })
+
+  // A real CI failure doesn't get IN via the pending-review gate. (#29850 still
+  // reaches this bucket through the trailing catch-all below, since it has no
+  // approvals and no changes-requested — a pre-existing overlap with Failing CI
+  // that this gate neither created nor fixes.) What's asserted here is that the
+  // gate itself no longer admits it: with an approval present, the gate is the
+  // only path that could have, and it declines.
+  it('does not admit a real CI failure through the pending-review gate (#29850)', () => {
+    expect(
+      needsFirstTeamReview(
+        vetsApi({
+          pending_teams: ['mobile-api-team'],
+          ci_status: 'failure',
+          failing_checks: [{ name: 'Test (Group 22)' }] as never,
+          approval_summary: { approved_count: 1, approved_users: ['someone'] } as never,
+        }),
+      ),
+    ).toBe(false)
+  })
+
+  it('excludes a backend-approved PR with only a standing secondary request', () => {
+    expect(
+      needsFirstTeamReview(
+        base({ pending_teams: ['qa-standards'], backend_approval_status: 'approved' }),
+      ),
     ).toBe(false)
   })
 })
