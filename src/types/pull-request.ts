@@ -313,11 +313,10 @@ export function hasPendingTeamReview(pr: PullRequest): boolean {
 
 export function isFinishedUnmerged(pr: PullRequest): boolean {
   // Still awaiting a requested reviewer/codeowner -> not finished; it belongs
-  // in "PRs Needing Team Review" until that review lands. Scoped to PRs without
-  // backend approval: once backend has approved, a lingering secondary review
-  // request no longer keeps the PR out of "finished" (GitHub leaves those
-  // requests standing indefinitely).
-  if (hasPendingTeamReview(pr) && pr.backend_approval_status !== 'approved') return false
+  // in "PRs Needing Team Review" until that review lands. This holds even when
+  // backend has already approved: backend often reviews before the owning team,
+  // and GitHub still blocks the merge on the outstanding codeowner review.
+  if (hasPendingTeamReview(pr)) return false
   // Backend-approved + open + green CI + not dependabot. A BE-approved PR
   // with broken CI belongs in Failing CI (since it can't be merged), and
   // dependabot PRs have their own bucket.
@@ -346,21 +345,17 @@ export function needsFirstTeamReview(pr: PullRequest): boolean {
   if (pr.repository_name === 'platform-atlas') return false
   if (pr.repository_name === 'vets-api-mockdata') return false
 
-  // An outstanding codeowner/reviewer request keeps the PR in this bucket, but
-  // only when that review is actually what's blocking it. GitHub leaves
-  // requested_reviewers populated as a standing request, so "has a pending
-  // reviewer" alone is true of ~2/3 of open PRs and would swamp the bucket.
+  // An outstanding codeowner/team review request keeps the PR here. Backend
+  // approval does NOT clear it: backend reviewers often approve before the
+  // owning team does, and the codeowner review is a separate, still-required
+  // gate (GitHub reports these as "Merging is blocked — waiting on code owner
+  // review"). So a backend-approved PR with a pending team goes back to
+  // needing team approval rather than counting as finished.
   //
-  // Two exclusions make it meaningful: a real CI failure belongs in Failing CI
-  // (note a failing "Backend Approval Check" is NOT one — that check failing IS
-  // the awaiting-review signal, which hasNonReviewFailingChecks filters out),
-  // and a PR that already has backend approval has had its review, so a pending
-  // secondary reviewer doesn't put it back in the first-review queue.
-  if (
-    hasPendingTeamReview(pr) &&
-    !hasNonReviewFailingChecks(pr) &&
-    pr.backend_approval_status !== 'approved'
-  ) {
+  // The one exclusion is a real CI failure, which belongs in Failing CI. Note a
+  // failing "Backend Approval Check" is NOT one — that check failing IS the
+  // awaiting-review signal, which hasNonReviewFailingChecks filters out.
+  if (hasPendingTeamReview(pr) && !hasNonReviewFailingChecks(pr)) {
     return true
   }
 

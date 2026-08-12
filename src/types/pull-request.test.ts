@@ -64,12 +64,15 @@ describe('isFinishedUnmerged', () => {
     ).toBe(false)
   })
 
-  // #28565 / #29650: backend-approved, only a standing secondary review request
-  // and a review-gate "failure" — those are finished, not awaiting review.
-  it('includes a backend-approved PR whose only pending review is secondary', () => {
+  // #29627 / #28565 / #29650: backend-approved but GitHub still reports
+  // "Merging is blocked — waiting on code owner review". Backend approval does
+  // not substitute for the team's own review, so these are NOT finished.
+  it('excludes a backend-approved PR still awaiting a codeowner team', () => {
     expect(
-      isFinishedUnmerged(base({ pending_teams: ['qa-standards'], backend_approval_status: 'approved' })),
-    ).toBe(true)
+      isFinishedUnmerged(
+        base({ pending_teams: ['govcio-vfep-codereviewers'], backend_approval_status: 'approved' }),
+      ),
+    ).toBe(false)
   })
 })
 
@@ -134,11 +137,17 @@ describe('needsFirstTeamReview', () => {
     ).toBe(false)
   })
 
-  it('excludes a backend-approved PR with only a standing secondary request', () => {
+  // Backend reviewers often approve before the owning team. A pending codeowner
+  // team is still a required, blocking review, so the PR comes back here.
+  it('includes a backend-approved PR still awaiting its codeowner team (#29627)', () => {
     expect(
       needsFirstTeamReview(
-        base({ pending_teams: ['qa-standards'], backend_approval_status: 'approved' }),
+        base({
+          pending_teams: ['govcio-vfep-codereviewers'],
+          backend_approval_status: 'approved',
+          approval_summary: { approved_count: 1, approved_users: ['Rachal-Cassity'] } as never,
+        }),
       ),
-    ).toBe(false)
+    ).toBe(true)
   })
 })
