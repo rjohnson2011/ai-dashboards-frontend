@@ -136,7 +136,10 @@ function Dashboard() {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [, setRateLimit] = useState<ApiResponse['rate_limit'] | null>(null)
   const [sortColumn, setSortColumn] = useState<string | null>('updated')
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+  // Oldest-updated first: a PR that hasn't moved in days is the one most likely
+  // to be forgotten, so it belongs at the top of the queue rather than buried
+  // under PRs that were touched minutes ago. Clicking the column still toggles.
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
   const [activeFilter, setActiveFilter] = useState<string>('ready')
   const [searchTerm, setSearchTerm] = useState('')
   const [showSearch, setShowSearch] = useState(false)
