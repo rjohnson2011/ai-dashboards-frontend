@@ -1038,10 +1038,16 @@ function Dashboard() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="block text-xs text-destructive hover:underline truncate max-w-[120px]"
-                                    title={check.name === 'Status Checks' ? 'Danger' : check.name}
+                                    title={
+                                      check.name === 'Status Checks'
+                                        ? 'Requires backend approval'
+                                        : check.name
+                                    }
                                     onClick={(e) => e.stopPropagation()}
                                   >
-                                    {check.name === 'Status Checks' ? 'Danger' : check.name}
+                                    {check.name === 'Status Checks'
+                                      ? 'Requires backend approval'
+                                      : check.name}
                                   </a>
                                 ))
                               ) : (
