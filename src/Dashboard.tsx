@@ -86,6 +86,8 @@ interface PullRequest {
     author_comment_at?: string
     backend_reviewer?: string
     dismissed_at?: string
+    requested_at?: string
+    approved_at?: string
   } | null
   latest_reviewer_activity?: {
     message: string
@@ -127,6 +129,40 @@ import {
   isDependabot,
 } from './types/pull-request'
 import { isInFailingCiBucket } from './lib/dashboard'
+
+// The event each changes-requested status is reporting happened at a specific
+// moment, and "when" is what tells a reviewer whether it's stale. Each status
+// carries its own timestamp field, so pick the one that matches.
+function changesRequestedTimestamp(
+  info: NonNullable<PullRequest['changes_requested_info']>
+): string | null {
+  switch (info.status) {
+    case 'changes_requested':
+      return info.requested_at || info.backend_comment_at || null
+    case 'new_commits_after_approval':
+      return info.approved_at || null
+    case 'backend_approval_dismissed':
+    case 'new_commit_from_author':
+      return info.dismissed_at || null
+    case 'new_comment_from_author':
+      return info.author_comment_at || info.backend_comment_at || null
+    default:
+      return null
+  }
+}
+
+// Eastern time, matching the reviewer-activity column. Includes the date since
+// these events are often days old — a bare clock time reads as "today".
+function formatEastern(iso: string): string {
+  return new Date(iso).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: 'America/New_York',
+  })
+}
 
 function Dashboard() {
   useTheme()
@@ -1026,27 +1062,37 @@ function Dashboard() {
                           <TableCell>
                             <div className="space-y-1">
                               {pr.changes_requested_info ? (
-                                pr.changes_requested_info.status === 'new_commit_from_author' ? (
-                                  <span className="text-xs font-medium text-purple-500">
-                                    New commits by author
-                                  </span>
-                                ) : pr.changes_requested_info.status === 'new_comment_from_author' ? (
-                                  <span className="text-xs font-medium text-blue-500">
-                                    New comment from author
-                                  </span>
-                                ) : pr.changes_requested_info.status === 'new_commits_after_approval' ? (
-                                  <span className="text-xs font-medium text-orange-500">
-                                    New commits after approval
-                                  </span>
-                                ) : pr.changes_requested_info.status === 'backend_approval_dismissed' ? (
-                                  <span className="text-xs font-medium text-red-500">
-                                    BE approval dismissed
-                                  </span>
-                                ) : (
-                                  <span className="text-xs text-warning">
-                                    {pr.changes_requested_info.message}
-                                  </span>
-                                )
+                                <>
+                                  {pr.changes_requested_info.status === 'new_commit_from_author' ? (
+                                    <span className="text-xs font-medium text-purple-500">
+                                      New commits by author
+                                    </span>
+                                  ) : pr.changes_requested_info.status === 'new_comment_from_author' ? (
+                                    <span className="text-xs font-medium text-blue-500">
+                                      New comment from author
+                                    </span>
+                                  ) : pr.changes_requested_info.status === 'new_commits_after_approval' ? (
+                                    <span className="text-xs font-medium text-orange-500">
+                                      New commits after approval
+                                    </span>
+                                  ) : pr.changes_requested_info.status === 'backend_approval_dismissed' ? (
+                                    <span className="text-xs font-medium text-red-500">
+                                      BE approval dismissed
+                                    </span>
+                                  ) : (
+                                    <span className="text-xs text-warning">
+                                      {pr.changes_requested_info.message}
+                                    </span>
+                                  )}
+                                  {(() => {
+                                    const ts = changesRequestedTimestamp(pr.changes_requested_info)
+                                    return ts ? (
+                                      <div className="text-xs text-muted-foreground">
+                                        {formatEastern(ts)}
+                                      </div>
+                                    ) : null
+                                  })()}
+                                </>
                               ) : pr.latest_reviewer_activity ? (
                                 <a
                                   href={pr.latest_reviewer_activity.url || pr.url}
@@ -1063,12 +1109,7 @@ function Dashboard() {
                                   {displayUser(pr.latest_reviewer_activity.user)} {pr.latest_reviewer_activity.type === 'comment' ? 'commented' : pr.latest_reviewer_activity.type}
                                   <br />
                                   <span className="text-muted-foreground">
-                                    {new Date(pr.latest_reviewer_activity.timestamp).toLocaleTimeString('en-US', {
-                                      hour: 'numeric',
-                                      minute: '2-digit',
-                                      hour12: true,
-                                      timeZone: 'America/New_York'
-                                    })}
+                                    {formatEastern(pr.latest_reviewer_activity.timestamp)}
                                   </span>
                                 </a>
                               ) : (
