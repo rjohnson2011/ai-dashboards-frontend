@@ -62,9 +62,9 @@ const QUEUES: FilterKey[] = [
 const QUEUE_COPY: Record<string, { title: string; hint: string }> = {
   ready: { title: 'Ready', hint: 'awaiting backend approval' },
   team: { title: 'Team review', hint: 'awaiting first team review' },
-  awaiting: { title: 'Changes', hint: 'reviewer requested changes — waiting on the author' },
+  awaiting: { title: 'Changes requested', hint: 'reviewer requested changes — waiting on the author' },
   failing: { title: 'Failing CI', hint: 'real check failures' },
-  approved: { title: 'Approved', hint: 'cleared, not yet merged' },
+  approved: { title: 'Approved but unmerged', hint: 'cleared, not yet merged' },
   all: { title: 'All open', hint: 'every open PR' },
   drafts: { title: 'Drafts', hint: 'work in progress' },
   dependabot: { title: 'Dependabot', hint: 'automated updates' },
@@ -191,7 +191,7 @@ export default function TriageBoard({ pullRequests }: Props) {
                 }}
               >
                 <div
-                  className="uppercase tracking-[0.08em] truncate"
+                  className="uppercase tracking-[0.08em] leading-[1.3] min-h-[26px]"
                   style={{ ...type.label, fontSize: 10, color: sel ? T.accent : T.text }}
                 >
                   {copy.title}
