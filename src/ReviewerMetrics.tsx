@@ -30,6 +30,10 @@ function ReviewerMetrics() {
           `${base}/api/v1/reviews/reviewer_activity?backend_only=${backendOnly}`,
           { headers: { ...authService.getAuthHeaders() } }
         )
+        if (res.status === 401 || res.status === 403) {
+          authService.logout()
+          return
+        }
         if (!res.ok) throw new Error(`Request failed: ${res.status}`)
         const data = await res.json()
         setWindows(data.windows)
