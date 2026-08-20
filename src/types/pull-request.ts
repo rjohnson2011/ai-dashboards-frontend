@@ -53,6 +53,8 @@ export interface PullRequest {
     author_comment_at?: string
     backend_reviewer?: string
     dismissed_at?: string
+    requested_at?: string
+    approved_at?: string
   } | null
   latest_reviewer_activity?: {
     message: string

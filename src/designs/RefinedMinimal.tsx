@@ -309,6 +309,8 @@ function RefinedEmpty({ filterKey, hasSearch }: { filterKey: FilterKey; hasSearc
     drafts: ['No drafts', 'Nobody is mid-PR.'],
     dependabot: ['Quiet', 'Dependabot has nothing open.'],
     approved: ['Nothing parked', 'No backend-approved PRs sitting unmerged.'],
+    team: ['No first reviews owed', 'Every PR has had a team look.'],
+    exempt: ['None exempt', 'No PRs carry the exemption label.'],
     all: ['Empty queue', 'All repositories are clear.'],
   }
   const [title, sub] = lines[filterKey]

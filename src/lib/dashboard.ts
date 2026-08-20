@@ -9,16 +9,19 @@ import {
   hasDismissedBackendApproval,
   isDependabot,
   isTrulyExemptFromBackendReview,
+  needsFirstTeamReview,
 } from '../types/pull-request'
 import { isGhostUser } from './utils'
 
 export type FilterKey =
   | 'ready'
+  | 'team'
   | 'awaiting'
   | 'failing'
   | 'drafts'
   | 'dependabot'
   | 'approved'
+  | 'exempt'
   | 'all'
 
 export interface FilterDef {
@@ -39,11 +42,13 @@ export function isInFailingCiBucket(pr: PullRequest): boolean {
 
 export const FILTERS: FilterDef[] = [
   { key: 'ready', label: 'Ready', predicate: isReadyForReview },
+  { key: 'team', label: 'Needing team review', predicate: needsFirstTeamReview },
   { key: 'awaiting', label: 'Awaiting author', predicate: isAwaitingAuthorChanges },
   { key: 'failing', label: 'Failing CI', predicate: isInFailingCiBucket },
   { key: 'approved', label: 'Approved · unmerged', predicate: isFinishedUnmerged },
   { key: 'drafts', label: 'Drafts', predicate: pr => pr.draft },
   { key: 'dependabot', label: 'Dependabot', predicate: isDependabot },
+  { key: 'exempt', label: 'Exempt BE review', predicate: pr => !pr.draft && isTrulyExemptFromBackendReview(pr) },
   { key: 'all', label: 'All open', predicate: pr => pr.state === 'open' },
 ]
 
@@ -71,12 +76,9 @@ export function classifyStatus(pr: PullRequest): { key: Status; label: string } 
   // hasNonReviewFailingChecks already excludes the backend-review gate. If
   // there are real failures, label by count of REAL failing checks (i.e.
   // exclude the BE gate from the displayed number too).
-  const realFailingCount = (pr.failing_checks || []).filter(c => {
-    const n = (c.name || '').toLowerCase()
-    if (n.includes('backend approval') || n.includes('succeed if backend') ||
-        n.includes('backend review') || n.includes('require backend')) return false
-    return true
-  }).length
+  const realFailingCount = (pr.failing_checks || []).filter(
+    c => !isReviewGate((c.name || '').toLowerCase())
+  ).length
   if (pr.ci_status === 'failure' && realFailingCount > 0) {
     return { key: 'failing', label: `${realFailingCount} failing` }
   }
@@ -175,7 +177,12 @@ function isReviewGate(name: string): boolean {
     n.includes('backend approval') ||
     n.includes('succeed if backend') ||
     n.includes('backend review') ||
-    n.includes('require backend')
+    // Hyphenated team name ("Check for backend-review-group approval").
+    n.includes('backend-review-group') ||
+    n.includes('require backend') ||
+    // The "Status Checks" rollup IS the backend-approval gate on vets-api:
+    // 37 of 41 audited "failures" were only this check, with real CI green.
+    n === 'status checks'
   )
 }
 
@@ -351,11 +358,13 @@ export function nameFromHandle(handle: string): string {
 export function countByFilter(prs: PullRequest[]): Record<FilterKey, number> {
   const base: Record<FilterKey, number> = {
     ready: 0,
+    team: 0,
     awaiting: 0,
     failing: 0,
     drafts: 0,
     dependabot: 0,
     approved: 0,
+    exempt: 0,
     all: 0,
   }
   for (const pr of prs) for (const f of FILTERS) if (f.predicate(pr)) base[f.key]++

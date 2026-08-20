@@ -19,77 +19,155 @@ interface Props {
 }
 
 // ── Triage Board ────────────────────────────────────────────────────────────
-// Design thesis: color is state, not decoration. Exactly three tones exist —
-// one violet accent (the selected queue, and only the selected queue), one
-// restrained red (genuinely broken CI), and quiet neutrals for everything
-// else. The signature element is the queue rail: the active queue card and
-// the table share a single accent rule, making "what am I looking at" a
-// physical connection rather than a label.
+// Design thesis: color is state, not decoration — one violet accent (the
+// selected queue and the table rail, nothing else), red only for genuinely
+// broken CI, green for approvals, amber for waiting-on-review states.
 //
-// Structure encodes priority: four ACTION queues get full cards; the three
-// informational counts (all / drafts / dependabot) are demoted to a one-line
-// strip. Total PRs is deliberately the quietest number on the page.
+// Type carries hierarchy instead of gray: everything is white, differentiated
+// by size and weight (per Ryan, 2026-08-20 — the gray ramp was unreadable).
+// Primary = 14px/500, secondary = 12px/400 at full white, labels = 11px caps.
+//
+// Feature parity with /dashboard is a requirement, not a goal: every bucket,
+// sortable columns, Open All, changes-requested detail with ET timestamps,
+// commented-by, and created dates all exist here — only the presentation is
+// condensed (8 fixed columns, title takes the slack, no horizontal scroll).
 
 const T = {
   bg: '#0B0E14',
   surface: '#11151D',
-  surfaceUp: '#161B25',
-  line: 'rgba(148,163,184,0.12)',
-  text: '#E8ECF4',
-  mut: '#8B93A7',
-  faint: '#5A6172',
+  line: 'rgba(148,163,184,0.14)',
+  text: '#FFFFFF',
   accent: '#8B7CF6',
   accentDim: 'rgba(139,124,246,0.14)',
   red: '#F87171',
-  redDim: 'rgba(248,113,113,0.12)',
   green: '#4ADE80',
   amber: '#FBBF24',
 }
 
-const ACTION_QUEUES: FilterKey[] = ['ready', 'awaiting', 'failing', 'approved']
-const STRIP_QUEUES: FilterKey[] = ['all', 'drafts', 'dependabot']
+// All-white type roles. Hierarchy comes from size/weight alone.
+const type = {
+  primary: { color: T.text, fontSize: 14, fontWeight: 500 } as const,
+  secondary: { color: T.text, fontSize: 12, fontWeight: 400 } as const,
+  label: { color: T.text, fontSize: 11, fontWeight: 600 } as const,
+}
+
+const ACTION_QUEUES: FilterKey[] = ['ready', 'team', 'awaiting', 'failing', 'approved']
+const STRIP_QUEUES: FilterKey[] = ['all', 'drafts', 'dependabot', 'exempt']
 
 const QUEUE_COPY: Record<string, { title: string; hint: string }> = {
   ready: { title: 'Ready for review', hint: 'awaiting backend approval' },
+  team: { title: 'Needing team review', hint: 'awaiting first team review' },
   awaiting: { title: 'Awaiting author', hint: 'reviewer requested changes' },
   failing: { title: 'Failing CI', hint: 'real check failures' },
   approved: { title: 'Approved · unmerged', hint: 'cleared, not yet merged' },
   all: { title: 'all open', hint: '' },
   drafts: { title: 'drafts', hint: '' },
   dependabot: { title: 'dependabot', hint: '' },
+  exempt: { title: 'exempt from BE review', hint: '' },
 }
 
-// Status tones collapse into the three-color system. Anything "waiting on a
-// human" is neutral; only real breakage is red; approvals are green.
 function statusTone(key: Status): string {
   if (key === 'failing') return T.red
   if (key === 'approved') return T.green
   if (key === 'changes_requested' || key === 'needs_reapproval') return T.amber
-  return T.mut
+  return T.text
 }
 
 const badgeTone: Record<string, string> = {
   approved: T.green,
   changes_requested: T.amber,
-  commented: T.faint,
+  commented: T.text,
 }
+
+// The moment each changes-requested status describes, in Eastern time —
+// mirrors /dashboard's column so no information is lost in this design.
+function changesRequestedDetail(
+  info: NonNullable<PullRequest['changes_requested_info']>
+): string | null {
+  const ts =
+    info.status === 'changes_requested'
+      ? info.requested_at || info.backend_comment_at
+      : info.status === 'new_commits_after_approval'
+        ? info.approved_at
+        : info.status === 'backend_approval_dismissed' || info.status === 'new_commit_from_author'
+          ? info.dismissed_at
+          : info.status === 'new_comment_from_author'
+            ? info.author_comment_at || info.backend_comment_at
+            : null
+  if (!ts) return info.message || null
+  const when = new Date(ts).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: 'America/New_York',
+  })
+  return `${info.message} · ${when}`
+}
+
+type SortCol = 'number' | 'title' | 'author' | 'created' | 'updated'
 
 export default function TriageBoard({ pullRequests }: Props) {
   const [active, setActive] = useState<FilterKey>('ready')
   const [query, setQuery] = useState('')
+  // Oldest-updated first by default, matching /dashboard: the forgotten PR is
+  // the one triage exists to surface.
+  const [sortCol, setSortCol] = useState<SortCol>('updated')
+  const [sortAsc, setSortAsc] = useState(true)
 
   const counts = useMemo(() => countByFilter(pullRequests), [pullRequests])
-  const rows = useMemo(
-    () => applyFilter(pullRequests, active, query),
-    [pullRequests, active, query]
-  )
+  const rows = useMemo(() => {
+    const filtered = applyFilter(pullRequests, active, query)
+    const dir = sortAsc ? 1 : -1
+    return [...filtered].sort((a, b) => {
+      switch (sortCol) {
+        case 'number':
+          return (a.number - b.number) * dir
+        case 'title':
+          return a.title.localeCompare(b.title) * dir
+        case 'author':
+          return a.author.localeCompare(b.author) * dir
+        case 'created':
+          return (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) * dir
+        case 'updated':
+          return (new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime()) * dir
+      }
+    })
+  }, [pullRequests, active, query, sortCol, sortAsc])
+
   const activeDef = FILTERS.find(f => f.key === active)
+
+  const toggleSort = (col: SortCol) => {
+    if (sortCol === col) setSortAsc(v => !v)
+    else {
+      setSortCol(col)
+      setSortAsc(col === 'updated' || col === 'created')
+    }
+  }
+
+  const openAll = () => {
+    rows.forEach(pr => window.open(pr.url, '_blank', 'noopener'))
+  }
+
+  const sortMark = (col: SortCol) => (sortCol === col ? (sortAsc ? ' ↑' : ' ↓') : '')
+
+  const HEADERS: Array<{ label: string; col?: SortCol; width?: string }> = [
+    { label: 'PR', col: 'number', width: '84px' },
+    { label: 'Title', col: 'title' },
+    { label: 'Author', col: 'author', width: '140px' },
+    { label: 'CI', width: '150px' },
+    { label: 'Approvals', width: '160px' },
+    { label: 'Status', width: '200px' },
+    { label: 'Created', col: 'created', width: '86px' },
+    { label: 'Updated', col: 'updated', width: '92px' },
+  ]
 
   return (
     <div style={{ background: T.bg, color: T.text, minHeight: '100vh' }}>
       <div className="mx-auto max-w-[1480px] px-5 sm:px-7 py-6 space-y-5">
         {/* ── Tier 1: action queues ── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
           {ACTION_QUEUES.map(key => {
             const sel = key === active
             const copy = QUEUE_COPY[key]
@@ -102,25 +180,27 @@ export default function TriageBoard({ pullRequests }: Props) {
                 style={{
                   background: sel ? T.accentDim : T.surface,
                   border: `1px solid ${sel ? T.accent : T.line}`,
-                  // The rail: selected card carries the accent rule that the
-                  // table below picks up.
                   boxShadow: sel ? `inset 0 2px 0 ${T.accent}` : 'none',
                   outlineColor: T.accent,
                 }}
               >
                 <div
-                  className="text-[11px] font-medium uppercase tracking-[0.14em]"
-                  style={{ color: sel ? T.accent : T.mut }}
+                  className="uppercase tracking-[0.13em]"
+                  style={{ ...type.label, color: sel ? T.accent : T.text }}
                 >
                   {copy.title}
                 </div>
                 <div
-                  className="mt-1 text-3xl font-semibold tabular-nums"
-                  style={{ color: isWarn && counts[key] > 0 ? T.red : T.text }}
+                  className="mt-1 tabular-nums"
+                  style={{
+                    fontSize: 30,
+                    fontWeight: 600,
+                    color: isWarn && counts[key] > 0 ? T.red : T.text,
+                  }}
                 >
                   {counts[key]}
                 </div>
-                <div className="mt-0.5 text-xs" style={{ color: T.faint }}>
+                <div className="mt-0.5" style={type.secondary}>
                   {copy.hint}
                 </div>
               </button>
@@ -128,11 +208,8 @@ export default function TriageBoard({ pullRequests }: Props) {
           })}
         </div>
 
-        {/* ── Tier 2: informational strip ── */}
-        <div
-          className="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs"
-          style={{ color: T.faint }}
-        >
+        {/* ── Tier 2: informational strip + search ── */}
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
           {STRIP_QUEUES.map(key => {
             const sel = key === active
             return (
@@ -140,9 +217,9 @@ export default function TriageBoard({ pullRequests }: Props) {
                 key={key}
                 onClick={() => setActive(key)}
                 className="hover:underline underline-offset-4"
-                style={{ color: sel ? T.accent : T.faint }}
+                style={{ ...type.secondary, color: sel ? T.accent : T.text }}
               >
-                <span className="tabular-nums font-medium" style={{ color: sel ? T.accent : T.mut }}>
+                <span className="tabular-nums" style={{ fontWeight: 600 }}>
                   {counts[key]}
                 </span>{' '}
                 {QUEUE_COPY[key].title}
@@ -154,11 +231,11 @@ export default function TriageBoard({ pullRequests }: Props) {
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="Filter by title, author, #"
-              className="rounded-md px-3 py-1.5 text-xs w-56 focus:outline-none"
+              className="rounded-md px-3 py-1.5 w-56 focus:outline-none placeholder-white/60"
               style={{
+                ...type.secondary,
                 background: T.surface,
                 border: `1px solid ${T.line}`,
-                color: T.text,
               }}
             />
           </span>
@@ -174,42 +251,46 @@ export default function TriageBoard({ pullRequests }: Props) {
           }}
         >
           <div
-            className="flex items-baseline justify-between px-4 pt-3 pb-2"
+            className="flex items-center justify-between gap-3 px-4 pt-3 pb-2"
             style={{ borderBottom: `1px solid ${T.line}` }}
           >
-            <div>
-              <span className="text-sm font-semibold">{activeDef?.label}</span>
-              <span className="ml-2 text-xs tabular-nums" style={{ color: T.faint }}>
+            <div className="flex items-baseline gap-2">
+              <span style={{ ...type.primary, fontWeight: 600 }}>{activeDef?.label}</span>
+              <span className="tabular-nums" style={type.secondary}>
                 {rows.length} {rows.length === 1 ? 'PR' : 'PRs'}
               </span>
+              {QUEUE_COPY[active]?.hint && (
+                <span style={type.secondary}>— {QUEUE_COPY[active].hint}</span>
+              )}
             </div>
-            {QUEUE_COPY[active]?.hint && (
-              <span className="text-xs" style={{ color: T.faint }}>
-                {QUEUE_COPY[active].hint}
-              </span>
-            )}
+            <button
+              onClick={openAll}
+              className="rounded-md px-3 py-1.5 transition-colors hover:bg-white/[0.06]"
+              style={{ ...type.secondary, fontWeight: 500, border: `1px solid ${T.line}` }}
+              title="Open every PR in this queue in a new tab"
+            >
+              Open all ({rows.length})
+            </button>
           </div>
 
-          {/* table-fixed + w-full: the table owns 100% width; Title absorbs
-              all slack. No horizontal scroll at any desktop width. */}
-          <table className="w-full table-fixed text-sm">
+          <table className="w-full table-fixed" style={{ fontSize: 14 }}>
             <colgroup>
-              <col style={{ width: '84px' }} />
-              <col />
-              <col style={{ width: '150px' }} />
-              <col style={{ width: '150px' }} />
-              <col style={{ width: '170px' }} />
-              <col style={{ width: '190px' }} />
-              <col style={{ width: '110px' }} />
+              {HEADERS.map(h => (
+                <col key={h.label} style={h.width ? { width: h.width } : undefined} />
+              ))}
             </colgroup>
             <thead>
-              <tr
-                className="text-[11px] uppercase tracking-[0.12em]"
-                style={{ color: T.faint }}
-              >
-                {['PR', 'Title', 'Author', 'CI', 'Approvals', 'Status', 'Updated'].map(h => (
-                  <th key={h} className="text-left font-medium px-4 py-2">
-                    {h}
+              <tr className="uppercase tracking-[0.11em]">
+                {HEADERS.map(h => (
+                  <th key={h.label} className="text-left px-4 py-2" style={type.label}>
+                    {h.col ? (
+                      <button onClick={() => toggleSort(h.col!)} className="uppercase hover:underline underline-offset-4" style={type.label}>
+                        {h.label}
+                        {sortMark(h.col)}
+                      </button>
+                    ) : (
+                      h.label
+                    )}
                   </th>
                 ))}
               </tr>
@@ -217,99 +298,122 @@ export default function TriageBoard({ pullRequests }: Props) {
             <tbody>
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-10 text-center text-sm" style={{ color: T.faint }}>
+                  <td colSpan={HEADERS.length} className="px-4 py-10 text-center" style={type.secondary}>
                     Nothing in this queue. Adjust the filter above, or enjoy the moment.
                   </td>
                 </tr>
               )}
               {rows.map(pr => {
                 const status = classifyStatus(pr)
-                const badges = reviewerBadgesFor(pr).slice(0, 3)
+                const allBadges = reviewerBadgesFor(pr)
+                const badges = allBadges.slice(0, 3)
+                const extra = allBadges.length - badges.length
                 const activity = summarizeActivity(pr, BACKEND_REVIEWERS)
-                const ci = summarizeFailingChecksCompact(pr)
+                const realFailures = summarizeFailingChecksCompact(pr)
+                const cri = pr.changes_requested_info
+                const criDetail = cri ? changesRequestedDetail(cri) : null
+                const commented = (pr.approval_summary?.commented_users || []).filter(Boolean)
                 return (
                   <tr
                     key={`${pr.repository_name}-${pr.number}`}
-                    className="cursor-pointer transition-colors hover:bg-white/[0.03]"
+                    className="cursor-pointer transition-colors hover:bg-white/[0.04]"
                     style={{ borderTop: `1px solid ${T.line}` }}
                     onClick={() => window.open(pr.url, '_blank', 'noopener')}
                   >
                     <td className="px-4 py-3 align-top">
-                      <span className="tabular-nums font-medium" style={{ color: T.mut }}>
+                      <span className="tabular-nums" style={type.primary}>
                         #{pr.number}
                       </span>
                       {pr.repository_name && pr.repository_name !== 'vets-api' && (
-                        <span
-                          className="block mt-0.5 text-[10px] truncate"
-                          style={{ color: T.faint }}
-                          title={pr.repository_name}
-                        >
+                        <span className="block mt-0.5 truncate" style={{ ...type.secondary, fontSize: 11 }} title={pr.repository_name}>
                           {pr.repository_name.replace('vets-api-', '')}
                         </span>
                       )}
                     </td>
                     <td className="px-4 py-3 align-top">
-                      <span className="block truncate" title={pr.title}>
+                      <span className="block truncate" style={type.primary} title={pr.title}>
                         {pr.title}
                       </span>
-                      <span className="block text-xs mt-0.5 truncate" style={{ color: T.faint }}>
+                      <span className="block mt-0.5 truncate" style={type.secondary}>
                         {activity.latestLabel} · {activity.latestTimeAgo}
                       </span>
                     </td>
                     <td className="px-4 py-3 align-top">
-                      <span className="block truncate text-xs" title={pr.author} style={{ color: T.mut }}>
+                      <span className="block truncate" style={type.secondary} title={pr.author}>
                         {displayUser(pr.author)}
                       </span>
                     </td>
-                    <td className="px-4 py-3 align-top text-xs">
-                      <span
-                        className="block truncate"
-                        title={ci}
-                        style={{
-                          color:
-                            status.key === 'failing'
-                              ? T.red
-                              : pr.ci_status === 'success'
-                                ? T.green
-                                : T.mut,
-                        }}
-                      >
-                        {ci}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 align-top text-xs">
-                      {badges.length === 0 ? (
-                        <span style={{ color: T.faint }}>—</span>
+                    <td className="px-4 py-3 align-top">
+                      {realFailures ? (
+                        <span className="block truncate" style={{ ...type.secondary, color: T.red }} title={realFailures}>
+                          {realFailures}
+                        </span>
+                      ) : pr.ci_status === 'success' ? (
+                        <span style={{ ...type.secondary, color: T.green }}>passing</span>
+                      ) : pr.ci_status === 'failure' ? (
+                        // Only the backend-approval gate is failing — that is
+                        // review state, not broken CI. Say what it means.
+                        <span className="block truncate" style={{ ...type.secondary, color: T.amber }} title="Requires backend approval">
+                          needs BE approval
+                        </span>
                       ) : (
-                        badges.map(b => (
-                          <span
-                            key={b.user}
-                            className="block truncate"
-                            title={`${b.user} (${b.state})`}
-                            style={{ color: badgeTone[b.state] || T.mut }}
-                          >
-                            {displayUser(b.user)}
-                          </span>
-                        ))
+                        <span style={type.secondary}>pending</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 align-top text-xs">
+                    <td className="px-4 py-3 align-top">
+                      {badges.length === 0 && commented.length === 0 ? (
+                        <span style={type.secondary}>—</span>
+                      ) : (
+                        <>
+                          {badges.map(b => (
+                            <span
+                              key={b.user}
+                              className="block truncate"
+                              title={`${b.user} (${b.state.replace('_', ' ')})`}
+                              style={{ ...type.secondary, color: badgeTone[b.state] || T.text }}
+                            >
+                              {displayUser(b.user)}
+                            </span>
+                          ))}
+                          {extra > 0 && (
+                            <span
+                              className="block"
+                              style={type.secondary}
+                              title={allBadges.slice(3).map(b => `${b.user} (${b.state})`).join(', ')}
+                            >
+                              +{extra} more
+                            </span>
+                          )}
+                          {commented.length > 0 && badges.every(b => b.state !== 'commented') && (
+                            <span
+                              className="block truncate"
+                              style={{ ...type.secondary, fontSize: 11 }}
+                              title={`Commented: ${commented.join(', ')}`}
+                            >
+                              💬 {commented.map(displayUser).join(', ')}
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 align-top">
                       <span className="inline-flex items-center gap-1.5 max-w-full">
-                        <span
-                          className="h-1.5 w-1.5 rounded-full shrink-0"
-                          style={{ background: statusTone(status.key) }}
-                        />
-                        <span className="truncate" title={status.label} style={{ color: T.mut }}>
+                        <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: statusTone(status.key) }} />
+                        <span className="truncate" style={type.secondary} title={status.label}>
                           {status.label}
                         </span>
                       </span>
+                      {criDetail && (
+                        <span className="block mt-0.5 truncate" style={{ ...type.secondary, fontSize: 11, color: T.amber }} title={criDetail}>
+                          {criDetail}
+                        </span>
+                      )}
                     </td>
-                    <td
-                      className="px-4 py-3 align-top text-xs tabular-nums"
-                      style={{ color: T.mut }}
-                      title={`opened ${absoluteTime(pr.created_at)}`}
-                    >
-                      {activity.latestTimeAgo.replace(' ago', '')}
+                    <td className="px-4 py-3 align-top tabular-nums" style={type.secondary} title={`opened ${absoluteTime(pr.created_at)}`}>
+                      {timeAgoShort(pr.created_at)}
+                    </td>
+                    <td className="px-4 py-3 align-top tabular-nums" style={type.secondary} title={absoluteTime(pr.updated_at)}>
+                      {timeAgoShort(pr.updated_at)}
                     </td>
                   </tr>
                 )
@@ -320,4 +424,11 @@ export default function TriageBoard({ pullRequests }: Props) {
       </div>
     </div>
   )
+}
+
+function timeAgoShort(iso: string): string {
+  const secs = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))
+  if (secs < 3600) return `${Math.max(1, Math.floor(secs / 60))}m`
+  if (secs < 86400) return `${Math.floor(secs / 3600)}h`
+  return `${Math.floor(secs / 86400)}d`
 }

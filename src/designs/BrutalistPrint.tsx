@@ -328,6 +328,8 @@ function BrutalistEmpty({ filterKey, hasSearch }: { filterKey: FilterKey; hasSea
     drafts: 'NO DRAFTS.',
     dependabot: 'NONE.',
     approved: 'NONE.',
+    team: 'NO FIRST REVIEWS.',
+    exempt: 'NONE.',
     all: 'EMPTY.',
   }
   return (

@@ -316,6 +316,8 @@ function CrtEmpty({ filterKey, hasSearch }: { filterKey: FilterKey; hasSearch: b
     drafts: '> no drafts.',
     dependabot: '> dependabot quiet.',
     approved: '> no parked approvals.',
+    team: '> no first reviews owed.',
+    exempt: '> none exempt.',
     all: '> repositories clear.',
   }
   return (
