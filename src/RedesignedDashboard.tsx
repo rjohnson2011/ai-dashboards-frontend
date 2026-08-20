@@ -47,7 +47,7 @@ export default function RedesignGallery() {
   const [activeKey, setActiveKey] = useState<string>(() => {
     return localStorage.getItem(STORAGE_KEY) || DESIGNS[0].key
   })
-  const { pullRequests, loading, error, lastUpdated, isUpdating, refresh } = usePullRequests()
+  const { pullRequests, loading, error, lastUpdated, refresh } = usePullRequests()
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, activeKey)
