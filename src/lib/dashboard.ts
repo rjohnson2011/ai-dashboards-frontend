@@ -380,13 +380,23 @@ export function applyFilter(
   let list = prs.filter(filterDef.predicate)
   if (searchTerm) {
     const q = searchTerm.toLowerCase()
-    list = list.filter(
-      pr =>
+    list = list.filter(pr => {
+      // Reviewer names too, so "rebecca" surfaces every PR Rebecca-Tolmach
+      // approved (or requested changes on / commented on) — the same names
+      // the Approvals column renders.
+      const reviewers = [
+        ...(pr.approval_summary?.approved_users || []),
+        ...(pr.approval_summary?.changes_requested_users || []),
+        ...(pr.approval_summary?.commented_users || []),
+      ]
+      return (
         pr.title.toLowerCase().includes(q) ||
         pr.author.toLowerCase().includes(q) ||
         String(pr.number).includes(q) ||
-        (pr.repository_name || '').toLowerCase().includes(q)
-    )
+        (pr.repository_name || '').toLowerCase().includes(q) ||
+        reviewers.some(u => (u || '').toLowerCase().includes(q))
+      )
+    })
   }
   list.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
   return list
