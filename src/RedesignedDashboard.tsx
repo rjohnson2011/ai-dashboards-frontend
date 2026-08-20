@@ -19,7 +19,7 @@ const DESIGNS: Design[] = [
   {
     key: 'triage',
     label: 'Triage Board',
-    blurb: 'Color = state · two-tier queues · full-width 7-column table',
+    blurb: 'Color = state · one-row queues · full-width table',
     Component: TriageBoard,
   },
   {

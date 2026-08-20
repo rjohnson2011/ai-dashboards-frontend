@@ -62,7 +62,7 @@ const QUEUES: FilterKey[] = [
 const QUEUE_COPY: Record<string, { title: string; hint: string }> = {
   ready: { title: 'Ready', hint: 'awaiting backend approval' },
   team: { title: 'Team review', hint: 'awaiting first team review' },
-  awaiting: { title: 'Awaiting author', hint: 'reviewer requested changes' },
+  awaiting: { title: 'Changes', hint: 'reviewer requested changes — waiting on the author' },
   failing: { title: 'Failing CI', hint: 'real check failures' },
   approved: { title: 'Approved', hint: 'cleared, not yet merged' },
   all: { title: 'All open', hint: 'every open PR' },
@@ -172,7 +172,7 @@ export default function TriageBoard({ pullRequests }: Props) {
     <div style={{ background: T.bg, color: T.text, minHeight: '100vh' }}>
       <div className="mx-auto max-w-[1480px] px-5 sm:px-7 py-6 space-y-5">
         {/* ── One row: all nine queues as equal boxes ── */}
-        <div className="grid grid-cols-3 md:grid-cols-5 xl:grid-cols-9 gap-2">
+        <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-2">
           {QUEUES.map(key => {
             const sel = key === active
             const copy = QUEUE_COPY[key]
