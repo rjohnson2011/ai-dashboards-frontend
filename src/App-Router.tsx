@@ -2,8 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import Dashboard from './Dashboard'
 import RedesignedDashboard from './RedesignedDashboard'
-import SprintMetrics from './SprintMetrics'
-import DetailedSprintMetrics from './DetailedSprintMetrics'
+import ReviewerMetrics from './ReviewerMetrics'
 import AuthGate from './components/AuthGate'
 import { ThemeProvider } from './contexts/ThemeContext'
 
@@ -42,8 +41,7 @@ function AppRouter() {
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/redesign" element={<RedesignedDashboard />} />
-              <Route path="/sprint-metrics" element={<SprintMetrics />} />
-              <Route path="/sprint-metrics/detailed" element={<DetailedSprintMetrics />} />
+              <Route path="/sprint-metrics" element={<ReviewerMetrics />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </AuthGate>
