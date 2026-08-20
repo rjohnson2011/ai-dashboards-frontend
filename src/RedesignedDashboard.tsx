@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import AppHeader from './components/AppHeader'
 import { usePullRequests } from './hooks/usePullRequests'
 
+import TriageBoard from './designs/TriageBoard'
 import EditorialTerminal from './designs/EditorialTerminal'
 import BrutalistPrint from './designs/BrutalistPrint'
 import RefinedMinimal from './designs/RefinedMinimal'
@@ -15,6 +16,12 @@ interface Design {
 }
 
 const DESIGNS: Design[] = [
+  {
+    key: 'triage',
+    label: 'Triage Board',
+    blurb: 'Color = state · two-tier queues · full-width 7-column table',
+    Component: TriageBoard,
+  },
   {
     key: 'editorial',
     label: 'Editorial Terminal',
