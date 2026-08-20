@@ -155,8 +155,6 @@ export default function TriageBoard({ pullRequests }: Props) {
     rows.forEach(pr => window.open(pr.url, '_blank', 'noopener'))
   }
 
-  const sortMark = (col: SortCol) => (sortCol === col ? (sortAsc ? ' ↑' : ' ↓') : '')
-
   const HEADERS: Array<{ label: string; col?: SortCol; width?: string }> = [
     { label: 'PR', col: 'number', width: '84px' },
     { label: 'Title', col: 'title' },
@@ -271,7 +269,6 @@ export default function TriageBoard({ pullRequests }: Props) {
                     {h.col ? (
                       <button onClick={() => toggleSort(h.col!)} className="uppercase hover:underline underline-offset-4" style={type.label}>
                         {h.label}
-                        {sortMark(h.col)}
                       </button>
                     ) : (
                       h.label
