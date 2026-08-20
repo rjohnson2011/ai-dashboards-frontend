@@ -56,7 +56,7 @@ const type = {
 // card's hover tooltip and in the table header once a queue is selected.
 const QUEUES: FilterKey[] = [
   'ready', 'team', 'awaiting', 'failing', 'approved',
-  'all', 'drafts', 'dependabot', 'exempt',
+  'drafts', 'dependabot', 'exempt', 'all',
 ]
 
 const QUEUE_COPY: Record<string, { title: string; hint: string }> = {
