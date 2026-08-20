@@ -55,7 +55,7 @@ const type = {
 // to survive nine-across at 1480px; the fuller explanation lives in each
 // card's hover tooltip and in the table header once a queue is selected.
 const QUEUES: FilterKey[] = [
-  'ready', 'dependabot', 'team', 'awaiting', 'failing',
+  'ready', 'dependabot', 'awaiting', 'team', 'failing',
   'approved', 'drafts', 'exempt', 'all',
 ]
 
