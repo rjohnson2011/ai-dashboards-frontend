@@ -156,14 +156,15 @@ export default function TriageBoard({ pullRequests }: Props) {
   }
 
   const HEADERS: Array<{ label: string; col?: SortCol; width?: string }> = [
-    { label: 'PR', col: 'number', width: '84px' },
+    { label: 'PR', col: 'number', width: '80px' },
     { label: 'Title', col: 'title' },
-    { label: 'Author', col: 'author', width: '140px' },
-    { label: 'CI', width: '150px' },
-    { label: 'Approvals', width: '160px' },
-    { label: 'Status', width: '200px' },
-    { label: 'Created', col: 'created', width: '86px' },
-    { label: 'Updated', col: 'updated', width: '92px' },
+    { label: 'Author', col: 'author', width: '120px' },
+    { label: 'CI', width: '130px' },
+    { label: 'Approvals', width: '150px' },
+    { label: 'Status', width: '130px' },
+    { label: 'Changes Requested', width: '170px' },
+    { label: 'Created', col: 'created', width: '72px' },
+    { label: 'Updated', col: 'updated', width: '80px' },
   ]
 
   return (
@@ -391,10 +392,14 @@ export default function TriageBoard({ pullRequests }: Props) {
                           {status.label}
                         </span>
                       </span>
-                      {criDetail && (
-                        <span className="block mt-0.5 truncate" style={{ ...type.secondary, fontSize: 11, color: T.amber }} title={criDetail}>
+                    </td>
+                    <td className="px-4 py-3 align-top">
+                      {criDetail ? (
+                        <span className="block truncate" style={{ ...type.secondary, color: T.amber }} title={criDetail}>
                           {criDetail}
                         </span>
+                      ) : (
+                        <span style={type.secondary}>—</span>
                       )}
                     </td>
                     <td className="px-4 py-3 align-top tabular-nums" style={type.secondary} title={`opened ${absoluteTime(pr.created_at)}`}>
