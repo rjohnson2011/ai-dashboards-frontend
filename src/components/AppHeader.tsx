@@ -5,7 +5,7 @@ import { APP_VERSION } from '../version'
 // Refined-minimal app header used across /dashboard and /redesign.
 //
 // Variants:
-// - 'classic'  → links to Sprint Metrics + the Try-redesign tease
+// - 'classic'  → links to Reviewer Activity + the Try-redesign tease
 // - 'gallery'  → renders the design-switcher segmented control instead
 //
 // Both share the same shell, divider, type scale and right-side meta
@@ -90,7 +90,7 @@ function BrandMark() {
 function ClassicNav() {
   return (
     <nav className="flex items-center gap-1 sm:gap-2 text-[13px]">
-      <NavLink to="/sprint-metrics">Sprint Metrics</NavLink>
+      <NavLink to="/sprint-metrics">Reviewer Activity</NavLink>
       <NavLink to="/redesign" accent>
         Gallery
       </NavLink>
