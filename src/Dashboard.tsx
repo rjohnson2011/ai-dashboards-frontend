@@ -521,12 +521,7 @@ function Dashboard() {
   return (
     <TooltipProvider>
       <div className="flex flex-col min-h-screen bg-background">
-        <AppHeader
-          variant="classic"
-          lastUpdated={lastUpdated}
-          isUpdating={isUpdating}
-          onRefresh={() => fetchPullRequests()}
-        />
+        <AppHeader variant="classic" lastUpdated={lastUpdated} />
         <div className="flex-1 space-y-6 sm:space-y-8 px-3 sm:px-2 py-4 sm:py-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>

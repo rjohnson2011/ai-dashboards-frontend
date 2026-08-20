@@ -69,8 +69,6 @@ export default function RedesignGallery() {
         onSelect={setActiveKey}
         activeBlurb={active.blurb}
         lastUpdated={lastUpdated}
-        isUpdating={isUpdating}
-        onRefresh={refresh}
       />
 
       <FontPreloader />

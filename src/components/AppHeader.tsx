@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { RefreshCw } from 'lucide-react'
 import UserMenu from './UserMenu'
 import { APP_VERSION } from '../version'
 
@@ -21,8 +20,6 @@ export interface AppHeaderDesign {
 
 interface BaseProps {
   lastUpdated?: string | Date | null
-  isUpdating?: boolean
-  onRefresh?: () => void
 }
 
 interface ClassicProps extends BaseProps {
@@ -57,9 +54,6 @@ export default function AppHeader(props: Props) {
 
         <div className="ml-auto flex items-center gap-3 sm:gap-4">
           <UpdatedBadge lastUpdated={props.lastUpdated ?? null} />
-          {props.onRefresh && (
-            <RefreshButton onClick={props.onRefresh} isUpdating={!!props.isUpdating} />
-          )}
           <UserMenu />
         </div>
       </div>
@@ -193,19 +187,6 @@ function UpdatedBadge({ lastUpdated }: { lastUpdated: string | Date | null }) {
   )
 }
 
-function RefreshButton({ onClick, isUpdating }: { onClick: () => void; isUpdating: boolean }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label="Refresh"
-      title="Refresh"
-      className="rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 dark:text-zinc-500 dark:hover:bg-zinc-900 dark:hover:text-zinc-100 transition-colors"
-    >
-      <RefreshCw className={`h-3.5 w-3.5 ${isUpdating ? 'animate-spin' : ''}`} />
-    </button>
-  )
-}
 
 function formatAgo(dt: Date): string {
   const secs = Math.max(0, Math.floor((Date.now() - dt.getTime()) / 1000))
