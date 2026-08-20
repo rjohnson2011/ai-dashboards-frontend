@@ -331,18 +331,18 @@ export default function TriageBoard({ pullRequests }: Props) {
                     <td className="px-4 py-3 align-top">
                       {realFailures ? (
                         <span className="block truncate" style={{ ...type.secondary, color: T.red }} title={realFailures}>
-                          {realFailures}
+                          {sentenceCase(realFailures)}
                         </span>
                       ) : pr.ci_status === 'success' ? (
-                        <span style={{ ...type.secondary, color: T.green }}>passing</span>
+                        <span style={{ ...type.secondary, color: T.green }}>Passing</span>
                       ) : pr.ci_status === 'failure' ? (
                         // Only the backend-approval gate is failing — that is
                         // review state, not broken CI. Say what it means.
                         <span className="block truncate" style={{ ...type.secondary, color: T.amber }} title="Requires backend approval">
-                          needs BE approval
+                          Needs BE approval
                         </span>
                       ) : (
-                        <span style={type.secondary}>pending</span>
+                        <span style={type.secondary}>Pending</span>
                       )}
                     </td>
                     <td className="px-4 py-3 align-top">
@@ -409,6 +409,12 @@ export default function TriageBoard({ pullRequests }: Props) {
       </div>
     </div>
   )
+}
+
+// CI-cell strings render sentence-cased here; the shared summaries stay
+// lowercase for designs that use them as terminal-style tags.
+function sentenceCase(s: string): string {
+  return s.length > 0 ? s[0].toUpperCase() + s.slice(1) : s
 }
 
 function timeAgoShort(iso: string): string {
