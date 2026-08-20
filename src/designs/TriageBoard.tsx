@@ -289,7 +289,13 @@ export default function TriageBoard({ pullRequests }: Props) {
                 </tr>
               )}
               {rows.map(pr => {
-                const status = classifyStatus(pr)
+                const rawStatus = classifyStatus(pr)
+                // "Open" says nothing. When the generic fallback fires and CI
+                // is in fact green, say the useful thing instead.
+                const status =
+                  rawStatus.key === 'open' && pr.ci_status === 'success'
+                    ? { ...rawStatus, label: 'Passing all CI' }
+                    : rawStatus
                 const allBadges = reviewerBadgesFor(pr)
                 const badges = allBadges.slice(0, 3)
                 const extra = allBadges.length - badges.length
