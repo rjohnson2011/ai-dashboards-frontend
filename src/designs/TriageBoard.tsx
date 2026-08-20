@@ -51,19 +51,24 @@ const type = {
   label: { color: T.text, fontSize: 11, fontWeight: 600 } as const,
 }
 
-const ACTION_QUEUES: FilterKey[] = ['ready', 'team', 'awaiting', 'failing', 'approved']
-const STRIP_QUEUES: FilterKey[] = ['all', 'drafts', 'dependabot', 'exempt']
+// One row of nine equal boxes (per Ryan, 2026-08-20). Titles are compressed
+// to survive nine-across at 1480px; the fuller explanation lives in each
+// card's hover tooltip and in the table header once a queue is selected.
+const QUEUES: FilterKey[] = [
+  'ready', 'team', 'awaiting', 'failing', 'approved',
+  'all', 'drafts', 'dependabot', 'exempt',
+]
 
 const QUEUE_COPY: Record<string, { title: string; hint: string }> = {
-  ready: { title: 'Ready for review', hint: 'awaiting backend approval' },
-  team: { title: 'Needing team review', hint: 'awaiting first team review' },
+  ready: { title: 'Ready', hint: 'awaiting backend approval' },
+  team: { title: 'Team review', hint: 'awaiting first team review' },
   awaiting: { title: 'Awaiting author', hint: 'reviewer requested changes' },
   failing: { title: 'Failing CI', hint: 'real check failures' },
-  approved: { title: 'Approved · unmerged', hint: 'cleared, not yet merged' },
-  all: { title: 'all open', hint: '' },
-  drafts: { title: 'drafts', hint: '' },
-  dependabot: { title: 'dependabot', hint: '' },
-  exempt: { title: 'exempt from BE review', hint: '' },
+  approved: { title: 'Approved', hint: 'cleared, not yet merged' },
+  all: { title: 'All open', hint: 'every open PR' },
+  drafts: { title: 'Drafts', hint: 'work in progress' },
+  dependabot: { title: 'Dependabot', hint: 'automated updates' },
+  exempt: { title: 'Exempt', hint: 'backend review not required' },
 }
 
 function statusTone(key: Status): string {
@@ -166,9 +171,9 @@ export default function TriageBoard({ pullRequests }: Props) {
   return (
     <div style={{ background: T.bg, color: T.text, minHeight: '100vh' }}>
       <div className="mx-auto max-w-[1480px] px-5 sm:px-7 py-6 space-y-5">
-        {/* ── Tier 1: action queues ── */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-          {ACTION_QUEUES.map(key => {
+        {/* ── One row: all nine queues as equal boxes ── */}
+        <div className="grid grid-cols-3 md:grid-cols-5 xl:grid-cols-9 gap-2">
+          {QUEUES.map(key => {
             const sel = key === active
             const copy = QUEUE_COPY[key]
             const isWarn = key === 'failing'
@@ -176,7 +181,8 @@ export default function TriageBoard({ pullRequests }: Props) {
               <button
                 key={key}
                 onClick={() => setActive(key)}
-                className="text-left rounded-lg px-4 py-3 transition-colors focus-visible:outline focus-visible:outline-2"
+                title={copy.hint}
+                className="text-left rounded-lg px-3 py-2.5 transition-colors focus-visible:outline focus-visible:outline-2"
                 style={{
                   background: sel ? T.accentDim : T.surface,
                   border: `1px solid ${sel ? T.accent : T.line}`,
@@ -185,60 +191,39 @@ export default function TriageBoard({ pullRequests }: Props) {
                 }}
               >
                 <div
-                  className="uppercase tracking-[0.13em]"
-                  style={{ ...type.label, color: sel ? T.accent : T.text }}
+                  className="uppercase tracking-[0.08em] truncate"
+                  style={{ ...type.label, fontSize: 10, color: sel ? T.accent : T.text }}
                 >
                   {copy.title}
                 </div>
                 <div
-                  className="mt-1 tabular-nums"
+                  className="mt-0.5 tabular-nums"
                   style={{
-                    fontSize: 30,
+                    fontSize: 24,
                     fontWeight: 600,
                     color: isWarn && counts[key] > 0 ? T.red : T.text,
                   }}
                 >
                   {counts[key]}
                 </div>
-                <div className="mt-0.5" style={type.secondary}>
-                  {copy.hint}
-                </div>
               </button>
             )
           })}
         </div>
 
-        {/* ── Tier 2: informational strip + search ── */}
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-          {STRIP_QUEUES.map(key => {
-            const sel = key === active
-            return (
-              <button
-                key={key}
-                onClick={() => setActive(key)}
-                className="hover:underline underline-offset-4"
-                style={{ ...type.secondary, color: sel ? T.accent : T.text }}
-              >
-                <span className="tabular-nums" style={{ fontWeight: 600 }}>
-                  {counts[key]}
-                </span>{' '}
-                {QUEUE_COPY[key].title}
-              </button>
-            )
-          })}
-          <span className="ml-auto">
-            <input
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              placeholder="Filter by title, author, #"
-              className="rounded-md px-3 py-1.5 w-56 focus:outline-none placeholder-white/60"
-              style={{
-                ...type.secondary,
-                background: T.surface,
-                border: `1px solid ${T.line}`,
-              }}
-            />
-          </span>
+        {/* ── Search ── */}
+        <div className="flex justify-end">
+          <input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Filter by title, author, #"
+            className="rounded-md px-3 py-1.5 w-56 focus:outline-none placeholder-white/60"
+            style={{
+              ...type.secondary,
+              background: T.surface,
+              border: `1px solid ${T.line}`,
+            }}
+          />
         </div>
 
         {/* ── The table ── */}
