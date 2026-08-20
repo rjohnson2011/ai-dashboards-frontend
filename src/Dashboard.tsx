@@ -120,7 +120,6 @@ interface ApiResponse {
 // types/pull-request.ts so that /dashboard and /redesign share one
 // source of truth.
 import {
-  BACKEND_REVIEWERS,
   isTrulyExemptFromBackendReview,
   isReadyForReview,
   isAwaitingAuthorChanges,
@@ -373,10 +372,6 @@ function Dashboard() {
         case 'backend_approval':
           aValue = a.backend_approval_status
           bValue = b.backend_approval_status
-          break
-        case 'ready_for_backend':
-          aValue = a.ready_for_backend_review ? 1 : 0
-          bValue = b.ready_for_backend_review ? 1 : 0
           break
         case 'created':
           aValue = new Date(a.created_at).getTime()
@@ -855,19 +850,6 @@ function Dashboard() {
                               Approvals
                             </button>
                           </TableHead>
-                          <TableHead className="w-[100px]">
-                            <button
-                              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
-                              onClick={() => handleSort('ready_for_backend')}
-                            >
-                              Ready for Review
-                              {sortColumn === 'ready_for_backend' ? (
-                                sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
-                              ) : (
-                                <ArrowUpDown className="h-4 w-4 opacity-50" />
-                              )}
-                            </button>
-                          </TableHead>
                           <TableHead className="w-[100px]">Changes Requested</TableHead>
                           <TableHead className="w-[90px]">Commented</TableHead>
                           <TableHead className="w-[70px]">
@@ -1043,19 +1025,6 @@ function Dashboard() {
                                 </a>
                               ) : (
                                 <span className="text-xs text-muted-foreground">None</span>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center justify-center">
-                              {(!pr.draft &&
-                                pr.approval_summary &&
-                                pr.approval_summary.approved_count > 0 &&
-                                pr.backend_approval_status !== 'approved' &&
-                                !(pr.approval_summary.approved_users?.some(user => BACKEND_REVIEWERS.includes(user)))) ? (
-                                <CheckCircle2 className="h-5 w-5 text-success" />
-                              ) : (
-                                <XCircle className="h-5 w-5 text-muted-foreground" />
                               )}
                             </div>
                           </TableCell>
