@@ -55,13 +55,13 @@ const type = {
 // to survive nine-across at 1480px; the fuller explanation lives in each
 // card's hover tooltip and in the table header once a queue is selected.
 const QUEUES: FilterKey[] = [
-  'ready', 'team', 'awaiting', 'failing', 'approved',
-  'drafts', 'dependabot', 'exempt', 'all',
+  'ready', 'dependabot', 'team', 'awaiting', 'failing',
+  'approved', 'drafts', 'exempt', 'all',
 ]
 
 const QUEUE_COPY: Record<string, { title: string; hint: string }> = {
   ready: { title: 'Ready', hint: 'awaiting backend approval' },
-  team: { title: 'Team review', hint: 'awaiting first team review' },
+  team: { title: 'Awaiting team review', hint: 'awaiting first team review' },
   awaiting: { title: 'Changes requested', hint: 'reviewer requested changes — waiting on the author' },
   failing: { title: 'Failing CI', hint: 'real check failures' },
   approved: { title: 'Approved but unmerged', hint: 'cleared, not yet merged' },
