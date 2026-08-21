@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { type PullRequest, BACKEND_REVIEWERS } from '../types/pull-request'
+import { type PullRequest } from '../types/pull-request'
 import {
   type FilterKey,
   type Status,
@@ -10,7 +10,6 @@ import {
   countByFilter,
   applyFilter,
   summarizeFailingChecksCompact,
-  summarizeActivity,
 } from '../lib/dashboard'
 import { displayUser } from '../lib/utils'
 
@@ -335,7 +334,6 @@ export default function TriageBoard({ pullRequests }: Props) {
                 const approvedAt = new Map(
                   (pr.approval_summary?.approved_user_details || []).map(d => [d.user, d.submitted_at])
                 )
-                const activity = summarizeActivity(pr, BACKEND_REVIEWERS)
                 const realFailures = summarizeFailingChecksCompact(pr)
                 const criCell = changesRequestedCell(pr)
                 const commented = (pr.approval_summary?.commented_users || []).filter(u => u && !isBotReviewer(u))
@@ -359,9 +357,6 @@ export default function TriageBoard({ pullRequests }: Props) {
                     <td className="px-4 py-3 align-top">
                       <span className="block truncate" style={type.primary} title={pr.title}>
                         {pr.title}
-                      </span>
-                      <span className="block mt-0.5 truncate" style={type.secondary}>
-                        {activity.latestLabel} · {activity.latestTimeAgo}
                       </span>
                     </td>
                     <td className="px-4 py-3 align-top">
