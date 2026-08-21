@@ -203,6 +203,31 @@ export default function TriageBoard({ pullRequests }: Props) {
 
   return (
     <div style={{ background: T.bg, color: T.text, minHeight: '100vh' }}>
+      <style>{`
+        .queue-box {
+          transition: transform 0.15s ease, box-shadow 0.15s ease,
+            border-color 0.15s ease, background-color 0.15s ease;
+        }
+        .queue-box:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4),
+            0 0 0 1px rgba(139, 124, 246, 0.35);
+        }
+        .queue-box--sel {
+          box-shadow: inset 0 2px 0 ${T.accent};
+        }
+        .queue-box--sel:hover {
+          transform: translateY(-2px);
+          box-shadow: inset 0 2px 0 ${T.accent},
+            0 6px 18px rgba(0, 0, 0, 0.4);
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .queue-box, .queue-box:hover, .queue-box--sel:hover {
+            transition: none;
+            transform: none;
+          }
+        }
+      `}</style>
       <div className="mx-auto max-w-[1480px] px-5 sm:px-7 py-6 space-y-5">
         {/* ── One row: all nine queues as equal boxes ── */}
         <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-2">
@@ -215,11 +240,10 @@ export default function TriageBoard({ pullRequests }: Props) {
                 key={key}
                 onClick={() => setActive(key)}
                 title={copy.hint}
-                className="text-left rounded-lg px-3 py-2.5 transition-colors focus-visible:outline focus-visible:outline-2"
+                className={`queue-box ${sel ? 'queue-box--sel' : ''} text-left rounded-lg px-3 py-2.5 focus-visible:outline focus-visible:outline-2`}
                 style={{
                   background: sel ? T.accentDim : T.surface,
                   border: `1px solid ${sel ? T.accent : T.line}`,
-                  boxShadow: sel ? `inset 0 2px 0 ${T.accent}` : 'none',
                   outlineColor: T.accent,
                 }}
               >
