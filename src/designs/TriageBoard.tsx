@@ -71,7 +71,7 @@ const QUEUE_COPY: Record<string, { title: string; hint: string }> = {
 }
 
 function statusTone(key: Status): string {
-  if (key === 'failing') return T.red
+  if (key === 'failing' || key === 'failing_be_approval') return T.red
   if (key === 'approved') return T.green
   if (key === 'changes_requested' || key === 'needs_reapproval') return T.amber
   return T.text
@@ -346,19 +346,23 @@ export default function TriageBoard({ pullRequests }: Props) {
               )}
               {rows.map(pr => {
                 const rawStatus = classifyStatus(pr)
+                const realFailuresStr = summarizeFailingChecksCompact(pr)
                 // "Open" says nothing. When the generic fallback fires and CI
-                // is in fact green, say the useful thing instead.
+                // is in fact green, say the useful thing instead. And when the
+                // only failing check is GitHub's required "Backend Approval
+                // Check", that IS the status — red, like GitHub shows it.
                 const status =
-                  rawStatus.key === 'open' && pr.ci_status === 'success'
-                    ? { ...rawStatus, label: 'Passing all CI' }
-                    : rawStatus
+                  pr.ci_status === 'failure' && !realFailuresStr
+                    ? { key: 'failing_be_approval' as const, label: 'BE Approval' }
+                    : rawStatus.key === 'open' && pr.ci_status === 'success'
+                      ? { ...rawStatus, label: 'Passing all CI' }
+                      : rawStatus
                 const allBadges = reviewerBadgesFor(pr).filter(b => !isBotReviewer(b.user))
                 const badges = allBadges.slice(0, 3)
                 const extra = allBadges.length - badges.length
                 const approvedAt = new Map(
                   (pr.approval_summary?.approved_user_details || []).map(d => [d.user, d.submitted_at])
                 )
-                const realFailures = summarizeFailingChecksCompact(pr)
                 const criCell = changesRequestedCell(pr)
                 const commented = (pr.approval_summary?.commented_users || []).filter(u => u && !isBotReviewer(u))
                 return (
@@ -389,9 +393,9 @@ export default function TriageBoard({ pullRequests }: Props) {
                       </span>
                     </td>
                     <td className="px-4 py-3 align-top">
-                      {realFailures ? (
-                        <span className="block truncate" style={{ ...type.secondary, color: T.red }} title={realFailures}>
-                          {sentenceCase(realFailures)}
+                      {realFailuresStr ? (
+                        <span className="block truncate" style={{ ...type.secondary, color: T.red }} title={realFailuresStr}>
+                          {sentenceCase(realFailuresStr)}
                         </span>
                       ) : pr.ci_status === 'success' ? (
                         <span style={{ ...type.secondary, color: T.green }}>Passing</span>
