@@ -78,6 +78,11 @@ function statusTone(key: Status): string {
   return T.text
 }
 
+// Bot reviewers add noise, not signal — reviews from humans only.
+function isBotReviewer(user: string): boolean {
+  return /\[bot\]$|copilot-pull-request|github-advanced-security|github-actions/i.test(user)
+}
+
 const badgeTone: Record<string, string> = {
   approved: T.green,
   changes_requested: T.amber,
@@ -324,13 +329,16 @@ export default function TriageBoard({ pullRequests }: Props) {
                   rawStatus.key === 'open' && pr.ci_status === 'success'
                     ? { ...rawStatus, label: 'Passing all CI' }
                     : rawStatus
-                const allBadges = reviewerBadgesFor(pr)
+                const allBadges = reviewerBadgesFor(pr).filter(b => !isBotReviewer(b.user))
                 const badges = allBadges.slice(0, 3)
                 const extra = allBadges.length - badges.length
+                const approvedAt = new Map(
+                  (pr.approval_summary?.approved_user_details || []).map(d => [d.user, d.submitted_at])
+                )
                 const activity = summarizeActivity(pr, BACKEND_REVIEWERS)
                 const realFailures = summarizeFailingChecksCompact(pr)
                 const criCell = changesRequestedCell(pr)
-                const commented = (pr.approval_summary?.commented_users || []).filter(Boolean)
+                const commented = (pr.approval_summary?.commented_users || []).filter(u => u && !isBotReviewer(u))
                 return (
                   <tr
                     key={`${pr.repository_name}-${pr.number}`}
@@ -383,16 +391,25 @@ export default function TriageBoard({ pullRequests }: Props) {
                         <span style={type.secondary}>—</span>
                       ) : (
                         <>
-                          {badges.map(b => (
-                            <span
-                              key={b.user}
-                              className="block truncate"
-                              title={`${b.user} (${b.state.replace('_', ' ')})`}
-                              style={{ ...type.secondary, color: badgeTone[b.state] || T.text }}
-                            >
-                              {displayUser(b.user)}
-                            </span>
-                          ))}
+                          {badges.map(b => {
+                            const at = b.state === 'approved' ? approvedAt.get(b.user) : null
+                            return (
+                              <span key={b.user} className="block">
+                                <span
+                                  className="block truncate"
+                                  title={`${b.user} (${b.state.replace('_', ' ')})`}
+                                  style={{ ...type.secondary, color: badgeTone[b.state] || T.text }}
+                                >
+                                  {displayUser(b.user)}
+                                </span>
+                                {at && (
+                                  <span className="block truncate" style={{ ...type.secondary, fontSize: 10 }}>
+                                    {fmtEastern(at)}
+                                  </span>
+                                )}
+                              </span>
+                            )
+                          })}
                           {extra > 0 && (
                             <span
                               className="block"

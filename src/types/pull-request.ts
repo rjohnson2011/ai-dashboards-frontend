@@ -36,6 +36,7 @@ export interface PullRequest {
     changes_requested_count: number
     pending_count: number
     approved_users: string[]
+    approved_user_details?: { user: string; submitted_at: string }[]
     changes_requested_users: string[]
     commented_users: string[]
     pending_users: string[]
