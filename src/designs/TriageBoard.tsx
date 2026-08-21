@@ -246,7 +246,7 @@ export default function TriageBoard({ pullRequests }: Props) {
         </div>
 
         {/* ── Search ── */}
-        <div className="flex justify-end">
+        <div className="flex justify-start">
           <input
             value={query}
             onChange={e => setQuery(e.target.value)}
