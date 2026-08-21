@@ -19,7 +19,7 @@ const DESIGNS: Design[] = [
   {
     key: 'triage',
     label: 'Triage Board',
-    blurb: 'Color = state · one-row queues · full-width table',
+    blurb: 'Backend PR review dashboard — monitoring vets-api, vets-api-mockdata, platform-atlas',
     Component: TriageBoard,
   },
   {
