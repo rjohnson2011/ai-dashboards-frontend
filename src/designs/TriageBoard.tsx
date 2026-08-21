@@ -84,23 +84,12 @@ const badgeTone: Record<string, string> = {
   commented: T.text,
 }
 
-// The moment each changes-requested status describes, in Eastern time —
-// mirrors /dashboard's column so no information is lost in this design.
-function changesRequestedDetail(
-  info: NonNullable<PullRequest['changes_requested_info']>
-): string | null {
-  const ts =
-    info.status === 'changes_requested'
-      ? info.requested_at || info.backend_comment_at
-      : info.status === 'new_commits_after_approval'
-        ? info.approved_at
-        : info.status === 'backend_approval_dismissed' || info.status === 'new_commit_from_author'
-          ? info.dismissed_at
-          : info.status === 'new_comment_from_author'
-            ? info.author_comment_at || info.backend_comment_at
-            : null
-  if (!ts) return info.message || null
-  const when = new Date(ts).toLocaleString('en-US', {
+// Mirrors /dashboard's Changes Requested column exactly: the same per-status
+// labels, the same ET timestamp, and the same fallback to the latest reviewer
+// activity when no changes-requested status exists — so the two pages never
+// disagree about a row.
+function fmtEastern(iso: string): string {
+  return new Date(iso).toLocaleString('en-US', {
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
@@ -108,7 +97,48 @@ function changesRequestedDetail(
     hour12: true,
     timeZone: 'America/New_York',
   })
-  return `${info.message} · ${when}`
+}
+
+function changesRequestedCell(pr: PullRequest): { label: string; when: string | null; tone: string } | null {
+  const info = pr.changes_requested_info
+  if (info) {
+    const ts =
+      info.status === 'changes_requested'
+        ? info.requested_at || info.backend_comment_at
+        : info.status === 'new_commits_after_approval'
+          ? info.approved_at
+          : info.status === 'backend_approval_dismissed' || info.status === 'new_commit_from_author'
+            ? info.dismissed_at
+            : info.status === 'new_comment_from_author'
+              ? info.author_comment_at || info.backend_comment_at
+              : null
+    const label =
+      info.status === 'new_commit_from_author'
+        ? 'New commits by author'
+        : info.status === 'new_comment_from_author'
+          ? 'New comment from author'
+          : info.status === 'new_commits_after_approval'
+            ? 'New commits after approval'
+            : info.status === 'backend_approval_dismissed'
+              ? 'BE approval dismissed'
+              : info.message
+    const tone =
+      info.status === 'backend_approval_dismissed'
+        ? T.red
+        : info.status === 'new_commits_after_approval' || info.status === 'changes_requested'
+          ? T.amber
+          : T.text
+    return { label, when: ts ? fmtEastern(ts) : null, tone }
+  }
+  const act = pr.latest_reviewer_activity
+  if (act) {
+    return {
+      label: `${displayUser(act.user)} ${act.type === 'comment' ? 'commented' : act.type}`,
+      when: fmtEastern(act.timestamp),
+      tone: T.text,
+    }
+  }
+  return null
 }
 
 type SortCol = 'number' | 'title' | 'author' | 'created' | 'updated'
@@ -299,8 +329,7 @@ export default function TriageBoard({ pullRequests }: Props) {
                 const extra = allBadges.length - badges.length
                 const activity = summarizeActivity(pr, BACKEND_REVIEWERS)
                 const realFailures = summarizeFailingChecksCompact(pr)
-                const cri = pr.changes_requested_info
-                const criDetail = cri ? changesRequestedDetail(cri) : null
+                const criCell = changesRequestedCell(pr)
                 const commented = (pr.approval_summary?.commented_users || []).filter(Boolean)
                 return (
                   <tr
@@ -394,10 +423,17 @@ export default function TriageBoard({ pullRequests }: Props) {
                       </span>
                     </td>
                     <td className="px-4 py-3 align-top">
-                      {criDetail ? (
-                        <span className="block truncate" style={{ ...type.secondary, color: T.amber }} title={criDetail}>
-                          {criDetail}
-                        </span>
+                      {criCell ? (
+                        <>
+                          <span className="block truncate" style={{ ...type.secondary, color: criCell.tone }} title={criCell.label}>
+                            {criCell.label}
+                          </span>
+                          {criCell.when && (
+                            <span className="block truncate" style={{ ...type.secondary, fontSize: 11 }}>
+                              {criCell.when}
+                            </span>
+                          )}
+                        </>
                       ) : (
                         <span style={type.secondary}>—</span>
                       )}
