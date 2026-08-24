@@ -467,3 +467,12 @@ export function applyFilter(
   list.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
   return list
 }
+
+// Compact age for tight table cells: "5m", "3h", "12d". Pass a suffix when a
+// design wants the wordier form ("3h ago").
+export function timeAgoShort(iso: string, suffix = ''): string {
+  const secs = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))
+  if (secs < 3600) return `${Math.max(1, Math.floor(secs / 60))}m${suffix}`
+  if (secs < 86400) return `${Math.floor(secs / 3600)}h${suffix}`
+  return `${Math.floor(secs / 86400)}d${suffix}`
+}

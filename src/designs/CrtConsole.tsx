@@ -17,7 +17,9 @@ import {
   summarizeFailingChecks,
   summarizeActivity,
   changesRequestedCell,
+  timeAgoShort,
 } from '../lib/dashboard'
+
 import { displayUser, isBotReviewer } from '../lib/utils'
 
 interface Props {
@@ -302,7 +304,7 @@ function CrtRow({ pr, idx }: { pr: PullRequest; idx: number }) {
             {activity.rollup && (
               <div className="opacity-40 tabular-nums">{activity.rollup.toLowerCase()}</div>
             )}
-            <div className="opacity-30 tabular-nums">opened {timeAgoShort(pr.created_at)}</div>
+            <div className="opacity-30 tabular-nums">opened {timeAgoShort(pr.created_at, ' ago')}</div>
           </div>
         )
       })()}
@@ -345,12 +347,6 @@ function CrtEmpty({ filterKey, hasSearch }: { filterKey: FilterKey; hasSearch: b
   )
 }
 
-function timeAgoShort(iso: string): string {
-  const secs = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))
-  if (secs < 3600) return `${Math.max(1, Math.floor(secs / 60))}m ago`
-  if (secs < 86400) return `${Math.floor(secs / 3600)}h ago`
-  return `${Math.floor(secs / 86400)}d ago`
-}
 
 function CrtStyle() {
   return (

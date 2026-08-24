@@ -19,7 +19,9 @@ import {
   summarizeActivity,
   changesRequestedCell,
   fmtEastern,
+  timeAgoShort,
 } from '../lib/dashboard'
+
 import { displayUser, isBotReviewer } from '../lib/utils'
 
 interface Props {
@@ -313,7 +315,7 @@ function PrRow({ pr }: { pr: PullRequest }) {
             {activity.rollup && (
               <div className="text-stone-600 mt-1 tabular-nums">{activity.rollup}</div>
             )}
-            <div className="text-stone-700 mt-1 tabular-nums">opened {timeAgoShort(pr.created_at)}</div>
+            <div className="text-stone-700 mt-1 tabular-nums">opened {timeAgoShort(pr.created_at, ' ago')}</div>
           </div>
         )
       })()}
@@ -406,12 +408,6 @@ function EmptyState({ filterKey, hasSearch }: { filterKey: FilterKey; hasSearch:
   )
 }
 
-function timeAgoShort(iso: string): string {
-  const secs = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))
-  if (secs < 3600) return `${Math.max(1, Math.floor(secs / 60))}m ago`
-  if (secs < 86400) return `${Math.floor(secs / 3600)}h ago`
-  return `${Math.floor(secs / 86400)}d ago`
-}
 
 function EditorialStyle() {
   return (

@@ -56,7 +56,7 @@ function ReviewerMetrics() {
           <div>
             <h2 className="text-xl font-semibold tracking-tight">Reviewer Activity</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Approved reviews per reviewer. Change requests and comments are not counted.
+              Approved reviews per reviewer. Change requests, comments, and dependabot PRs are not counted.
             </p>
           </div>
           <label className="flex items-center gap-2 text-sm">

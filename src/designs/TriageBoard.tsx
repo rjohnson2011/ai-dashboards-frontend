@@ -12,7 +12,9 @@ import {
   summarizeFailingChecksCompact,
   changesRequestedCell,
   fmtEastern,
+  timeAgoShort,
 } from '../lib/dashboard'
+
 import { displayUser, isBotReviewer } from '../lib/utils'
 
 interface Props {
@@ -446,9 +448,3 @@ function sentenceCase(s: string): string {
   return s.length > 0 ? s[0].toUpperCase() + s.slice(1) : s
 }
 
-function timeAgoShort(iso: string): string {
-  const secs = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))
-  if (secs < 3600) return `${Math.max(1, Math.floor(secs / 60))}m`
-  if (secs < 86400) return `${Math.floor(secs / 3600)}h`
-  return `${Math.floor(secs / 86400)}d`
-}

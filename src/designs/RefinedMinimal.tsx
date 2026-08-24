@@ -16,7 +16,9 @@ import {
   summarizeFailingChecks,
   summarizeActivity,
   changesRequestedCell,
+  timeAgoShort,
 } from '../lib/dashboard'
+
 import { displayUser, isBotReviewer } from '../lib/utils'
 
 interface Props {
@@ -256,7 +258,7 @@ function RefinedRow({ pr }: { pr: PullRequest }) {
               {activity.rollup && (
                 <div className="text-neutral-400 mt-0.5 tabular-nums">{activity.rollup}</div>
               )}
-              <div className="text-neutral-300 mt-0.5 tabular-nums">opened {timeAgoShort(pr.created_at)}</div>
+              <div className="text-neutral-300 mt-0.5 tabular-nums">opened {timeAgoShort(pr.created_at, ' ago')}</div>
             </div>
           )
         })()}
@@ -340,12 +342,6 @@ function RefinedEmpty({ filterKey, hasSearch }: { filterKey: FilterKey; hasSearc
   )
 }
 
-function timeAgoShort(iso: string): string {
-  const secs = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))
-  if (secs < 3600) return `${Math.max(1, Math.floor(secs / 60))}m ago`
-  if (secs < 86400) return `${Math.floor(secs / 3600)}h ago`
-  return `${Math.floor(secs / 86400)}d ago`
-}
 
 function RefinedStyle() {
   return (
