@@ -16,3 +16,8 @@ export function displayUser(handle: string | undefined | null): string {
   if (!handle) return ""
   return isGhostUser(handle) ? "(former user)" : handle
 }
+
+// Bot reviewers add noise, not signal — reviews from humans only.
+export function isBotReviewer(user: string): boolean {
+  return /\[bot\]$|copilot-pull-request|github-advanced-security|github-actions/i.test(user)
+}

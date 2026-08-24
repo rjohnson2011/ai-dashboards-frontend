@@ -15,8 +15,9 @@ import {
   applyFilter,
   summarizeFailingChecks,
   summarizeActivity,
+  changesRequestedCell,
 } from '../lib/dashboard'
-import { displayUser } from '../lib/utils'
+import { displayUser, isBotReviewer } from '../lib/utils'
 
 interface Props {
   pullRequests: PullRequest[]
@@ -178,9 +179,10 @@ function RefinedStat({ label, value, accent }: { label: string; value: number; a
 
 function RefinedRow({ pr }: { pr: PullRequest }) {
   const status = classifyStatus(pr)
-  const reviewers = reviewerBadgesFor(pr)
+  const reviewers = reviewerBadgesFor(pr).filter(b => !isBotReviewer(b.user))
   const exempt = isTrulyExemptFromBackendReview(pr)
   const beApproved = pr.approval_summary?.approved_users?.some(u => BACKEND_REVIEWERS.includes(u))
+  const cri = changesRequestedCell(pr)
 
   return (
     <li>
@@ -198,7 +200,7 @@ function RefinedRow({ pr }: { pr: PullRequest }) {
               {status.label}
             </span>
             <span className="font-mono text-[16px] tabular-nums text-neutral-400">
-              · {pr.repository_name} #{pr.number}
+              · {pr.repository_name && pr.repository_name !== 'vets-api' ? `${pr.repository_name} ` : ''}#{pr.number}
             </span>
             {pr.draft && (
               <span className="font-mono text-[16px] uppercase tracking-[0.16em] text-neutral-400">
@@ -219,11 +221,18 @@ function RefinedRow({ pr }: { pr: PullRequest }) {
             {status.key === 'failing' && (
               <span className="text-neutral-400"> — {summarizeFailingChecks(pr)}</span>
             )}
+            {cri && (
+              <span className="text-neutral-400">
+                {' '}
+                — {cri.label}
+                {cri.when && ` · ${cri.when}`}
+              </span>
+            )}
           </div>
         </div>
 
         <div className="flex items-center gap-3 self-center">
-          <RefinedReviewerStack badges={reviewers} />
+          <RefinedReviewerStack badges={reviewers} approvedAt={pr.approval_summary?.approved_user_details} />
           {beApproved && (
             <span
               className="font-mono text-[16px] uppercase tracking-[0.2em] px-1.5 py-0.5 rounded-sm"
@@ -247,6 +256,7 @@ function RefinedRow({ pr }: { pr: PullRequest }) {
               {activity.rollup && (
                 <div className="text-neutral-400 mt-0.5 tabular-nums">{activity.rollup}</div>
               )}
+              <div className="text-neutral-300 mt-0.5 tabular-nums">opened {timeAgoShort(pr.created_at)}</div>
             </div>
           )
         })()}
@@ -255,12 +265,19 @@ function RefinedRow({ pr }: { pr: PullRequest }) {
   )
 }
 
-function RefinedReviewerStack({ badges }: { badges: { user: string; state: string }[] }) {
+function RefinedReviewerStack({
+  badges,
+  approvedAt,
+}: {
+  badges: { user: string; state: string }[]
+  approvedAt?: { user: string; submitted_at: string }[]
+}) {
   if (badges.length === 0) {
     return <span className="font-mono text-[16px] text-neutral-400">—</span>
   }
   const visible = badges.slice(0, 4)
   const overflow = badges.length - visible.length
+  const approvedAtMap = new Map((approvedAt || []).map(d => [d.user, d.submitted_at]))
   return (
     <div className="flex -space-x-1.5 items-center">
       {visible.map(({ user, state }, i) => {
@@ -270,12 +287,13 @@ function RefinedReviewerStack({ badges }: { badges: { user: string; state: strin
             : state === 'changes_requested'
               ? '#dc2626'
               : '#d4d4d4'
+        const at = state === 'approved' ? approvedAtMap.get(user) : null
         return (
           <span
             key={user + state + i}
             className="relative inline-flex h-[24px] w-[24px] items-center justify-center rounded-full text-[16px] font-mono font-medium text-neutral-700 bg-neutral-100"
             style={{ boxShadow: `0 0 0 1.5px ${ringColor}, 0 0 0 3px white` }}
-            title={`${displayUser(user)} · ${state.replace('_', ' ')}`}
+            title={`${displayUser(user)} · ${state.replace('_', ' ')}${at ? ` · ${absoluteTime(at)}` : ''}`}
           >
             {nameFromHandle(user)}
           </span>
@@ -320,6 +338,13 @@ function RefinedEmpty({ filterKey, hasSearch }: { filterKey: FilterKey; hasSearc
       <div className="mt-3 font-mono text-[16px] text-neutral-500">{sub}</div>
     </div>
   )
+}
+
+function timeAgoShort(iso: string): string {
+  const secs = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))
+  if (secs < 3600) return `${Math.max(1, Math.floor(secs / 60))}m ago`
+  if (secs < 86400) return `${Math.floor(secs / 3600)}h ago`
+  return `${Math.floor(secs / 86400)}d ago`
 }
 
 function RefinedStyle() {

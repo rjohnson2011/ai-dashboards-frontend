@@ -17,8 +17,10 @@ import {
   applyFilter,
   summarizeFailingChecks,
   summarizeActivity,
+  changesRequestedCell,
+  fmtEastern,
 } from '../lib/dashboard'
-import { displayUser } from '../lib/utils'
+import { displayUser, isBotReviewer } from '../lib/utils'
 
 interface Props {
   pullRequests: PullRequest[]
@@ -222,10 +224,11 @@ function PrRow({ pr }: { pr: PullRequest }) {
   // mapped, so a newly-added Status never crashes the gallery (e.g. reading
   // colors.stripe on undefined).
   const colors = STATUS_COLOR[status.key] ?? STATUS_COLOR.open
-  const reviewers = reviewerBadgesFor(pr)
+  const reviewers = reviewerBadgesFor(pr).filter(b => !isBotReviewer(b.user))
   const exempt = isTrulyExemptFromBackendReview(pr)
   const authorColor = colorForHandle(pr.author)
   const beApproved = pr.approval_summary?.approved_users?.some(u => BACKEND_REVIEWERS.includes(u))
+  const cri = changesRequestedCell(pr)
 
   return (
     <button
@@ -237,7 +240,9 @@ function PrRow({ pr }: { pr: PullRequest }) {
       <div className="min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <span className="font-mono text-[16px] tabular-nums text-stone-500">#{pr.number}</span>
-          <span className="font-mono text-[16px] tracking-wide text-stone-500">{pr.repository_name}</span>
+          {pr.repository_name && pr.repository_name !== 'vets-api' && (
+            <span className="font-mono text-[16px] tracking-wide text-stone-500">{pr.repository_name}</span>
+          )}
           {pr.draft && (
             <span className="font-mono text-[16px] uppercase tracking-[0.2em] text-stone-500 border border-stone-800 px-1 py-px">
               draft
@@ -279,10 +284,16 @@ function PrRow({ pr }: { pr: PullRequest }) {
             {summarizeFailingChecks(pr)}
           </span>
         )}
+        {cri && (
+          <span className="font-mono text-[11px] text-stone-500 truncate" title={cri.label}>
+            {cri.label}
+            {cri.when && <span className="text-stone-600"> · {cri.when}</span>}
+          </span>
+        )}
       </div>
 
       <div className="flex items-center gap-2 min-h-[22px]">
-        <ReviewerStack badges={reviewers} />
+        <ReviewerStack badges={reviewers} approvedAt={pr.approval_summary?.approved_user_details} />
         {beApproved && (
           <span title="Backend reviewer approved" className="text-[#9ab877]">
             <CheckCircle2 className="h-3 w-3" />
@@ -302,6 +313,7 @@ function PrRow({ pr }: { pr: PullRequest }) {
             {activity.rollup && (
               <div className="text-stone-600 mt-1 tabular-nums">{activity.rollup}</div>
             )}
+            <div className="text-stone-700 mt-1 tabular-nums">opened {timeAgoShort(pr.created_at)}</div>
           </div>
         )
       })()}
@@ -309,12 +321,19 @@ function PrRow({ pr }: { pr: PullRequest }) {
   )
 }
 
-function ReviewerStack({ badges }: { badges: { user: string; state: string }[] }) {
+function ReviewerStack({
+  badges,
+  approvedAt,
+}: {
+  badges: { user: string; state: string }[]
+  approvedAt?: { user: string; submitted_at: string }[]
+}) {
   if (badges.length === 0) {
     return <span className="text-[16px] tracking-wide text-stone-600 font-mono">—</span>
   }
   const visible = badges.slice(0, 5)
   const overflow = badges.length - visible.length
+  const approvedAtMap = new Map((approvedAt || []).map(d => [d.user, d.submitted_at]))
   return (
     <div className="flex -space-x-1.5 items-center">
       {visible.map(({ user, state }, i) => {
@@ -325,6 +344,7 @@ function ReviewerStack({ badges }: { badges: { user: string; state: string }[] }
             : state === 'changes_requested'
               ? '#c97a64'
               : 'rgba(255,255,255,0.18)'
+        const at = state === 'approved' ? approvedAtMap.get(user) : null
         return (
           <span
             key={user + state + i}
@@ -334,7 +354,7 @@ function ReviewerStack({ badges }: { badges: { user: string; state: string }[] }
               color: c.fg,
               boxShadow: `0 0 0 1.5px ${ringColor}, 0 0 0 3px var(--ed-bg)`,
             }}
-            title={`${displayUser(user)} · ${state.replace('_', ' ')}`}
+            title={`${displayUser(user)} · ${state.replace('_', ' ')}${at ? ` · ${fmtEastern(at)}` : ''}`}
           >
             {nameFromHandle(user)}
           </span>
@@ -384,6 +404,13 @@ function EmptyState({ filterKey, hasSearch }: { filterKey: FilterKey; hasSearch:
       <div className="mt-2 font-mono text-[16px] uppercase tracking-[0.18em] text-stone-500">{sub}</div>
     </div>
   )
+}
+
+function timeAgoShort(iso: string): string {
+  const secs = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))
+  if (secs < 3600) return `${Math.max(1, Math.floor(secs / 60))}m ago`
+  if (secs < 86400) return `${Math.floor(secs / 3600)}h ago`
+  return `${Math.floor(secs / 86400)}d ago`
 }
 
 function EditorialStyle() {

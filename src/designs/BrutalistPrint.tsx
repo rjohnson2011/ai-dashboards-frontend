@@ -16,8 +16,9 @@ import {
   applyFilter,
   summarizeFailingChecksCompact,
   summarizeActivity,
+  changesRequestedCell,
 } from '../lib/dashboard'
-import { displayUser } from '../lib/utils'
+import { displayUser, isBotReviewer } from '../lib/utils'
 
 interface Props {
   pullRequests: PullRequest[]
@@ -198,10 +199,14 @@ function ColHead({ children, align = 'left' }: { children: React.ReactNode; alig
 
 function BrutalistRow({ pr, idx }: { pr: PullRequest; idx: number }) {
   const status = classifyStatus(pr)
-  const reviewers = reviewerBadgesFor(pr)
+  const reviewers = reviewerBadgesFor(pr).filter(b => !isBotReviewer(b.user))
   const exempt = isTrulyExemptFromBackendReview(pr)
   const isFailing = status.key === 'failing' || status.key === 'changes_requested'
   const beApproved = pr.approval_summary?.approved_users?.some(u => BACKEND_REVIEWERS.includes(u))
+  const approvedAtMap = new Map(
+    (pr.approval_summary?.approved_user_details || []).map(d => [d.user, d.submitted_at])
+  )
+  const cri = changesRequestedCell(pr)
 
   return (
     <button
@@ -217,9 +222,11 @@ function BrutalistRow({ pr, idx }: { pr: PullRequest; idx: number }) {
           <span className="font-mono text-[16px] tabular-nums text-black/55 group-hover:text-[var(--brut-bg)]/65">
             #{pr.number}
           </span>
-          <span className="font-mono text-[16px] tracking-wide uppercase text-black/55 group-hover:text-[var(--brut-bg)]/65">
-            {pr.repository_name}
-          </span>
+          {pr.repository_name && pr.repository_name !== 'vets-api' && (
+            <span className="font-mono text-[16px] tracking-wide uppercase text-black/55 group-hover:text-[var(--brut-bg)]/65">
+              {pr.repository_name}
+            </span>
+          )}
           {pr.draft && (
             <span className="font-mono text-[16px] uppercase tracking-[0.22em] border border-current px-1">
               draft
@@ -254,6 +261,14 @@ function BrutalistRow({ pr, idx }: { pr: PullRequest; idx: number }) {
             {summarizeFailingChecksCompact(pr)}
           </span>
         )}
+        {cri && (
+          <span
+            className="font-mono text-[11px] uppercase tracking-[0.14em] text-black/60 group-hover:text-[var(--brut-bg)]/65 line-clamp-2"
+            title={cri.label}
+          >
+            {cri.label}
+          </span>
+        )}
       </div>
 
       <div className="flex items-center gap-2 flex-wrap min-h-[22px]">
@@ -262,16 +277,19 @@ function BrutalistRow({ pr, idx }: { pr: PullRequest; idx: number }) {
             none
           </span>
         ) : (
-          reviewers.slice(0, 3).map(({ user, state }) => (
-            <span
-              key={user + state}
-              className="font-mono text-[16px] uppercase tracking-[0.18em] border border-current px-1 py-px"
-              style={state === 'changes_requested' ? { color: '#e8331c' } : {}}
-              title={`${state.replace('_', ' ')}`}
-            >
-              {nameFromHandle(user)}
-            </span>
-          ))
+          reviewers.slice(0, 3).map(({ user, state }) => {
+            const at = state === 'approved' ? approvedAtMap.get(user) : null
+            return (
+              <span
+                key={user + state}
+                className="font-mono text-[16px] uppercase tracking-[0.18em] border border-current px-1 py-px"
+                style={state === 'changes_requested' ? { color: '#e8331c' } : {}}
+                title={`${displayUser(user)} · ${state.replace('_', ' ')}${at ? ` · ${absoluteTime(at)}` : ''}`}
+              >
+                {nameFromHandle(user)}
+              </span>
+            )
+          })
         )}
         {reviewers.length > 3 && (
           <span className="font-mono text-[16px] uppercase tracking-[0.22em] text-black/45 group-hover:text-[var(--brut-bg)]/55">
@@ -305,6 +323,9 @@ function BrutalistRow({ pr, idx }: { pr: PullRequest; idx: number }) {
                 {activity.rollup}
               </div>
             )}
+            <div className="text-black/35 group-hover:text-[var(--brut-bg)]/40 mt-0.5 tabular-nums">
+              opened {timeAgoShort(pr.created_at)}
+            </div>
           </div>
         )
       })()}
@@ -339,6 +360,13 @@ function BrutalistEmpty({ filterKey, hasSearch }: { filterKey: FilterKey; hasSea
       </div>
     </div>
   )
+}
+
+function timeAgoShort(iso: string): string {
+  const secs = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))
+  if (secs < 3600) return `${Math.max(1, Math.floor(secs / 60))}m`
+  if (secs < 86400) return `${Math.floor(secs / 3600)}h`
+  return `${Math.floor(secs / 86400)}d`
 }
 
 function BrutalistStyle() {

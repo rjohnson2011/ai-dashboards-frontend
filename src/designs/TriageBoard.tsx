@@ -10,8 +10,10 @@ import {
   countByFilter,
   applyFilter,
   summarizeFailingChecksCompact,
+  changesRequestedCell,
+  fmtEastern,
 } from '../lib/dashboard'
-import { displayUser } from '../lib/utils'
+import { displayUser, isBotReviewer } from '../lib/utils'
 
 interface Props {
   pullRequests: PullRequest[]
@@ -77,72 +79,15 @@ function statusTone(key: Status): string {
   return T.text
 }
 
-// Bot reviewers add noise, not signal — reviews from humans only.
-function isBotReviewer(user: string): boolean {
-  return /\[bot\]$|copilot-pull-request|github-advanced-security|github-actions/i.test(user)
-}
-
 const badgeTone: Record<string, string> = {
   approved: T.green,
   changes_requested: T.amber,
   commented: T.text,
 }
 
-// Mirrors /dashboard's Changes Requested column exactly: the same per-status
-// labels, the same ET timestamp, and the same fallback to the latest reviewer
-// activity when no changes-requested status exists — so the two pages never
-// disagree about a row.
-function fmtEastern(iso: string): string {
-  return new Date(iso).toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-    timeZone: 'America/New_York',
-  })
-}
-
-function changesRequestedCell(pr: PullRequest): { label: string; when: string | null; tone: string } | null {
-  const info = pr.changes_requested_info
-  if (info) {
-    const ts =
-      info.status === 'changes_requested'
-        ? info.requested_at || info.backend_comment_at
-        : info.status === 'new_commits_after_approval'
-          ? info.approved_at
-          : info.status === 'backend_approval_dismissed' || info.status === 'new_commit_from_author'
-            ? info.dismissed_at
-            : info.status === 'new_comment_from_author'
-              ? info.author_comment_at || info.backend_comment_at
-              : null
-    const label =
-      info.status === 'new_commit_from_author'
-        ? 'New commits by author'
-        : info.status === 'new_comment_from_author'
-          ? 'New comment from author'
-          : info.status === 'new_commits_after_approval'
-            ? 'New commits after approval'
-            : info.status === 'backend_approval_dismissed'
-              ? 'BE approval dismissed'
-              : info.message
-    const tone =
-      info.status === 'backend_approval_dismissed'
-        ? T.red
-        : info.status === 'new_commits_after_approval' || info.status === 'changes_requested'
-          ? T.amber
-          : T.text
-    return { label, when: ts ? fmtEastern(ts) : null, tone }
-  }
-  const act = pr.latest_reviewer_activity
-  if (act) {
-    return {
-      label: `${displayUser(act.user)} ${act.type === 'comment' ? 'commented' : act.type}`,
-      when: fmtEastern(act.timestamp),
-      tone: T.text,
-    }
-  }
-  return null
+// Map the shared cell's semantic tone to this design's palette.
+function criTone(tone: 'red' | 'amber' | 'neutral'): string {
+  return tone === 'red' ? T.red : tone === 'amber' ? T.amber : T.text
 }
 
 type SortCol = 'number' | 'title' | 'author' | 'created' | 'updated'
@@ -465,7 +410,7 @@ export default function TriageBoard({ pullRequests }: Props) {
                     <td className="px-4 py-3 align-top">
                       {criCell ? (
                         <>
-                          <span className="block truncate" style={{ ...type.secondary, color: criCell.tone }} title={criCell.label}>
+                          <span className="block truncate" style={{ ...type.secondary, color: criTone(criCell.tone) }} title={criCell.label}>
                             {criCell.label}
                           </span>
                           {criCell.when && (

@@ -16,8 +16,9 @@ import {
   applyFilter,
   summarizeFailingChecks,
   summarizeActivity,
+  changesRequestedCell,
 } from '../lib/dashboard'
-import { displayUser } from '../lib/utils'
+import { displayUser, isBotReviewer } from '../lib/utils'
 
 interface Props {
   pullRequests: PullRequest[]
@@ -207,9 +208,13 @@ function CrtStat({ label, value, color }: { label: string; value: number; color?
 function CrtRow({ pr, idx }: { pr: PullRequest; idx: number }) {
   const status = classifyStatus(pr)
   const color = STATUS_COLOR[status.key]
-  const reviewers = reviewerBadgesFor(pr)
+  const reviewers = reviewerBadgesFor(pr).filter(b => !isBotReviewer(b.user))
   const exempt = isTrulyExemptFromBackendReview(pr)
   const beApproved = pr.approval_summary?.approved_users?.some(u => BACKEND_REVIEWERS.includes(u))
+  const approvedAtMap = new Map(
+    (pr.approval_summary?.approved_user_details || []).map(d => [d.user, d.submitted_at])
+  )
+  const cri = changesRequestedCell(pr)
 
   return (
     <button
@@ -221,8 +226,12 @@ function CrtRow({ pr, idx }: { pr: PullRequest; idx: number }) {
       <div className="min-w-0">
         <div className="flex items-center gap-2 mb-0.5 text-[16px] uppercase tracking-[0.16em] opacity-70">
           <span>#{pr.number}</span>
-          <span>·</span>
-          <span>{pr.repository_name}</span>
+          {pr.repository_name && pr.repository_name !== 'vets-api' && (
+            <>
+              <span>·</span>
+              <span>{pr.repository_name}</span>
+            </>
+          )}
           {pr.draft && <span className="text-[var(--crt-amber)]">· DRAFT</span>}
           {exempt && <span style={{ color: '#9ad6c4' }}>· EXEMPT</span>}
         </div>
@@ -243,6 +252,12 @@ function CrtRow({ pr, idx }: { pr: PullRequest; idx: number }) {
             {summarizeFailingChecks(pr)}
           </span>
         )}
+        {cri && (
+          <span className="text-[11px] opacity-60 line-clamp-2" title={cri.label}>
+            {cri.label.toLowerCase()}
+            {cri.when && ` · ${cri.when}`}
+          </span>
+        )}
       </div>
 
       <div className="flex items-center gap-1.5 flex-wrap min-h-[20px] text-[16px] tracking-wide">
@@ -252,12 +267,13 @@ function CrtRow({ pr, idx }: { pr: PullRequest; idx: number }) {
           reviewers.slice(0, 3).map(({ user, state }) => {
             const c =
               state === 'approved' ? '#7cd87c' : state === 'changes_requested' ? '#ff5d5d' : 'inherit'
+            const at = state === 'approved' ? approvedAtMap.get(user) : null
             return (
               <span
                 key={user + state}
                 style={{ color: c }}
                 className="inline-flex items-center"
-                title={`${displayUser(user)} · ${state.replace('_', ' ')}`}
+                title={`${displayUser(user)} · ${state.replace('_', ' ')}${at ? ` · ${absoluteTime(at)}` : ''}`}
               >
                 {nameFromHandle(user)}
               </span>
@@ -286,6 +302,7 @@ function CrtRow({ pr, idx }: { pr: PullRequest; idx: number }) {
             {activity.rollup && (
               <div className="opacity-40 tabular-nums">{activity.rollup.toLowerCase()}</div>
             )}
+            <div className="opacity-30 tabular-nums">opened {timeAgoShort(pr.created_at)}</div>
           </div>
         )
       })()}
@@ -326,6 +343,13 @@ function CrtEmpty({ filterKey, hasSearch }: { filterKey: FilterKey; hasSearch: b
       <div className="mt-3">{lines[filterKey]}</div>
     </div>
   )
+}
+
+function timeAgoShort(iso: string): string {
+  const secs = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))
+  if (secs < 3600) return `${Math.max(1, Math.floor(secs / 60))}m ago`
+  if (secs < 86400) return `${Math.floor(secs / 3600)}h ago`
+  return `${Math.floor(secs / 86400)}d ago`
 }
 
 function CrtStyle() {

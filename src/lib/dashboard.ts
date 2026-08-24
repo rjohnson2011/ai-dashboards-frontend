@@ -11,7 +11,7 @@ import {
   isTrulyExemptFromBackendReview,
   needsFirstTeamReview,
 } from '../types/pull-request'
-import { isGhostUser } from './utils'
+import { displayUser, isGhostUser } from './utils'
 
 export type FilterKey =
   | 'ready'
@@ -166,6 +166,72 @@ export function absoluteTime(iso: string): string {
     hour12: true,
     timeZone: 'America/New_York',
   })
+}
+
+// Shorter Eastern-time stamp (no year) for the Changes Requested cell and
+// approval timestamps, where the row context already implies "recent."
+export function fmtEastern(iso: string): string {
+  return new Date(iso).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: 'America/New_York',
+  })
+}
+
+export interface ChangesRequestedCell {
+  label: string
+  when: string | null
+  // Semantic tone, not a color — callers map this to their own palette.
+  tone: 'red' | 'amber' | 'neutral'
+}
+
+// Mirrors /dashboard's Changes Requested column exactly: the same per-status
+// labels, the same ET timestamp, and the same fallback to the latest reviewer
+// activity when no changes-requested status exists — so every design agrees
+// with /dashboard about a row's changes-requested state.
+export function changesRequestedCell(pr: PullRequest): ChangesRequestedCell | null {
+  const info = pr.changes_requested_info
+  if (info) {
+    const ts =
+      info.status === 'changes_requested'
+        ? info.requested_at || info.backend_comment_at
+        : info.status === 'new_commits_after_approval'
+          ? info.approved_at
+          : info.status === 'backend_approval_dismissed' || info.status === 'new_commit_from_author'
+            ? info.dismissed_at
+            : info.status === 'new_comment_from_author'
+              ? info.author_comment_at || info.backend_comment_at
+              : null
+    const label =
+      info.status === 'new_commit_from_author'
+        ? 'New commits by author'
+        : info.status === 'new_comment_from_author'
+          ? 'New comment from author'
+          : info.status === 'new_commits_after_approval'
+            ? 'New commits after approval'
+            : info.status === 'backend_approval_dismissed'
+              ? 'BE approval dismissed'
+              : info.message
+    const tone: ChangesRequestedCell['tone'] =
+      info.status === 'backend_approval_dismissed'
+        ? 'red'
+        : info.status === 'new_commits_after_approval' || info.status === 'changes_requested'
+          ? 'amber'
+          : 'neutral'
+    return { label, when: ts ? fmtEastern(ts) : null, tone }
+  }
+  const act = pr.latest_reviewer_activity
+  if (act) {
+    return {
+      label: `${displayUser(act.user)} ${act.type === 'comment' ? 'commented' : act.type}`,
+      when: fmtEastern(act.timestamp),
+      tone: 'neutral',
+    }
+  }
+  return null
 }
 
 // Filters out "Backend Approval / Succeed if backend approval is confirmed"
