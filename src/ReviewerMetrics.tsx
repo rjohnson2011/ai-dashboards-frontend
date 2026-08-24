@@ -6,6 +6,14 @@ import AppHeader from './components/AppHeader'
 
 type Entry = { reviewer: string; count: number }
 type Windows = { day: Entry[]; week: Entry[]; month: Entry[]; ytd: Entry[] }
+type ScopeKey = 'all' | 'human' | 'dependabot'
+type Scopes = Record<ScopeKey, Windows>
+
+const SCOPE_SECTIONS: Array<{ key: ScopeKey; title: string; note: string }> = [
+  { key: 'human', title: 'vets-api reviews', note: 'dependabot PRs excluded' },
+  { key: 'dependabot', title: 'Dependabot reviews', note: 'approvals on dependabot PRs only' },
+  { key: 'all', title: 'Combined', note: 'everything counted together' },
+]
 
 const WINDOW_LABELS: Array<{ key: keyof Windows; label: string }> = [
   { key: 'day', label: 'Last 24 hours' },
@@ -15,7 +23,7 @@ const WINDOW_LABELS: Array<{ key: keyof Windows; label: string }> = [
 ]
 
 function ReviewerMetrics() {
-  const [windows, setWindows] = useState<Windows | null>(null)
+  const [scopes, setScopes] = useState<Scopes | null>(null)
   const [backendMembers, setBackendMembers] = useState<string[]>([])
   const [backendOnly, setBackendOnly] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -36,7 +44,7 @@ function ReviewerMetrics() {
         }
         if (!res.ok) throw new Error(`Request failed: ${res.status}`)
         const data = await res.json()
-        setWindows(data.windows)
+        setScopes(data.scopes)
         setBackendMembers(data.backend_members || [])
         setError(null)
       } catch {
@@ -56,7 +64,7 @@ function ReviewerMetrics() {
           <div>
             <h2 className="text-xl font-semibold tracking-tight">Reviewer Activity</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Approved reviews per reviewer. Change requests, comments, and dependabot PRs are not counted.
+              Approved reviews per reviewer. Change requests and comments are not counted.
             </p>
           </div>
           <label className="flex items-center gap-2 text-sm">
@@ -72,43 +80,54 @@ function ReviewerMetrics() {
         {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
         {error && <p className="text-sm text-destructive">{error}</p>}
 
-        {windows && !loading && (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {WINDOW_LABELS.map(({ key, label }) => {
-              const rows = windows[key] || []
-              const max = rows.length > 0 ? rows[0].count : 0
-              return (
-                <Card key={key}>
-                  <CardHeader>
-                    <CardTitle className="text-base">{label}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {rows.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">No approvals in this window.</p>
-                    ) : (
-                      rows.map(row => (
-                        <div key={row.reviewer} className="space-y-1">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="truncate">{displayUser(row.reviewer)}</span>
-                            <span className="text-muted-foreground tabular-nums">{row.count}</span>
-                          </div>
-                          {/* Width relative to the window's top reviewer, so
-                              each card scales independently. */}
-                          <div className="h-1.5 rounded bg-muted overflow-hidden">
-                            <div
-                              className="h-full bg-primary"
-                              style={{ width: max > 0 ? `${(row.count / max) * 100}%` : '0%' }}
-                            />
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
-        )}
+        {scopes && !loading &&
+          SCOPE_SECTIONS.map(({ key: scopeKey, title, note }) => {
+            const windows = scopes[scopeKey]
+            if (!windows) return null
+            return (
+              <section key={scopeKey} className="space-y-3">
+                <div className="flex items-baseline gap-2">
+                  <h3 className="text-base font-semibold">{title}</h3>
+                  <span className="text-xs text-muted-foreground">{note}</span>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                  {WINDOW_LABELS.map(({ key, label }) => {
+                    const rows = windows[key] || []
+                    const max = rows.length > 0 ? rows[0].count : 0
+                    return (
+                      <Card key={key}>
+                        <CardHeader>
+                          <CardTitle className="text-base">{label}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                          {rows.length === 0 ? (
+                            <p className="text-xs text-muted-foreground">No approvals in this window.</p>
+                          ) : (
+                            rows.map(row => (
+                              <div key={row.reviewer} className="space-y-1">
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="truncate">{displayUser(row.reviewer)}</span>
+                                  <span className="text-muted-foreground tabular-nums">{row.count}</span>
+                                </div>
+                                {/* Width relative to the window's top reviewer, so
+                                    each card scales independently. */}
+                                <div className="h-1.5 rounded bg-muted overflow-hidden">
+                                  <div
+                                    className="h-full bg-primary"
+                                    style={{ width: max > 0 ? `${(row.count / max) * 100}%` : '0%' }}
+                                  />
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </CardContent>
+                      </Card>
+                    )
+                  })}
+                </div>
+              </section>
+            )
+          })}
       </div>
     </div>
   )
