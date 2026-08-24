@@ -125,6 +125,10 @@ function GallerySwitcher({
           const isActive = d.key === activeKey
           return (
             <button
+              // index.css has an unlayered `.dark button { color: var(--foreground) }`
+              // that outguns Tailwind's dark:text-zinc-900 on the active pill,
+              // rendering white-on-white. Inline wins over everything.
+              style={isActive ? { color: '#18181b' } : undefined}
               key={d.key}
               type="button"
               onClick={() => onSelect(d.key)}
