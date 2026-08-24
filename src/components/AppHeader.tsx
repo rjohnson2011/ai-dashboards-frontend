@@ -61,10 +61,6 @@ export default function AppHeader(props: Props) {
       {props.variant === 'gallery' && props.activeBlurb && (
         <div className="mx-auto max-w-[1480px] px-5 sm:px-7 pb-2">
           <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-neutral-400 dark:text-zinc-500">
-            <span className="text-neutral-700 dark:text-zinc-300">
-              {props.designs.find(d => d.key === props.activeKey)?.label}
-            </span>
-            <span className="mx-2 text-neutral-300 dark:text-zinc-700">·</span>
             {props.activeBlurb}
           </p>
         </div>
