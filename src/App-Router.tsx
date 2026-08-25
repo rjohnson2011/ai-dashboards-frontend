@@ -38,11 +38,16 @@ function AppRouter() {
         <BrowserRouter>
           <AuthGate>
             <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<Dashboard />} />
+              {/* The Triage Board gallery is the product now: it serves the
+                  root, /dashboard, and /redesign so existing links and
+                  bookmarks all land on it. The original table lives on at
+                  /classic for anyone who wants it. */}
+              <Route path="/" element={<RedesignedDashboard />} />
+              <Route path="/dashboard" element={<RedesignedDashboard />} />
               <Route path="/redesign" element={<RedesignedDashboard />} />
+              <Route path="/classic" element={<Dashboard />} />
               <Route path="/sprint-metrics" element={<ReviewerMetrics />} />
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </AuthGate>
         </BrowserRouter>

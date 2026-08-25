@@ -71,7 +71,7 @@ export default function AppHeader(props: Props) {
 
 function BrandMark() {
   return (
-    <Link to="/dashboard" className="flex items-center gap-2 group shrink-0">
+    <Link to="/" className="flex items-center gap-2 group shrink-0">
       <span
         aria-hidden
         className="inline-block h-2 w-2 rounded-full bg-indigo-500 group-hover:bg-indigo-400 transition-colors"
@@ -87,8 +87,8 @@ function ClassicNav() {
   return (
     <nav className="flex items-center gap-1 sm:gap-2 text-[13px]">
       <NavLink to="/sprint-metrics">Reviewer Activity</NavLink>
-      <NavLink to="/redesign" accent>
-        Gallery
+      <NavLink to="/" accent>
+        Dashboard
       </NavLink>
     </nav>
   )
@@ -156,7 +156,7 @@ function GallerySwitcher({
         ))}
       </select>
       <Link
-        to="/dashboard"
+        to="/classic"
         className="hidden sm:inline text-xs text-neutral-500 hover:text-neutral-900 dark:text-zinc-500 dark:hover:text-zinc-200 transition-colors"
       >
         ← Classic

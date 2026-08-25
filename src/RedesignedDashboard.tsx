@@ -52,7 +52,10 @@ const STORAGE_KEY = 'redesign-active-key'
 
 export default function RedesignGallery() {
   const [activeKey, setActiveKey] = useState<string>(() => {
-    return localStorage.getItem(STORAGE_KEY) || DESIGNS[0].key
+    // Honour a stored choice only if it still exists; otherwise fall back to
+    // the first design (Triage Board), which is now the default dashboard.
+    const stored = localStorage.getItem(STORAGE_KEY)
+    return DESIGNS.some(d => d.key === stored) ? (stored as string) : DESIGNS[0].key
   })
   const { pullRequests, loading, error, lastUpdated, refresh } = usePullRequests()
 
