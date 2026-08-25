@@ -289,6 +289,11 @@ function BrutalistRow({ pr, idx }: { pr: PullRequest; idx: number }) {
                 title={`${displayUser(user)} · ${state.replace('_', ' ')}${at ? ` · ${absoluteTime(at)}` : ''}`}
               >
                 {nameFromHandle(user)}
+                {/* Approval time set in the stencil, not hidden in a tooltip —
+                    every other design shows it inline. */}
+                {at && (
+                  <span className="ml-1 tracking-[0.12em] opacity-70">{timeAgoShort(at, ' ago')}</span>
+                )}
               </span>
             )
           })
