@@ -50,10 +50,13 @@ const DESIGNS: Design[] = [
 
 const STORAGE_KEY = 'redesign-active-key'
 
-export default function RedesignGallery() {
+export default function RedesignGallery({ forceKey }: { forceKey?: string } = {}) {
   const [activeKey, setActiveKey] = useState<string>(() => {
-    // Honour a stored choice only if it still exists; otherwise fall back to
-    // the first design (Triage Board), which is now the default dashboard.
+    // `/` and `/dashboard` always open on the canonical dashboard (Triage
+    // Board): those URLs are the product, so a design someone sampled once in
+    // the gallery must not become what the whole team sees there. Only
+    // /redesign — the gallery itself — remembers the last pick.
+    if (forceKey && DESIGNS.some(d => d.key === forceKey)) return forceKey
     const stored = localStorage.getItem(STORAGE_KEY)
     return DESIGNS.some(d => d.key === stored) ? (stored as string) : DESIGNS[0].key
   })
