@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import AppHeader from './components/AppHeader'
 import { usePullRequests } from './hooks/usePullRequests'
+import { authService } from './services/auth'
 
 import TriageBoard from './designs/TriageBoard'
 import EditorialTerminal from './designs/EditorialTerminal'
@@ -48,23 +49,37 @@ const DESIGNS: Design[] = [
   },
 ]
 
-const STORAGE_KEY = 'redesign-active-key'
+// Per-account preference. Keyed by the signed-in user's email so two people
+// sharing a browser profile don't overwrite each other's choice; the legacy
+// unscoped key is read once as a fallback so existing picks survive.
+const LEGACY_STORAGE_KEY = 'redesign-active-key'
+
+function prefKeyFor(email?: string | null): string {
+  return email ? `dashboard-design:${email}` : LEGACY_STORAGE_KEY
+}
 
 export default function RedesignGallery({ forceKey }: { forceKey?: string } = {}) {
+  const email = authService.getUser()?.email
+  const prefKey = prefKeyFor(email)
+
   const [activeKey, setActiveKey] = useState<string>(() => {
-    // `/` and `/dashboard` always open on the canonical dashboard (Triage
-    // Board): those URLs are the product, so a design someone sampled once in
-    // the gallery must not become what the whole team sees there. Only
-    // /redesign — the gallery itself — remembers the last pick.
+    // A design the user explicitly picked is their preference everywhere,
+    // including / and /dashboard. `forceKey` only decides the default for
+    // someone who has never chosen — so the team lands on the Triage Board
+    // without overriding anyone who deliberately switched.
+    const saved = localStorage.getItem(prefKey) || localStorage.getItem(LEGACY_STORAGE_KEY)
+    if (saved && DESIGNS.some(d => d.key === saved)) return saved
     if (forceKey && DESIGNS.some(d => d.key === forceKey)) return forceKey
-    const stored = localStorage.getItem(STORAGE_KEY)
-    return DESIGNS.some(d => d.key === stored) ? (stored as string) : DESIGNS[0].key
+    return DESIGNS[0].key
   })
   const { pullRequests, loading, error, lastUpdated, refresh } = usePullRequests()
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, activeKey)
-  }, [activeKey])
+    localStorage.setItem(prefKey, activeKey)
+    // Keep the legacy key in step so a sign-out/sign-in cycle (or mock mode,
+    // where there is no email) still resolves to the same design.
+    localStorage.setItem(LEGACY_STORAGE_KEY, activeKey)
+  }, [prefKey, activeKey])
 
   // Each design's stylesheet uses !important to override the global
   // `.dark * { color: white !important }` rule from dark-mode-force-white.css.
