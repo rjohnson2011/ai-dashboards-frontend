@@ -435,3 +435,51 @@ export function mockApiResponse(): ApiResponse {
     updating: false,
   }
 }
+
+// Mock /api/v1/reviews/reviewer_activity payload for local design work.
+// Deterministic (seeded) so screenshots are reproducible run to run.
+export function mockReviewerActivity() {
+  const reviewers = ['rjohnson', 'cdonavin', 'jweissman', 'amartinez', 'lchen', 'dpatel', 'skim', 'tnguyen']
+  let seed = 42
+  const rand = () => {
+    seed = (seed * 1664525 + 1013904223) % 4294967296
+    return seed / 4294967296
+  }
+  const now = Date.now()
+  const events: Array<{ reviewer: string; at: string; dependabot: boolean; pr: number; repo: string }> = []
+  let pr = 24000
+  for (let day = 89; day >= 0; day--) {
+    const date = new Date(now - day * 86_400_000)
+    const weekday = date.getDay()
+    const weekend = weekday === 0 || weekday === 6
+    const volume = weekend ? 1 : 6 + Math.floor(rand() * 6) + (weekday === 2 ? 3 : 0)
+    for (let i = 0; i < volume; i++) {
+      const reviewer = reviewers[Math.floor(Math.pow(rand(), 1.6) * reviewers.length)]
+      const hour = 9 + Math.floor(rand() * 9)
+      const at = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hour, Math.floor(rand() * 60))
+      if (at.getTime() > now) continue
+      events.push({ reviewer, at: at.toISOString(), dependabot: rand() < 0.3, pr: pr++, repo: 'vets-api' })
+    }
+  }
+  const counts = (since: number, dependabot: boolean | null) => {
+    const map = new Map<string, number>()
+    for (const e of events) {
+      if (new Date(e.at).getTime() < since) continue
+      if (dependabot !== null && e.dependabot !== dependabot) continue
+      map.set(e.reviewer, (map.get(e.reviewer) ?? 0) + 1)
+    }
+    return [...map.entries()].map(([reviewer, count]) => ({ reviewer, count })).sort((a, b) => b.count - a.count)
+  }
+  const windows = (dependabot: boolean | null) => ({
+    day: counts(now - 86_400_000, dependabot),
+    week: counts(now - 7 * 86_400_000, dependabot),
+    month: counts(now - 30 * 86_400_000, dependabot),
+    ytd: counts(new Date(new Date().getFullYear(), 0, 1).getTime(), dependabot),
+  })
+  return {
+    scopes: { all: windows(null), human: windows(false), dependabot: windows(true) },
+    events,
+    backend_members: reviewers.slice(0, 6),
+    generated_at: new Date(now).toISOString(),
+  }
+}

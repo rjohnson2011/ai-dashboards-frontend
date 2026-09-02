@@ -1,134 +1,219 @@
-import { useEffect, useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card'
-import { authService } from './services/auth'
-import { displayUser } from './lib/utils'
+import { useEffect, useMemo, useState } from 'react'
 import AppHeader from './components/AppHeader'
+import StatTile, { Delta } from './components/analytics/StatTile'
+import PulseChart from './components/analytics/PulseChart'
+import Leaderboard from './components/analytics/Leaderboard'
+import WeekdayHeatmap from './components/analytics/WeekdayHeatmap'
+import { SeriesLegend } from './components/analytics/PulseChart'
+import { A } from './components/analytics/theme'
+import { authService } from './services/auth'
+import { mockReviewerActivity } from './services/mockData'
+import {
+  type ReviewerActivityPayload,
+  type WindowKey,
+  dailySeries,
+  formatCompact,
+  leaderboardRows,
+  weekdayHeatmap,
+  windowSummary,
+} from './lib/analytics'
 
-type Entry = { reviewer: string; count: number }
-type Windows = { day: Entry[]; week: Entry[]; month: Entry[]; ytd: Entry[] }
-type ScopeKey = 'all' | 'human' | 'dependabot'
-type Scopes = Record<ScopeKey, Windows>
+// Read at call time (not module load) so tests can switch it off per run.
+const mockModeOn = () => import.meta.env.VITE_USE_MOCK_DATA === 'true'
 
-const SCOPE_SECTIONS: Array<{ key: ScopeKey; title: string; note: string }> = [
-  { key: 'human', title: 'vets-api reviews', note: 'dependabot PRs excluded' },
-  { key: 'dependabot', title: 'Dependabot reviews', note: 'approvals on dependabot PRs only' },
-  { key: 'all', title: 'Combined', note: 'everything counted together' },
+const WINDOW_TABS: Array<{ key: WindowKey; label: string; empty: string }> = [
+  { key: 'day', label: '24 hours', empty: 'No approvals in the last 24 hours.' },
+  { key: 'week', label: '7 days', empty: 'No approvals in the last 7 days.' },
+  { key: 'month', label: '30 days', empty: 'No approvals in the last 30 days.' },
+  { key: 'ytd', label: 'Year to date', empty: 'No approvals yet this year.' },
 ]
 
-const WINDOW_LABELS: Array<{ key: keyof Windows; label: string }> = [
-  { key: 'day', label: 'Last 24 hours' },
-  { key: 'week', label: 'Last 7 days' },
-  { key: 'month', label: 'Last 30 days' },
-  { key: 'ytd', label: '2026 to date' },
-]
-
+// Sprint Analytics: approved reviews, who gave them, and when. Approvals only;
+// change requests and comments are stored but never counted (team decision).
 function ReviewerMetrics() {
-  const [scopes, setScopes] = useState<Scopes | null>(null)
-  const [backendMembers, setBackendMembers] = useState<string[]>([])
+  const [data, setData] = useState<ReviewerActivityPayload | null>(null)
   const [backendOnly, setBackendOnly] = useState(true)
+  const [window, setWindow] = useState<WindowKey>('week')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
+    let cancelled = false
     const load = async () => {
       setLoading(true)
       try {
+        if (mockModeOn()) {
+          if (!cancelled) setData(mockReviewerActivity())
+          return
+        }
         const base = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-        const res = await fetch(
-          `${base}/api/v1/reviews/reviewer_activity?backend_only=${backendOnly}`,
-          { headers: { ...authService.getAuthHeaders() } }
-        )
+        const res = await fetch(`${base}/api/v1/reviews/reviewer_activity?backend_only=${backendOnly}`, {
+          headers: { ...authService.getAuthHeaders() },
+        })
         if (res.status === 401 || res.status === 403) {
           authService.logout()
           return
         }
         if (!res.ok) throw new Error(`Request failed: ${res.status}`)
-        const data = await res.json()
-        setScopes(data.scopes)
-        setBackendMembers(data.backend_members || [])
-        setError(null)
+        const json = (await res.json()) as ReviewerActivityPayload
+        if (!cancelled) {
+          setData(json)
+          setError(null)
+        }
       } catch {
-        setError('Could not load reviewer activity.')
+        if (!cancelled) setError('Could not load review activity. Check the API and try again.')
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }
     load()
-  }, [backendOnly])
+    return () => {
+      cancelled = true
+    }
+  }, [backendOnly, reloadKey])
+
+  // Anchor "now" to the API's timestamp so every derived number agrees with
+  // the totals it computed, and so a re-render never shifts a day bucket.
+  const now = useMemo(() => (data?.generated_at ? new Date(data.generated_at) : new Date()), [data])
+  const events = useMemo(() => data?.events ?? [], [data])
+  const summary = useMemo(() => windowSummary(events, now), [events, now])
+  const series = useMemo(() => dailySeries(events, 90, now), [events, now])
+  const heat = useMemo(() => weekdayHeatmap(events, 10), [events])
+  const rows = useMemo(() => (data ? leaderboardRows(data.scopes, window) : []), [data, window])
+  const ytd = useMemo(
+    () => (data?.scopes.all?.ytd ?? []).reduce((sum, e) => sum + e.count, 0),
+    [data]
+  )
+  const memberCount = data?.backend_members?.length ?? 0
+  const tab = WINDOW_TABS.find(t => t.key === window) ?? WINDOW_TABS[1]
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppHeader variant="classic" />
-      <div className="px-4 py-6 space-y-6 mx-auto max-w-[1480px]">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div className="min-h-screen" style={{ background: A.bg, color: A.text }}>
+      <AppHeader variant="classic" lastUpdated={data?.generated_at ?? null} />
+
+      <main className="mx-auto max-w-[1480px] px-5 py-6 sm:px-7">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-xl font-semibold tracking-tight">Reviewer Activity</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Approved reviews per reviewer. Change requests and comments are not counted.
+            <h1 style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-0.01em' }}>Sprint Analytics</h1>
+            <p style={{ fontSize: 13, marginTop: 4 }}>
+              Approved reviews on the repositories this dashboard follows. Change requests and comments are not counted.
             </p>
           </div>
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={backendOnly}
-              onChange={e => setBackendOnly(e.target.checked)}
-            />
-            Backend review group only ({backendMembers.length})
+          <label className="flex cursor-pointer select-none items-center gap-2.5" style={{ fontSize: 13 }}>
+            <span
+              role="switch"
+              aria-checked={backendOnly}
+              tabIndex={0}
+              onClick={() => setBackendOnly(v => !v)}
+              onKeyDown={e => {
+                if (e.key === ' ' || e.key === 'Enter') {
+                  e.preventDefault()
+                  setBackendOnly(v => !v)
+                }
+              }}
+              className="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2"
+              style={{ background: backendOnly ? A.accent : A.mutedSoft }}
+            >
+              <span
+                className="inline-block h-4 w-4 rounded-full transition-transform"
+                style={{ background: A.text, transform: backendOnly ? 'translateX(18px)' : 'translateX(2px)' }}
+              />
+            </span>
+            Backend review group only{memberCount > 0 ? ` (${memberCount})` : ''}
           </label>
         </div>
 
-        {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && (
+          <div className="mt-6 flex items-center gap-3 rounded-md px-4 py-3" style={{ border: `1px solid ${A.down}`, fontSize: 13 }}>
+            <span>{error}</span>
+            <button
+              type="button"
+              onClick={() => setReloadKey(k => k + 1)}
+              className="rounded-md px-2.5 py-1"
+              style={{ border: `1px solid ${A.line}`, fontSize: 12 }}
+            >
+              Retry
+            </button>
+          </div>
+        )}
 
-        {scopes && !loading &&
-          SCOPE_SECTIONS.map(({ key: scopeKey, title, note }) => {
-            const windows = scopes[scopeKey]
-            if (!windows) return null
-            return (
-              <section key={scopeKey} className="space-y-3">
-                <div className="flex items-baseline gap-2">
-                  <h3 className="text-base font-semibold">{title}</h3>
-                  <span className="text-xs text-muted-foreground">{note}</span>
+        {!data && loading && !error && (
+          <p className="mt-10" style={{ fontSize: 13 }}>Loading approvals…</p>
+        )}
+
+        {data && (
+          <div
+            aria-busy={loading}
+            className="mt-6 transition-opacity"
+            style={{ opacity: loading ? 0.5 : 1 }}
+          >
+            {/* Hero band: the one number, its neighbours, and the pulse. */}
+            <section className="grid gap-4 lg:grid-cols-[minmax(300px,2fr)_5fr]">
+              <div className="flex flex-col gap-3">
+                <div className="rounded-lg px-5 py-4" style={{ background: A.surface, border: `1px solid ${A.line}` }}>
+                  <div style={{ fontSize: 13 }}>Approvals in the last 30 days</div>
+                  <div data-testid="hero-count" style={{ fontSize: 56, fontWeight: 600, lineHeight: 1.05, marginTop: 6 }}>
+                    {formatCompact(summary.month.count)}
+                  </div>
+                  <div className="mt-2">
+                    <Delta count={summary.month.count} previous={summary.month.previous} period="30 days before" />
+                  </div>
                 </div>
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                  {WINDOW_LABELS.map(({ key, label }) => {
-                    const rows = windows[key] || []
-                    const max = rows.length > 0 ? rows[0].count : 0
-                    return (
-                      <Card key={key}>
-                        <CardHeader>
-                          <CardTitle className="text-base">{label}</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                          {rows.length === 0 ? (
-                            <p className="text-xs text-muted-foreground">No approvals in this window.</p>
-                          ) : (
-                            rows.map(row => (
-                              <div key={row.reviewer} className="space-y-1">
-                                <div className="flex items-center justify-between text-xs">
-                                  <span className="truncate">{displayUser(row.reviewer)}</span>
-                                  <span className="text-muted-foreground tabular-nums">{row.count}</span>
-                                </div>
-                                {/* Width relative to the window's top reviewer, so
-                                    each card scales independently. */}
-                                <div className="h-1.5 rounded bg-muted overflow-hidden">
-                                  <div
-                                    className="h-full bg-primary"
-                                    style={{ width: max > 0 ? `${(row.count / max) * 100}%` : '0%' }}
-                                  />
-                                </div>
-                              </div>
-                            ))
-                          )}
-                        </CardContent>
-                      </Card>
-                    )
-                  })}
+                <StatTile label="Last 24 hours" count={summary.day.count} previous={summary.day.previous} spark={summary.day.spark} note="day before" />
+                <StatTile label="Last 7 days" count={summary.week.count} previous={summary.week.previous} spark={summary.week.spark} note="week before" />
+                <StatTile label="Year to date" count={ytd} note={`Since January 1, ${now.getFullYear()}`} />
+              </div>
+              <div className="rounded-lg px-5 py-4" style={{ background: A.surface, border: `1px solid ${A.line}` }}>
+                <PulseChart data={series} />
+              </div>
+            </section>
+
+            <section className="mt-8 grid gap-8 lg:grid-cols-5" style={{ borderTop: `1px solid ${A.line}`, paddingTop: 24 }}>
+              <div className="lg:col-span-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h2 style={{ fontSize: 14, fontWeight: 500 }}>Who is reviewing</h2>
+                    <p style={{ fontSize: 12 }}>Approvals per reviewer, {tab.label.toLowerCase()}.</p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <SeriesLegend />
+                    <div role="tablist" aria-label="Window" className="flex rounded-md p-0.5" style={{ background: A.mutedSoft }}>
+                      {WINDOW_TABS.map(t => {
+                        const active = t.key === window
+                        return (
+                          <button
+                            key={t.key}
+                            type="button"
+                            role="tab"
+                            aria-selected={active}
+                            onClick={() => setWindow(t.key)}
+                            className="rounded px-2.5 py-1 transition-colors"
+                            style={{
+                              fontSize: 12,
+                              fontWeight: active ? 600 : 400,
+                              color: A.text,
+                              background: active ? A.accent : 'transparent',
+                            }}
+                          >
+                            {t.label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
                 </div>
-              </section>
-            )
-          })}
-      </div>
+                <Leaderboard rows={rows} emptyNote={tab.empty} />
+              </div>
+              <div className="lg:col-span-2">
+                <h2 style={{ fontSize: 14, fontWeight: 500 }}>When reviews happen</h2>
+                <p style={{ fontSize: 12 }}>Approvals by weekday, last 90 days, busiest ten reviewers.</p>
+                <WeekdayHeatmap heat={heat} />
+              </div>
+            </section>
+          </div>
+        )}
+      </main>
     </div>
   )
 }
