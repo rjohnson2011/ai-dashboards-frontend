@@ -93,6 +93,7 @@ export default function RedesignGallery({ forceKey }: { forceKey?: string } = {}
       <AppHeader
         variant="gallery"
         designs={DESIGNS.map(({ key, label, blurb }) => ({ key, label, blurb }))}
+        primaryKey={DESIGNS[0].key}
         activeKey={activeKey}
         onSelect={setActiveKey}
         activeBlurb={active.blurb}
