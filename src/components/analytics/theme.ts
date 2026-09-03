@@ -18,7 +18,7 @@ export const A = {
 } as const
 
 export const SERIES = {
-  human: { label: 'Human PRs', color: A.accent },
+  human: { label: 'Backend PRs', color: A.accent },
   dependabot: { label: 'Dependabot PRs', color: A.muted },
 } as const
 

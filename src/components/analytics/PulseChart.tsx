@@ -162,7 +162,7 @@ export default function PulseChart({ data }: Props) {
             <thead className="sticky top-0" style={{ background: A.surface }}>
               <tr>
                 <th className="px-3 py-1.5 text-left font-medium">Day</th>
-                <th className="px-3 py-1.5 text-right font-medium">Human</th>
+                <th className="px-3 py-1.5 text-right font-medium">Backend</th>
                 <th className="px-3 py-1.5 text-right font-medium">Dependabot</th>
                 <th className="px-3 py-1.5 text-right font-medium">Total</th>
               </tr>

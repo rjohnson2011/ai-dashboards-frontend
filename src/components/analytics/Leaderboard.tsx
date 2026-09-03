@@ -22,7 +22,7 @@ export default function Leaderboard({ rows, emptyNote }: Props) {
         const width = max > 0 ? (row.total / max) * 100 : 0
         const humanShare = row.total > 0 ? (row.human / row.total) * 100 : 0
         const name = displayUser(row.reviewer)
-        const detail = `${name}: ${row.human} on human PRs, ${row.dependabot} on dependabot PRs`
+        const detail = `${name}: ${row.human} on backend PRs, ${row.dependabot} on dependabot PRs`
         return (
           <li key={row.reviewer} className="flex items-center gap-3" title={detail}>
             <span className="w-5 shrink-0 text-right tabular-nums" style={{ color: A.text, fontSize: 11 }}>
