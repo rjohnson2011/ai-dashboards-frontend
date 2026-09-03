@@ -9,9 +9,11 @@ import { A } from './components/analytics/theme'
 import { authService } from './services/auth'
 import { mockReviewerActivity } from './services/mockData'
 import {
+  type PulseRange,
   type ReviewerActivityPayload,
+  PULSE_RANGES,
   type WindowKey,
-  dailySeries,
+  weekdaySeries,
   formatCompact,
   leaderboardRows,
   weekdayHeatmap,
@@ -34,9 +36,13 @@ function ReviewerMetrics() {
   const [data, setData] = useState<ReviewerActivityPayload | null>(null)
   const [backendOnly, setBackendOnly] = useState(true)
   const [window, setWindow] = useState<WindowKey>('week')
+  const [range, setRange] = useState<PulseRange>('2w')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [reloadKey, setReloadKey] = useState(0)
+
+  // 90 days of events covers every range but the year, which asks for more.
+  const eventsDays = range === '1y' ? 366 : 90
 
   useEffect(() => {
     let cancelled = false
@@ -48,7 +54,7 @@ function ReviewerMetrics() {
           return
         }
         const base = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-        const res = await fetch(`${base}/api/v1/reviews/reviewer_activity?backend_only=${backendOnly}`, {
+        const res = await fetch(`${base}/api/v1/reviews/reviewer_activity?backend_only=${backendOnly}&events_days=${eventsDays}`, {
           headers: { ...authService.getAuthHeaders() },
         })
         if (res.status === 401 || res.status === 403) {
@@ -71,15 +77,21 @@ function ReviewerMetrics() {
     return () => {
       cancelled = true
     }
-  }, [backendOnly, reloadKey])
+  }, [backendOnly, eventsDays, reloadKey])
 
   // Anchor "now" to the API's timestamp so every derived number agrees with
   // the totals it computed, and so a re-render never shifts a day bucket.
   const now = useMemo(() => (data?.generated_at ? new Date(data.generated_at) : new Date()), [data])
   const events = useMemo(() => data?.events ?? [], [data])
   const summary = useMemo(() => windowSummary(events, now), [events, now])
-  const series = useMemo(() => dailySeries(events, 90, now), [events, now])
-  const heat = useMemo(() => weekdayHeatmap(events, 10), [events])
+  const rangeDays = PULSE_RANGES.find(r => r.key === range)?.days ?? 14
+  const series = useMemo(() => weekdaySeries(events, rangeDays, now), [events, rangeDays, now])
+  // The heatmap always describes the last 90 days, whatever the chart range.
+  const heatEvents = useMemo(() => {
+    const cutoff = now.getTime() - 90 * 86_400_000
+    return events.filter(e => new Date(e.at).getTime() >= cutoff)
+  }, [events, now])
+  const heat = useMemo(() => weekdayHeatmap(heatEvents, 10), [heatEvents])
   const rows = useMemo(() => (data ? leaderboardRows(data.scopes, window) : []), [data, window])
   const ytd = useMemo(
     () => (data?.scopes.all?.ytd ?? []).reduce((sum, e) => sum + e.count, 0),
@@ -160,12 +172,12 @@ function ReviewerMetrics() {
                     <Delta count={summary.month.count} previous={summary.month.previous} period="30 days before" />
                   </div>
                 </div>
-                <StatTile label="Last 24 hours" count={summary.day.count} previous={summary.day.previous} spark={summary.day.spark} note="day before" />
+                <StatTile label="Last 24 hours" count={summary.day.count} previous={summary.day.previous} note="day before" />
                 <StatTile label="Last 7 days" count={summary.week.count} previous={summary.week.previous} spark={summary.week.spark} note="week before" />
                 <StatTile label="Year to date" count={ytd} note={`Since January 1, ${now.getFullYear()}`} />
               </div>
               <div className="rounded-lg px-5 py-4" style={{ background: A.surface, border: `1px solid ${A.line}` }}>
-                <PulseChart data={series} />
+                <PulseChart data={series} range={range} onRangeChange={setRange} />
               </div>
             </section>
 

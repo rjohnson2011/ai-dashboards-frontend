@@ -223,7 +223,7 @@ function GallerySwitcher({
 function UpdatedBadge({ lastUpdated }: { lastUpdated: string | Date | null }) {
   if (!lastUpdated) {
     return (
-      <span className="hidden lg:inline text-[11px] text-neutral-400 dark:text-zinc-500">
+      <span className="hidden lg:inline text-[11px] text-neutral-500 dark:text-white">
         v{APP_VERSION.version}
       </span>
     )
@@ -232,11 +232,11 @@ function UpdatedBadge({ lastUpdated }: { lastUpdated: string | Date | null }) {
   const ago = formatAgo(dt)
   return (
     <span
-      className="hidden md:inline text-[11px] tabular-nums text-neutral-500 dark:text-zinc-500"
+      className="hidden md:inline text-[11px] tabular-nums text-neutral-500 dark:text-white"
       title={dt.toLocaleString()}
     >
       Updated {ago}
-      <span className="mx-1.5 text-neutral-300 dark:text-zinc-700">·</span>
+      <span className="mx-1.5 text-neutral-300 dark:text-white/60">·</span>
       v{APP_VERSION.version}
     </span>
   )

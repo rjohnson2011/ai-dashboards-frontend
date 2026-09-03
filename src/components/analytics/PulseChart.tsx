@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { A, SERIES, prefersReducedMotion } from './theme'
-import type { DayPoint } from '../../lib/analytics'
+import { PULSE_RANGES, type DayPoint, type PulseRange } from '../../lib/analytics'
 
 interface Props {
   data: DayPoint[]
+  range: PulseRange
+  onRangeChange: (range: PulseRange) => void
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -70,7 +72,7 @@ export function SeriesLegend() {
 
 // Stacked gradient area of daily approvals. Human approvals sit on the
 // baseline (they are the story); dependabot rides on top in slate.
-export default function PulseChart({ data }: Props) {
+export default function PulseChart({ data, range, onRangeChange }: Props) {
   const [view, setView] = useState<'chart' | 'table'>('chart')
   const animate = !prefersReducedMotion()
   const tickEvery = Math.max(1, Math.floor(data.length / 6))
@@ -80,11 +82,34 @@ export default function PulseChart({ data }: Props) {
     <div className="flex h-full flex-col">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 style={{ color: A.text, fontSize: 14, fontWeight: 500 }}>Daily approvals, last 90 days</h2>
-          <p style={{ color: A.text, fontSize: 12 }}>Hover a day for the split.</p>
+          <h2 style={{ color: A.text, fontSize: 14, fontWeight: 500 }}>Daily approvals, weekdays</h2>
+          <p style={{ color: A.text, fontSize: 12 }}>Weekend approvals count toward the following Monday.</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           <SeriesLegend />
+          <div role="tablist" aria-label="Range" className="flex rounded-md p-0.5" style={{ background: A.mutedSoft }}>
+            {PULSE_RANGES.map(r => {
+              const active = r.key === range
+              return (
+                <button
+                  key={r.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => onRangeChange(r.key)}
+                  className="rounded px-2.5 py-1 transition-colors"
+                  style={{
+                    fontSize: 12,
+                    fontWeight: active ? 600 : 400,
+                    color: A.text,
+                    background: active ? A.accent : 'transparent',
+                  }}
+                >
+                  {r.label}
+                </button>
+              )
+            })}
+          </div>
           <button
             type="button"
             onClick={() => setView(v => (v === 'chart' ? 'table' : 'chart'))}

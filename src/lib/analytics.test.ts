@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   type ApprovalEvent,
-  dailySeries,
+  weekdaySeries,
   windowSummary,
   leaderboardRows,
   weekdayHeatmap,
@@ -16,14 +16,31 @@ function ev(reviewer: string, daysAgo: number, dependabot = false, hoursAgo = 0)
   return { reviewer, at: at.toISOString(), dependabot, pr: 1, repo: 'vets-api' }
 }
 
-describe('dailySeries', () => {
-  it('buckets approvals by local day over the requested span, zero-filled, ending today', () => {
-    const events = [ev('bob', 0), ev('bob', 1), ev('carol', 1, true), ev('bob', 5)]
-    const series = dailySeries(events, 3, NOW)
-    expect(series).toEqual([
-      { date: '2026-08-31', human: 0, dependabot: 0 },
-      { date: '2026-09-01', human: 1, dependabot: 1 },
-      { date: '2026-09-02', human: 1, dependabot: 0 },
+describe('weekdaySeries', () => {
+  it('skips Saturday and Sunday, folds their approvals into Monday, and ends on the last completed day', () => {
+    // NOW is Wed Sep 2. Seven days ending yesterday covers Wed Aug 26 .. Tue Sep 1.
+    const events = [
+      ev('bob', 7), // Wed Aug 26
+      ev('bob', 4), // Sat Aug 29 -> Mon Aug 31
+      ev('carol', 3, true), // Sun Aug 30 -> Mon Aug 31
+      ev('bob', 2), // Mon Aug 31
+      ev('bob', 0), // today: not a completed day
+    ]
+    expect(weekdaySeries(events, 7, NOW)).toEqual([
+      { date: '2026-08-26', human: 1, dependabot: 0 },
+      { date: '2026-08-27', human: 0, dependabot: 0 },
+      { date: '2026-08-28', human: 0, dependabot: 0 },
+      { date: '2026-08-31', human: 2, dependabot: 1 },
+      { date: '2026-09-01', human: 0, dependabot: 0 },
+    ])
+  })
+
+  it('holds weekend approvals for a Monday outside the range instead of showing them on the weekend', () => {
+    const sunday = new Date(2026, 8, 6, 12) // Sun Sep 6
+    const events = [{ reviewer: 'bob', at: new Date(2026, 8, 5, 12).toISOString(), dependabot: false, pr: 1, repo: 'r' }]
+    expect(weekdaySeries(events, 3, sunday)).toEqual([
+      { date: '2026-09-03', human: 0, dependabot: 0 },
+      { date: '2026-09-04', human: 0, dependabot: 0 },
     ])
   })
 })
@@ -46,14 +63,17 @@ describe('windowSummary', () => {
     expect(s.month.previous).toBe(1)
   })
 
-  it('gives each window a sparkline with one point per sub-bucket', () => {
-    const s = windowSummary([ev('bob', 0), ev('bob', 2)], NOW)
-    expect(s.day.spark).toHaveLength(24)
-    expect(s.week.spark).toHaveLength(7)
-    expect(s.month.spark).toHaveLength(30)
-    expect(s.day.spark[23]).toBe(1)
-    expect(s.week.spark[6]).toBe(1)
-    expect(s.week.spark[4]).toBe(1)
+  it('gives the week a sparkline over the last seven completed weekdays, weekends folded into Monday', () => {
+    // NOW is Wed Sep 2, so the completed weekdays are Mon Aug 24 .. Tue Sep 1.
+    const events = [
+      ev('bob', 0), // today: not a completed day
+      ev('bob', 1), // Tue Sep 1 -> last point
+      ev('bob', 4), // Sat Aug 29 -> Mon Aug 31
+      ev('bob', 9), // Mon Aug 24 -> first point
+      ev('bob', 12), // Fri Aug 21 -> before the window
+    ]
+    const s = windowSummary(events, NOW)
+    expect(s.week.spark).toEqual([1, 0, 0, 0, 0, 1, 1])
   })
 })
 

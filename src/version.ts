@@ -1,4 +1,4 @@
 export const APP_VERSION = {
-  version: "6.0.48",
-  timestamp: "2026-09-03T16:53:06.749Z"
+  version: "7.0.0",
+  timestamp: "2026-09-03T16:57:31.681Z"
 };

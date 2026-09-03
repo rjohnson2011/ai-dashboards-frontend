@@ -448,7 +448,7 @@ export function mockReviewerActivity() {
   const now = Date.now()
   const events: Array<{ reviewer: string; at: string; dependabot: boolean; pr: number; repo: string }> = []
   let pr = 24000
-  for (let day = 89; day >= 0; day--) {
+  for (let day = 370; day >= 0; day--) {
     const date = new Date(now - day * 86_400_000)
     const weekday = date.getDay()
     const weekend = weekday === 0 || weekday === 6

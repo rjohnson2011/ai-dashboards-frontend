@@ -27,13 +27,23 @@ export interface ReviewerActivityPayload {
   generated_at?: string
 }
 
+// Ranges offered on the daily approvals chart. The year needs more events
+// than the API sends by default; the page asks for them when it is picked.
+export type PulseRange = '2w' | '1m' | '3m' | '1y'
+
+export const PULSE_RANGES: Array<{ key: PulseRange; label: string; days: number }> = [
+  { key: '2w', label: '2 weeks', days: 14 },
+  { key: '1m', label: 'Month', days: 30 },
+  { key: '3m', label: '3 months', days: 90 },
+  { key: '1y', label: 'Year', days: 365 },
+]
+
 export interface DayPoint {
   date: string
   human: number
   dependabot: number
 }
 
-const HOUR = 3_600_000
 const DAY = 86_400_000
 
 function pad(n: number): string {
@@ -48,40 +58,75 @@ function startOfDay(d: Date): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate())
 }
 
-function startOfHour(d: Date): Date {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours())
+function addDays(d: Date, n: number): Date {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n)
 }
 
-// Whole calendar days from `from` to `to` (negative when `to` is earlier).
-// Rounded so a DST shift never pushes a day into its neighbour.
-function dayDiff(from: Date, to: Date): number {
-  return Math.round((startOfDay(to).getTime() - startOfDay(from).getTime()) / DAY)
+function isWeekend(d: Date): boolean {
+  const dow = d.getDay()
+  return dow === 0 || dow === 6
 }
 
-// Approvals per local calendar day for the last `days` days, ending today.
-export function dailySeries(events: ApprovalEvent[], days: number, now: Date): DayPoint[] {
-  const today = startOfDay(now)
+// The team does not review on weekends, so a Saturday or Sunday approval
+// counts toward the following Monday.
+function toWorkday(d: Date): Date {
+  const day = startOfDay(d)
+  const dow = day.getDay()
+  if (dow === 6) return addDays(day, 2)
+  if (dow === 0) return addDays(day, 1)
+  return day
+}
+
+function pointsFor(dates: Date[]): { points: DayPoint[]; index: Map<string, DayPoint> } {
   const points: DayPoint[] = []
   const index = new Map<string, DayPoint>()
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i)
+  for (const d of dates) {
     const point = { date: localDateKey(d), human: 0, dependabot: 0 }
     points.push(point)
     index.set(point.date, point)
   }
+  return { points, index }
+}
+
+function fold(events: ApprovalEvent[], index: Map<string, DayPoint>): void {
   for (const e of events) {
-    const point = index.get(localDateKey(new Date(e.at)))
+    const point = index.get(localDateKey(toWorkday(new Date(e.at))))
     if (!point) continue
     if (e.dependabot) point.dependabot += 1
     else point.human += 1
   }
+}
+
+// Approvals per weekday over the `days` calendar days ending yesterday, so
+// the trailing point is always a completed day rather than "today so far".
+// Saturday and Sunday are omitted; their approvals fold into the following
+// Monday when that Monday is in range.
+export function weekdaySeries(events: ApprovalEvent[], days: number, now: Date): DayPoint[] {
+  const today = startOfDay(now)
+  const dates: Date[] = []
+  for (let i = days; i >= 1; i--) {
+    const d = addDays(today, -i)
+    if (!isWeekend(d)) dates.push(d)
+  }
+  const { points, index } = pointsFor(dates)
+  fold(events, index)
   return points
+}
+
+// The last `n` weekdays strictly before today, oldest first.
+function completedWeekdays(now: Date, n: number): Date[] {
+  const out: Date[] = []
+  let d = addDays(startOfDay(now), -1)
+  while (out.length < n) {
+    if (!isWeekend(d)) out.unshift(d)
+    d = addDays(d, -1)
+  }
+  return out
 }
 
 export interface WindowStats {
   count: number
   previous: number
-  spark: number[]
 }
 
 function countBetween(events: ApprovalEvent[], from: number, to: number): number {
@@ -94,35 +139,24 @@ function countBetween(events: ApprovalEvent[], from: number, to: number): number
 }
 
 // Rolling counts for the last 24h / 7d / 30d with the equal-length window
-// before each (for the delta), plus a sparkline: clock hours for the day,
-// calendar days for the week and month, oldest first.
-export function windowSummary(events: ApprovalEvent[], now: Date): Record<'day' | 'week' | 'month', WindowStats> {
+// before each (for the delta). The week also carries a sparkline over the
+// last seven completed weekdays, so the trailing point is never a partial
+// day that reads as a drop.
+export function windowSummary(
+  events: ApprovalEvent[],
+  now: Date
+): { day: WindowStats; week: WindowStats & { spark: number[] }; month: WindowStats } {
   const t0 = now.getTime()
-  const rolling = (span: number): Omit<WindowStats, 'spark'> => ({
+  const rolling = (span: number): WindowStats => ({
     count: countBetween(events, t0 - span, t0 + 1),
     previous: countBetween(events, t0 - 2 * span, t0 - span),
   })
-
-  const hourly = new Array<number>(24).fill(0)
-  const hourEnd = startOfHour(now).getTime()
-  for (const e of events) {
-    const idx = 23 + Math.round((startOfHour(new Date(e.at)).getTime() - hourEnd) / HOUR)
-    if (idx >= 0 && idx < 24) hourly[idx] += 1
-  }
-
-  const daily = (n: number): number[] => {
-    const buckets = new Array<number>(n).fill(0)
-    for (const e of events) {
-      const idx = n - 1 + dayDiff(now, new Date(e.at))
-      if (idx >= 0 && idx < n) buckets[idx] += 1
-    }
-    return buckets
-  }
-
+  const { points, index } = pointsFor(completedWeekdays(now, 7))
+  fold(events, index)
   return {
-    day: { ...rolling(DAY), spark: hourly },
-    week: { ...rolling(7 * DAY), spark: daily(7) },
-    month: { ...rolling(30 * DAY), spark: daily(30) },
+    day: rolling(DAY),
+    week: { ...rolling(7 * DAY), spark: points.map(p => p.human + p.dependabot) },
+    month: rolling(30 * DAY),
   }
 }
 

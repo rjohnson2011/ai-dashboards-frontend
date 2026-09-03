@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import ReviewerMetrics from './ReviewerMetrics'
 
@@ -64,5 +65,19 @@ describe('ReviewerMetrics page', () => {
     await screen.findByTestId('hero-count')
     const url = String(fetchMock.mock.calls[0][0])
     expect(url).toContain('backend_only=true')
+    expect(url).toContain('events_days=90')
+  })
+
+  it('refetches a year of events when the pulse range is set to Year', async () => {
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter>
+        <ReviewerMetrics />
+      </MemoryRouter>
+    )
+    await screen.findByTestId('hero-count')
+    await user.click(screen.getByRole('tab', { name: 'Year' }))
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
+    expect(String(fetchMock.mock.calls[1][0])).toContain('events_days=366')
   })
 })
