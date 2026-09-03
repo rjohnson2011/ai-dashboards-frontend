@@ -29,6 +29,7 @@ const WINDOW_TABS: Array<{ key: WindowKey; label: string; empty: string }> = [
   { key: 'day', label: '24 hours', empty: 'No approvals in the last 24 hours.' },
   { key: 'week', label: '7 days', empty: 'No approvals in the last 7 days.' },
   { key: 'month', label: '30 days', empty: 'No approvals in the last 30 days.' },
+  { key: 'quarter', label: '90 days', empty: 'No approvals in the last 90 days.' },
   { key: 'ytd', label: 'Year to date', empty: 'No approvals yet this year.' },
 ]
 

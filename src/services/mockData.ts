@@ -485,6 +485,7 @@ export function mockReviewerActivity() {
     day: counts(now - 86_400_000, dependabot),
     week: counts(now - 7 * 86_400_000, dependabot),
     month: counts(now - 30 * 86_400_000, dependabot),
+    quarter: counts(now - 90 * 86_400_000, dependabot),
     ytd: counts(new Date(new Date().getFullYear(), 0, 1).getTime(), dependabot),
   })
   return {

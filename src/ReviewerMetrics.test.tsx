@@ -9,7 +9,7 @@ const iso = (daysAgo: number) => new Date(Date.now() - daysAgo * 86_400_000).toI
 const payload = {
   scopes: {
     all: { day: [], week: [{ reviewer: 'bob', count: 4 }, { reviewer: 'carol', count: 3 }], month: [], ytd: [] },
-    human: { day: [], week: [{ reviewer: 'bob', count: 4 }, { reviewer: 'carol', count: 1 }], month: [{ reviewer: 'bob', count: 4 }], ytd: [{ reviewer: 'bob', count: 40 }] },
+    human: { day: [], week: [{ reviewer: 'bob', count: 4 }, { reviewer: 'carol', count: 1 }], month: [{ reviewer: 'bob', count: 4 }], quarter: [{ reviewer: 'dan', count: 9 }], ytd: [{ reviewer: 'bob', count: 40 }] },
     dependabot: { day: [], week: [{ reviewer: 'carol', count: 2 }], month: [{ reviewer: 'carol', count: 2 }], ytd: [] },
   },
   events: [
@@ -79,5 +79,17 @@ describe('ReviewerMetrics page', () => {
     await user.click(screen.getByRole('tab', { name: 'Year' }))
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
     expect(String(fetchMock.mock.calls[1][0])).toContain('events_days=366')
+  })
+
+  it('offers a 90-day leaderboard window', async () => {
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter>
+        <ReviewerMetrics />
+      </MemoryRouter>
+    )
+    await screen.findByTestId('hero-count')
+    await user.click(screen.getByRole('tab', { name: '90 days' }))
+    expect(screen.getByTestId('leaderboard')).toHaveTextContent('dan')
   })
 })

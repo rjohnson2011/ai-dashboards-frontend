@@ -17,7 +17,7 @@ export interface Entry {
   count: number
 }
 
-export type WindowKey = 'day' | 'week' | 'month' | 'ytd'
+export type WindowKey = 'day' | 'week' | 'month' | 'quarter' | 'ytd'
 export type ScopeKey = 'all' | 'human' | 'dependabot'
 export type Windows = Partial<Record<WindowKey, Entry[]>>
 export type Scopes = Partial<Record<ScopeKey, Windows>>
