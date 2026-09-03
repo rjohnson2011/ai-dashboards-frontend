@@ -7,6 +7,7 @@ interface Props {
   data: DayPoint[]
   range: PulseRange
   onRangeChange: (range: PulseRange) => void
+  onDayClick?: (date: string) => void
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -72,7 +73,7 @@ export function SeriesLegend() {
 
 // Stacked gradient area of daily approvals. Human approvals sit on the
 // baseline (they are the story); dependabot rides on top in slate.
-export default function PulseChart({ data, range, onRangeChange }: Props) {
+export default function PulseChart({ data, range, onRangeChange, onDayClick }: Props) {
   const [view, setView] = useState<'chart' | 'table'>('chart')
   const animate = !prefersReducedMotion()
   const tickEvery = Math.max(1, Math.floor(data.length / 6))
@@ -83,7 +84,9 @@ export default function PulseChart({ data, range, onRangeChange }: Props) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 style={{ color: A.text, fontSize: 14, fontWeight: 500 }}>Daily approvals, weekdays</h2>
-          <p style={{ color: A.text, fontSize: 12 }}>Weekend approvals count toward the following Monday.</p>
+          <p style={{ color: A.text, fontSize: 12 }}>
+            Weekend approvals count toward the following Monday. Click a day to see its PRs.
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-4">
           <SeriesLegend />
@@ -125,7 +128,15 @@ export default function PulseChart({ data, range, onRangeChange }: Props) {
       {view === 'chart' ? (
         <div className="mt-3 min-h-[260px] flex-1">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -12 }}>
+            <AreaChart
+              data={data}
+              margin={{ top: 8, right: 8, bottom: 0, left: -12 }}
+              style={{ cursor: onDayClick ? 'pointer' : undefined }}
+              onClick={state => {
+                const label = state?.activeLabel
+                if (onDayClick && typeof label === 'string') onDayClick(label)
+              }}
+            >
               <defs>
                 <linearGradient id="pulse-human" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor={A.accent} stopOpacity={0.38} />
@@ -194,7 +205,11 @@ export default function PulseChart({ data, range, onRangeChange }: Props) {
             </thead>
             <tbody className="tabular-nums">
               {[...data].reverse().map(p => (
-                <tr key={p.date} style={{ borderTop: `1px solid ${A.grid}` }}>
+                <tr
+                  key={p.date}
+                  style={{ borderTop: `1px solid ${A.grid}`, cursor: onDayClick ? 'pointer' : undefined }}
+                  onClick={() => onDayClick?.(p.date)}
+                >
                   <td className="px-3 py-1">{longDate(p.date)}</td>
                   <td className="px-3 py-1 text-right">{p.human}</td>
                   <td className="px-3 py-1 text-right">{p.dependabot}</td>

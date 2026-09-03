@@ -8,6 +8,8 @@ export interface ApprovalEvent {
   dependabot: boolean
   pr: number | null
   repo: string | null
+  title?: string | null
+  url?: string | null
 }
 
 export interface Entry {
@@ -217,4 +219,37 @@ export function formatCompact(n: number): string {
 export function percentDelta(count: number, previous: number): number | null {
   if (previous === 0) return null
   return Math.round(((count - previous) / previous) * 100)
+}
+
+export interface ApprovedPr {
+  pr: number | null
+  repo: string | null
+  title: string | null
+  url: string | null
+  dependabot: boolean
+  approvals: Array<{ reviewer: string; at: string }>
+}
+
+// The PRs approved on a chart day (a local date key), grouped by PR in order
+// of first approval. Uses the same weekend folding as the chart, so clicking
+// a Monday also lists the weekend's approvals.
+export function approvalsOn(events: ApprovalEvent[], date: string): ApprovedPr[] {
+  const groups = new Map<string, ApprovedPr>()
+  const matching = events
+    .filter(e => localDateKey(toWorkday(new Date(e.at))) === date)
+    .sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime())
+  for (const e of matching) {
+    const key = `${e.repo ?? ''}#${e.pr ?? ''}`
+    const group = groups.get(key) ?? {
+      pr: e.pr,
+      repo: e.repo,
+      title: e.title ?? null,
+      url: e.url ?? null,
+      dependabot: e.dependabot,
+      approvals: [],
+    }
+    group.approvals.push({ reviewer: e.reviewer, at: e.at })
+    groups.set(key, group)
+  }
+  return [...groups.values()]
 }

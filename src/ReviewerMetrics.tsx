@@ -4,6 +4,7 @@ import StatTile, { Delta } from './components/analytics/StatTile'
 import PulseChart from './components/analytics/PulseChart'
 import Leaderboard from './components/analytics/Leaderboard'
 import WeekdayHeatmap from './components/analytics/WeekdayHeatmap'
+import DayDetail from './components/analytics/DayDetail'
 import { SeriesLegend } from './components/analytics/PulseChart'
 import { A } from './components/analytics/theme'
 import { authService } from './services/auth'
@@ -12,6 +13,7 @@ import {
   type PulseRange,
   type ReviewerActivityPayload,
   PULSE_RANGES,
+  approvalsOn,
   type WindowKey,
   weekdaySeries,
   formatCompact,
@@ -37,6 +39,7 @@ function ReviewerMetrics() {
   const [backendOnly, setBackendOnly] = useState(true)
   const [window, setWindow] = useState<WindowKey>('week')
   const [range, setRange] = useState<PulseRange>('2w')
+  const [selectedDay, setSelectedDay] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [reloadKey, setReloadKey] = useState(0)
@@ -92,6 +95,7 @@ function ReviewerMetrics() {
     return events.filter(e => new Date(e.at).getTime() >= cutoff)
   }, [events, now])
   const heat = useMemo(() => weekdayHeatmap(heatEvents, 10), [heatEvents])
+  const dayGroups = useMemo(() => (selectedDay ? approvalsOn(events, selectedDay) : []), [events, selectedDay])
   const rows = useMemo(() => (data ? leaderboardRows(data.scopes, window) : []), [data, window])
   const ytd = useMemo(
     () => (data?.scopes.all?.ytd ?? []).reduce((sum, e) => sum + e.count, 0),
@@ -177,7 +181,7 @@ function ReviewerMetrics() {
                 <StatTile label="Year to date" count={ytd} note={`Since January 1, ${now.getFullYear()}`} />
               </div>
               <div className="rounded-lg px-5 py-4" style={{ background: A.surface, border: `1px solid ${A.line}` }}>
-                <PulseChart data={series} range={range} onRangeChange={setRange} />
+                <PulseChart data={series} range={range} onRangeChange={setRange} onDayClick={setSelectedDay} />
               </div>
             </section>
 
@@ -226,6 +230,10 @@ function ReviewerMetrics() {
           </div>
         )}
       </main>
+
+      {selectedDay && (
+        <DayDetail key={selectedDay} date={selectedDay} groups={dayGroups} onClose={() => setSelectedDay(null)} />
+      )}
     </div>
   )
 }

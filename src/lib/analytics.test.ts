@@ -6,6 +6,7 @@ import {
   leaderboardRows,
   weekdayHeatmap,
   formatCompact,
+  approvalsOn,
 } from './analytics'
 
 // Fixed "now": Wednesday 2026-09-02 at noon local time.
@@ -112,5 +113,24 @@ describe('formatCompact', () => {
     expect(formatCompact(842)).toBe('842')
     expect(formatCompact(1284)).toBe('1.3K')
     expect(formatCompact(12900)).toBe('12.9K')
+  })
+})
+
+describe('approvalsOn', () => {
+  it('groups a weekday\'s approvals by PR, folding the preceding weekend into Monday', () => {
+    const at = (d: number, h: number) => new Date(2026, 7, d, h).toISOString()
+    const events = [
+      { reviewer: 'bob', at: at(29, 10), dependabot: false, pr: 7, repo: 'vets-api', title: 'Fix A', url: 'u7' }, // Sat
+      { reviewer: 'carol', at: at(31, 9), dependabot: false, pr: 7, repo: 'vets-api', title: 'Fix A', url: 'u7' }, // Mon
+      { reviewer: 'bob', at: at(31, 11), dependabot: true, pr: 8, repo: 'vets-api', title: null, url: 'u8' }, // Mon
+      { reviewer: 'bob', at: at(28, 11), dependabot: false, pr: 9, repo: 'vets-api', title: 'Fri', url: 'u9' }, // Fri
+    ]
+    expect(approvalsOn(events, '2026-08-31')).toEqual([
+      { pr: 7, repo: 'vets-api', title: 'Fix A', url: 'u7', dependabot: false, approvals: [
+        { reviewer: 'bob', at: at(29, 10) },
+        { reviewer: 'carol', at: at(31, 9) },
+      ] },
+      { pr: 8, repo: 'vets-api', title: null, url: 'u8', dependabot: true, approvals: [{ reviewer: 'bob', at: at(31, 11) }] },
+    ])
   })
 })

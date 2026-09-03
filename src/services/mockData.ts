@@ -446,7 +446,12 @@ export function mockReviewerActivity() {
     return seed / 4294967296
   }
   const now = Date.now()
-  const events: Array<{ reviewer: string; at: string; dependabot: boolean; pr: number; repo: string }> = []
+  const titles = [
+    'Add specs for ClaimsApi::ServiceObject', 'Trim claim status webhook payload', 'Bump rubocop to 1.65',
+    'Document new feature toggle pattern', 'Migrate appeals job to background worker', 'Fix ICN lookup for secondary IDs',
+    'Update CSP header for analytics provider', 'Refactor mailer service to use Active Job',
+  ]
+  const events: Array<{ reviewer: string; at: string; dependabot: boolean; pr: number; repo: string; title: string | null; url: string }> = []
   let pr = 24000
   for (let day = 370; day >= 0; day--) {
     const date = new Date(now - day * 86_400_000)
@@ -458,7 +463,13 @@ export function mockReviewerActivity() {
       const hour = 9 + Math.floor(rand() * 9)
       const at = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hour, Math.floor(rand() * 60))
       if (at.getTime() > now) continue
-      events.push({ reviewer, at: at.toISOString(), dependabot: rand() < 0.3, pr: pr++, repo: 'vets-api' })
+      const dependabot = rand() < 0.3
+      const number = pr++
+      events.push({
+        reviewer, at: at.toISOString(), dependabot, pr: number, repo: 'vets-api',
+        title: dependabot ? `Bump ${['nokogiri', 'rack', 'sidekiq', 'puma'][number % 4]} from 1.${number % 9}.0 to 1.${number % 9}.1` : day > 60 ? null : titles[number % titles.length],
+        url: `https://va.ghe.com/department-of-veterans-affairs/vets-api/pull/${number}`,
+      })
     }
   }
   const counts = (since: number, dependabot: boolean | null) => {
